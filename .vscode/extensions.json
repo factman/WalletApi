@@ -1,0 +1,16 @@
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "steoates.autoimport",
+    "stringham.move-ts",
+    "yoavbls.pretty-ts-errors",
+    "ms-vscode.vscode-typescript-next",
+    "usernamehw.errorlens",
+    "streetsidesoftware.code-spell-checker",
+    "wix.vscode-import-cost",
+    "davidanson.vscode-markdownlint",
+    "yzhang.markdown-all-in-one",
+    "christian-kohler.path-intellisense"
+  ]
+}

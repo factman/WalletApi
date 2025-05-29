@@ -1,0 +1,51 @@
+{
+  "name": "wallet-api",
+  "version": "0.0.1",
+  "description": "Demo Application for a wallet service API",
+  "keywords": [
+    "wallet",
+    "api",
+    "demo",
+    "lendsqr"
+  ],
+  "license": "MIT",
+  "author": "Odunayo Mohammed",
+  "type": "module",
+  "main": "./dist/src/index.js",
+  "scripts": {
+    "start": "node .",
+    "dev": "tsx --watch --env-file .env src/index.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest",
+    "test:run": "vitest --run",
+    "test:ui": "vitest --ui",
+    "coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "knex": "^3.1.0",
+    "morgan": "^1.10.0",
+    "mysql2": "^3.14.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.27.0",
+    "@types/express": "^5.0.2",
+    "@types/node": "^22.15.24",
+    "@vitest/coverage-v8": "^3.1.4",
+    "@vitest/eslint-plugin": "^1.2.1",
+    "eslint": "^9.27.0",
+    "eslint-plugin-perfectionist": "^4.13.0",
+    "prettier": "^3.5.3",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.33.0",
+    "vitest": "^3.1.4"
+  }
+}
