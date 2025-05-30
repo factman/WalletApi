@@ -1,13 +1,16 @@
 // @ts-check
 
 import eslint from "@eslint/js";
-import tseslint from "typescript-eslint";
-import perfectionist from "eslint-plugin-perfectionist";
 import vitest from "@vitest/eslint-plugin";
+import perfectionist from "eslint-plugin-perfectionist";
+import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   {
-    ignores: ["**/*.js"],
+    ignores: ["dist/**/*.js", "dist/**", "**/*.mjs", "eslint.config.js", "**/*.js"],
+  },
+  {
+    files: ["src/**/*.ts"],
   },
   eslint.configs.recommended,
   tseslint.configs.strictTypeChecked,
