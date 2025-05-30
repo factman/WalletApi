@@ -3,20 +3,23 @@
   "display": "Node 22",
   "_version": "22.0.0",
   "compilerOptions": {
-    "lib": ["es2024", "ESNext.Array", "ESNext.Collection", "ESNext.Iterator"],
-    "module": "nodenext",
-    "target": "es2022",
+    "lib": ["DOM", "ES6"],
+    "resolveJsonModule": true,
+    "module": "CommonJS",
+    "target": "ES2021",
+    "allowSyntheticDefaultImports": true,
     "strict": true,
+    "sourceMap": true,
     "esModuleInterop": true,
+    "moduleResolution": "node",
     "skipLibCheck": true,
-    "moduleResolution": "node16",
     "outDir": "./dist",
     "rootDir": "./",
-    "baseUrl": ".",
+    "allowJs": true,
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["dist"]
+  "exclude": ["dist", "node_modules", "coverage", "docs"]
 }
