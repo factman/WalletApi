@@ -30,6 +30,17 @@ function getDatabaseConfig(nodeEnvironment: EnvType["NODE_ENV"]): Knex.Config {
 
 export default {
   ...getDatabaseConfig(env.NODE_ENV),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  afterCreate: (conn: any, cb: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    conn.query("SET timezone='UTC'", (err: unknown) => {
+      if (err) {
+        console.error("Error setting timezone:", err);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        cb(err, conn);
+      }
+    });
+  },
   compileSqlOnError: false,
   migrations: {
     directory: "./db/migrations",
