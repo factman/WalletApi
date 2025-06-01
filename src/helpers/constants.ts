@@ -8,5 +8,5 @@ export enum SCHEMA_TABLES {
 
 export enum SCHEMA_VIEWS {
   AUTHENTICATED_USERS = "authenticatedUsers",
-  USERS_PROFILES = "usersProfiles",
+  USERS_PROFILES = "userProfiles",
 }

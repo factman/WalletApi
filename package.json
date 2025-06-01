@@ -29,9 +29,15 @@
     "test": "vitest",
     "test:run": "vitest --run",
     "test:ui": "vitest --ui",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "migrate:latest": "dotenvx run -- knex migrate:latest",
+    "migrate:rollback": "dotenvx run -- knex migrate:rollback",
+    "migrate:up": "dotenvx run -- knex migrate:up",
+    "migrate:down": "dotenvx run -- knex migrate:down",
+    "seed": "dotenvx run -- knex seed:run"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "helmet": "^8.1.0",
@@ -40,6 +46,7 @@
     "mysql2": "^3.14.1"
   },
   "devDependencies": {
+    "@dotenvx/dotenvx": "^1.44.1",
     "@eslint/js": "^9.27.0",
     "@types/express": "^5.0.2",
     "@types/knex": "^0.15.2",
