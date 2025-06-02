@@ -12,6 +12,24 @@ export default tseslint.config(
   {
     files: ["src/**/*.ts"],
   },
+  {
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
+      "@typescript-eslint/no-unnecessary-type-parameter": [
+        "error",
+        {
+          allowInGenericTypeNames: true,
+        },
+      ],
+    },
+  },
   eslint.configs.recommended,
   tseslint.configs.strictTypeChecked,
   tseslint.configs.stylisticTypeChecked,

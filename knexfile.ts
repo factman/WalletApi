@@ -18,7 +18,8 @@ const defaultKnexConfig: Knex.Knex.Config = {
           console.error("Error setting timezone:", err);
           cb(err, conn);
         } else {
-          conn.query("SELECT @@max_connections;", (err: unknown) => {
+          conn.query("SELECT @@max_connections as maxConnections;", (err: unknown, data: unknown) => {
+            console.log("Database connections:", data, "\n");
             cb(err, conn);
           });
         }

@@ -18,7 +18,8 @@
     "allowJs": true,
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "typeRoots": ["./@types", "./node_modules/@types"]
   },
   "include": ["**/*.ts", "src/**/*.ts"],
   "exclude": ["dist", "node_modules", "coverage", "docs"]
