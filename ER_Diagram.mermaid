@@ -1,0 +1,155 @@
+---
+title: Demo Wallet Database Tables
+config:
+    theme: dark
+    darkMode: true
+    themeVariables:
+        lineColor: white
+---
+erDiagram
+    Users_Table {
+        CHAR(36) id pk, uk "NOT NULL UUID"
+        VARCHAR(255) email uk "NOT NULL"
+        VARCHAR(20) phone uk "NOT NULL"
+        ENUM status "NOT NULL ENUM(blacklisted, deleted, suspended, verified, unverified)"
+        VARCHAR password "NOT NULL"
+        VARCHAR(255) timezone "NOT NULL"
+        BOOLEAN isBlacklisted "NOT NULL"
+        BOOLEAN isEmailVerified "NOT NULL"
+        BOOLEAN isKycVerified "NOT NULL"
+        BOOLEAN isPasswordResetRequired "NOT NULL"
+        BOOLEAN isTwoFactorEnabled "NOT NULL"
+        DATETIME lastLogin "NULL"
+        DATETIME updatedAt "NOT NULL"
+        DATETIME createdAt "NOT NULL"
+        DATETIME deletedAt "NULL"
+    }
+
+    Sessions_Table {
+        CHAR(36) id pk, uk "NOT NULL UUID"
+        CHAR(36) userId fk, uk "NOT NULL REFERENCE Users_Table.id"
+        VARCHAR userAgent "NOT NULL"
+        VARCHAR accessToken "NOT NULL"
+        DATETIME accessTokenExpiresAt "NOT NULL"
+        VARCHAR(255) deviceId "NOT NULL"
+        DATETIME expiresAt "NOT NULL"
+        VARCHAR(45) ipAddress "NOT NULL"
+        BOOLEAN isTwoFactorVerified "NOT NULL"
+        VARCHAR refreshToken "NOT NULL"
+        VARCHAR refreshTokenExpiresAt "NOT NULL"
+        CHAR(6) twoFactorCode "NULL"
+        DATETIME twoFactorCodeExpiresAt "NULL"
+        DATETIME twoFactorVerifiedAt "NULL"
+        DATETIME createdAt "NOT NULL"
+        DATETIME updatedAt "NOT NULL"
+    }
+    Sessions_Table 1--1 Users_Table : "One to One"
+
+    Profiles_Table {
+        CHAR(36) id pk, uk "NOT NULL UUID"
+        CHAR(36) userId fk, uk "NOT NULL REFERENCE Users_Table.id"
+        VARCHAR image "NULL"
+        VARCHAR(255) firstName "NOT NULL"
+        VARCHAR(255) lastName "NOT NULL"
+        VARCHAR(255) middleName "NULL"
+        VARCHAR(6) gender "NOT NULL"
+        VARCHAR(255) state "NULL"
+        VARCHAR address "NULL"
+        CHAR(11) bvn "NOT NULL"
+        VARCHAR(255) bvn_email "NULL"
+        VARCHAR(20) bvn_phone "NULL"
+        JSON bvnMetadata "NOT NULL"
+        DATE dob "NOT NULL"
+        DATETIME createdAt "NOT NULL"
+        DATETIME updatedAt "NOT NULL"
+    }
+    Profiles_Table 1--1 Users_Table : "One to One"
+
+    Wallets_Table {
+        CHAR(36) id pk, uk "NOT NULL UUID"
+        CHAR(36) userId fk, uk "NOT NULL REFERENCE Users_Table.id"
+        VARCHAR(255) accountName "NOT NULL"
+        CHAR(10) accountNumber uk "NOT NULL"
+        DECIMAL(11_2) balance "NOT NULL"
+        DECIMAL(11_2) lienBalance "NOT NULL"
+        CHAR(3) currency "NOT NULL"
+        BOOLEAN isTransactionPinSet "NOT NULL"
+        CHAR(4) transactionPin "NULL"
+        BOOLEAN isSettlementAccountSet "NOT NULL"
+        VARCHAR(255) settlementAccountName "NULL"
+        CHAR(10) settlementAccountNumber "NULL"
+        VARCHAR(10) settlementBankCode "NULL"
+        ENUM status "NOT NULL ENUM(active, blocked, inactive)"
+        DATETIME createdAt "NOT NULL"
+        DATETIME updatedAt "NOT NULL"
+    }
+    Wallets_Table 1--1 Users_Table : "One to One"
+
+    Transactions_Table {
+        CHAR(36) id pk, uk "NOT NULL UUID"
+        CHAR(36) userId fk "NOT NULL REFERENCE Users_Table.id"
+        CHAR(36) walletId fk "NOT NULL REFERENCE Wallets_Table.id"
+        CHAR(30) sessionId uk "NOT NULL"
+        DECIMAL(11_2) amount "NOT NULL"
+        DECIMAL(11_2) fee "NOT NULL"
+        DECIMAL(11_2) closingBalance "NOT NULL"
+        DECIMAL(11_2) openingBalance "NOT NULL"
+        CHAR(3) currency "NOT NULL"
+        ENUM channel "NOT NULL ENUM(bank_transfer, wallet)"
+        DATETIME settlementDate "NULL"
+        ENUM status "NOT NULL ENUM(completed, failed, pending)"
+        ENUM type "NOT NULL ENUM(credit, debit)"
+        JSON metadata "NULL"
+        VARCHAR remark "NOT NULL"
+        DATETIME createdAt "NOT NULL"
+        DATETIME updatedAt "NOT NULL"
+
+    }
+    Transactions_Table 1+--1 Users_Table : "One to Many"
+    Transactions_Table 1+--1 Wallets_Table : "One to Many"
+
+    AuthenticatedUsers_View {
+        VARCHAR(255) deviceId "Sessions_Table.deviceId"
+        VARCHAR(255) email "Users_Table.email"
+        VARCHAR(45) ipAddress "Sessions_Table.ipAddress"
+        BOOLEAN isBlacklisted "Users_Table.isBlacklisted"
+        BOOLEAN isEmailVerified "Users_Table.isEmailVerified"
+        BOOLEAN isKycVerified "Users_Table.isKycVerified"
+        BOOLEAN isPasswordResetRequired "Users_Table.isPasswordResetRequired"
+        BOOLEAN isTwoFactorEnabled "Sessions_Table.isTwoFactorEnabled"
+        DATETIME lastLogin "Users_Table.lastLogin"
+        VARCHAR(20) phone "Users_Table.phone"
+        DATETIME sessionExpiresAt "Sessions_Table.expiresAt"
+        CHAR(36) sessionId "Sessions_Table.id"
+        ENUM status "Users_Table.status"
+        VARCHAR(255) timezone "Users_Table.timezone"
+        VARCHAR userAgent "Sessions_Table.userAgent"
+        CHAR(36) userId "Users_Table.id"
+    }
+    AuthenticatedUsers_View 1--1 Sessions_Table : "One to One"
+    AuthenticatedUsers_View 1--1 Users_Table : "One to One"
+
+    UserProfiles_View {
+        VARCHAR address "Profiles_Table.address"
+        CHAR(11) bvn "Profiles_Table.bvn"
+        DATE dob "Profiles_Table.dob"
+        VARCHAR(255) email "Users_Table.email"
+        VARCHAR(255) firstName "Profiles_Table.firstName"
+        VARCHAR(6) gender "Profiles_Table.gender"
+        VARCHAR image "Profiles_Table.image"
+        BOOLEAN isBlacklisted "Users_Table.isBlacklisted"
+        BOOLEAN isEmailVerified "Users_Table.isEmailVerified"
+        BOOLEAN isKycVerified "Users_Table.isKycVerified"
+        BOOLEAN isTwoFactorEnabled "Users_Table.isTwoFactorEnabled"
+        DATETIME lastLogin "Users_Table.lastLogin"
+        VARCHAR(255) lastName "Profiles_Table.lastName"
+        VARCHAR(255) middleName "Profiles_Table.middleName"
+        VARCHAR(20) phone "Users_Table.phone"
+        CHAR(36) profileId "Profiles_Table.id"
+        VARCHAR(255) state "Profiles_Table.state"
+        ENUM status "Users_Table.status"
+        VARCHAR(255) timezone "Users_Table.timezone"
+        CHAR(36) userId "Users_Table.id"
+    }
+    UserProfiles_View 1--1 Users_Table : "One to One"
+    UserProfiles_View 1--1 Profiles_Table : "One to One"
