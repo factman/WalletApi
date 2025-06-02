@@ -22,7 +22,7 @@ export default interface ProfileModel {
   bvn: string;
   bvn_email: string;
   bvn_phone: string;
-  bvnMetadata: string;
+  bvnMetadata: Record<string, unknown>;
   createdAt: Date;
   dob: string;
   firstName: string;

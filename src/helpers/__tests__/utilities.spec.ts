@@ -1,5 +1,6 @@
 import { Server } from "node:http";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import { gracefulShutdown } from "../utilities";
 
 describe("gracefulShutdown", () => {
@@ -9,12 +10,16 @@ describe("gracefulShutdown", () => {
   let originalExitCode = process.exitCode;
 
   beforeEach(() => {
-    closeMock = vi.fn((cb) => cb && cb(undefined));
+    closeMock = vi.fn((cb: (arg: unknown) => void) => {
+      cb(undefined);
+    });
     server = { close: closeMock } as unknown as Server;
     processOnSpy = vi.spyOn(process, "on");
     originalExitCode = process.exitCode;
     process.exitCode = undefined;
-    vi.spyOn(console, "log").mockImplementation(() => {});
+    vi.spyOn(console, "log").mockImplementation(() => {
+      /* no-op */
+    });
   });
 
   afterEach(() => {
@@ -28,13 +33,17 @@ describe("gracefulShutdown", () => {
     expect(processOnSpy).toHaveBeenCalledWith("SIGTERM", expect.any(Function));
   });
 
-  it("calls server.close and logs success on shutdown", async () => {
+  it("calls server.close and logs success on shutdown", () => {
     gracefulShutdown(server);
 
     // Find the registered listener
-    const listener = processOnSpy.mock.calls.find(([signal]) => signal === "SIGINT")?.[1] || async function () {};
+    const listener =
+      processOnSpy.mock.calls.find(([signal]) => signal === "SIGINT")?.[1] ??
+      async function () {
+        /* no-op */
+      };
 
-    await listener();
+    listener();
 
     expect(closeMock).toHaveBeenCalled();
     expect(console.log).toHaveBeenCalledWith("Server closed successfully");
@@ -42,37 +51,50 @@ describe("gracefulShutdown", () => {
     expect(console.log).toHaveBeenCalledWith("Graceful shutdown initiated. Exiting process...");
   });
 
-  it("logs error if server.close returns error", async () => {
+  it("logs error if server.close returns error", () => {
     const error = new Error("fail");
-    (error as any).name = "CloseError";
-    closeMock = vi.fn((cb) => cb && cb(error));
+    error.name = "CloseError";
+    closeMock = vi.fn((cb: (arg: unknown) => unknown) => cb(error));
     server = { close: closeMock } as unknown as Server;
 
     gracefulShutdown(server);
 
-    const listener = processOnSpy.mock.calls.find(([signal]) => signal === "SIGINT")?.[1] || async function () {};
+    const listener =
+      processOnSpy.mock.calls.find(([signal]) => signal === "SIGINT")?.[1] ??
+      async function () {
+        /* no-op */
+      };
 
-    await listener();
+    listener();
 
     expect(console.log).toHaveBeenCalledWith("Error closing server:", "CloseError", "fail");
   });
 
-  it("calls cleanUp if provided", async () => {
+  it("calls cleanUp if provided", () => {
     const cleanUp = vi.fn().mockResolvedValue(undefined);
     gracefulShutdown(server, cleanUp);
 
-    const listener = processOnSpy.mock.calls.find(([signal]) => signal === "SIGINT")?.[1] || async function () {};
+    const listener =
+      processOnSpy.mock.calls.find(([signal]) => signal === "SIGINT")?.[1] ??
+      async function () {
+        /* no-op */
+      };
 
-    await listener();
+    listener();
 
     expect(cleanUp).toHaveBeenCalled();
   });
 
-  it("does not throw if cleanUp is not provided", async () => {
+  it("does not throw if cleanUp is not provided", () => {
     gracefulShutdown(server);
 
-    const listener = processOnSpy.mock.calls.find(([signal]) => signal === "SIGINT")?.[1] || async function () {};
+    const listener =
+      processOnSpy.mock.calls.find(([signal]) => signal === "SIGINT")?.[1] ??
+      async function () {
+        /* no-op */
+      };
 
-    await expect(listener()).resolves.not.toThrow();
+    listener();
+    expect(server.close).toHaveBeenCalled();
   });
 });

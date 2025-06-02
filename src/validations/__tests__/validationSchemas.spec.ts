@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { authorizationSchema } from "../validationSchemas";
 
 describe("authorizationSchema", () => {
