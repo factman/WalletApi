@@ -11,6 +11,8 @@
     "wix.vscode-import-cost",
     "davidanson.vscode-markdownlint",
     "yzhang.markdown-all-in-one",
-    "christian-kohler.path-intellisense"
+    "christian-kohler.path-intellisense",
+    "vitest.explorer",
+    "mermaidchart.vscode-mermaid-chart"
   ]
 }
