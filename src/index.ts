@@ -1,9 +1,9 @@
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import helmet from "helmet";
+import { StatusCodes } from "http-status-codes";
 import morgan from "morgan";
 
-import { StatusCodes } from "http-status-codes";
 import database from "./configs/database";
 import { env } from "./configs/env";
 import { errorResponse } from "./helpers/responseHandlers";

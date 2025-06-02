@@ -22,12 +22,7 @@ export default tseslint.config(
           caughtErrorsIgnorePattern: "^_",
         },
       ],
-      "@typescript-eslint/no-unnecessary-type-parameter": [
-        "error",
-        {
-          allowInGenericTypeNames: true,
-        },
-      ],
+      "@typescript-eslint/no-unnecessary-type-parameters": "warn",
     },
   },
   eslint.configs.recommended,
