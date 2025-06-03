@@ -38,7 +38,12 @@ app.use((req, res, _: NextFunction) => {
 app.use((err: Error, req: Request, res: Response, _: NextFunction) => {
   console.error(`${req.method}: ${req.url} - Error(${err.name}): ${err.message}`);
   console.error(err.stack);
-  errorResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, null, "Something went wrong: Internal Server Error");
+  errorResponse(
+    res,
+    StatusCodes.INTERNAL_SERVER_ERROR,
+    null,
+    "Something went wrong: Internal Server Error",
+  );
 });
 
 // Start the server

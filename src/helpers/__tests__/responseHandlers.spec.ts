@@ -11,7 +11,10 @@ function createResponseMock() {
     this.statusCode = code;
     return this;
   });
-  res.json = vi.fn().mockImplementation(function (this: Response & { body: unknown }, data: unknown) {
+  res.json = vi.fn().mockImplementation(function (
+    this: Response & { body: unknown },
+    data: unknown,
+  ) {
     this.body = data;
     return this;
   });

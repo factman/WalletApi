@@ -1,7 +1,7 @@
 import { Server } from "node:http";
 
 export function gracefulShutdown(server: Server, cleanUp?: () => Promise<void>) {
-  const listener: NodeJS.SignalsListener = () => {
+  const listener = async () => {
     server.close((err) => {
       if (!err) {
         console.log("Server closed successfully");
@@ -11,18 +11,12 @@ export function gracefulShutdown(server: Server, cleanUp?: () => Promise<void>) 
     });
 
     console.log("Graceful shutdown initiated. Exiting process...");
-    process.exitCode = 0; // Set exit code to 0 to indicate success
 
-    if (cleanUp)
-      cleanUp()
-        .then(() => {
-          console.log("Cleanup completed successfully.");
-        })
-        .catch(() => {
-          console.error("Error during cleanup.");
-        });
+    if (cleanUp) await cleanUp();
+
+    process.exitCode = 0; // Set exit code to 0 to indicate success
   };
 
-  process.on("SIGINT", listener);
-  process.on("SIGTERM", listener);
+  process.on("SIGINT", listener as never);
+  process.on("SIGTERM", listener as never);
 }

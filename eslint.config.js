@@ -22,7 +22,7 @@ export default tseslint.config(
           caughtErrorsIgnorePattern: "^_",
         },
       ],
-      "@typescript-eslint/no-unnecessary-type-parameters": "warn",
+      "@typescript-eslint/no-unnecessary-type-parameters": "off",
     },
   },
   eslint.configs.recommended,
