@@ -11,6 +11,7 @@ export function authorizationSchema(message: string) {
 
 const baseTokenSchema = z.object({
   deviceId: z.string().nonempty("Device ID is required"),
+  exp: z.number(),
   ipAddress: z.string().ip().nonempty("IP Address is required"),
   sessionId: z.string().uuid().nonempty("Session ID is required"),
   userAgent: z.string().nonempty("User Agent is required"),

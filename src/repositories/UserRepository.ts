@@ -24,4 +24,21 @@ export class UserRepository {
   ) {
     return await trx<UserModel>(SCHEMA_TABLES.USERS).insert(param).returning("*").first();
   }
+
+  async getUserById(id: string) {
+    return await this.db<UserModel>(SCHEMA_TABLES.USERS).select().where({ id }).first();
+  }
+
+  async updateUser(
+    trx: Knex.Knex.Transaction,
+    id: string,
+    userData: Partial<
+      Omit<UserModel, "createdAt" | "deletedAt" | "email" | "id" | "phone" | "updatedAt">
+    >,
+  ) {
+    return trx<UserModel>(SCHEMA_TABLES.USERS)
+      .update({ ...userData, updatedAt: this.db.fn.now() }, "*")
+      .where({ id })
+      .first();
+  }
 }

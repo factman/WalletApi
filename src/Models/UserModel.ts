@@ -1,3 +1,11 @@
+export enum UserStatus {
+  BLACKLISTED = "blacklisted",
+  DELETED = "deleted",
+  SUSPENDED = "suspended",
+  UNVERIFIED = "unverified",
+  VERIFIED = "verified",
+}
+
 export enum UserTableColumns {
   CREATED_AT = "createdAt",
   DELETED_AT = "deletedAt",
@@ -14,14 +22,6 @@ export enum UserTableColumns {
   STATUS = "status",
   TIMEZONE = "timezone",
   UPDATED_AT = "updatedAt",
-}
-
-enum UserStatus {
-  BLACKLISTED = "blacklisted",
-  DELETED = "deleted",
-  SUSPENDED = "suspended",
-  UNVERIFIED = "unverified",
-  VERIFIED = "verified",
 }
 
 export default interface UserModel {

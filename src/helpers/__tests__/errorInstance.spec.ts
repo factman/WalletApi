@@ -1,43 +1,62 @@
-import { StatusCodes } from "http-status-codes";
+import { getReasonPhrase, StatusCodes } from "http-status-codes";
 import { describe, expect, it } from "vitest";
 
 import { CustomError } from "../errorInstance";
 
 describe("CustomError", () => {
-  it("should create an error with the provided message", () => {
-    const err = new CustomError("Something went wrong");
-    expect(err.message).toBe("Something went wrong");
-  });
-
-  it("should set the default status to BAD_REQUEST", () => {
-    const err = new CustomError("Default status");
-    expect(err.status).toBe(StatusCodes.BAD_REQUEST);
-  });
-
-  it("should set the status to the provided value", () => {
-    const err = new CustomError("Not found", StatusCodes.NOT_FOUND);
-    expect(err.status).toBe(StatusCodes.NOT_FOUND);
-  });
-
-  it("should set the name to the provided value", () => {
-    const err = new CustomError("Custom name", StatusCodes.BAD_REQUEST, "MyError");
-    expect(err.name).toBe("MyError");
-  });
-
-  it("should set the name to 'CustomError' by default", () => {
-    const err = new CustomError("Default name");
-    expect(err.name).toBe("CustomError");
-  });
-
-  it("should be instance of Error and CustomError", () => {
-    const err = new CustomError("Instance check");
+  it("should create an instance with default values", () => {
+    const err = new CustomError("Test error");
     expect(err).toBeInstanceOf(Error);
     expect(err).toBeInstanceOf(CustomError);
+    expect(err.message).toBe("Test error");
+    expect(err.status).toBe(StatusCodes.BAD_REQUEST);
+    expect(err.name).toBe("CustomError");
+    expect(err.payload).toBeUndefined();
+    expect(err.stack).toBeDefined();
   });
 
-  it("should have a stack trace", () => {
-    const err = new CustomError("Stack trace");
-    expect(typeof err.stack).toBe("string");
-    expect(err.stack).toContain("CustomError");
+  it("should create an instance with custom values", () => {
+    const payload = { foo: "bar" };
+    const err = new CustomError("Custom message", StatusCodes.NOT_FOUND, payload, "MyError");
+    expect(err.message).toBe("Custom message");
+    expect(err.status).toBe(StatusCodes.NOT_FOUND);
+    expect(err.name).toBe("MyError");
+    expect(err.payload).toEqual(payload);
+  });
+
+  it("should set payload to undefined if not provided", () => {
+    const err = new CustomError("No payload", StatusCodes.OK);
+    expect(err.payload).toBeUndefined();
+  });
+
+  it("fromError should return the same CustomError instance", () => {
+    const err = new CustomError("Already custom", StatusCodes.FORBIDDEN);
+    const result = CustomError.fromError(err, StatusCodes.BAD_REQUEST);
+    expect(result).toBe(err);
+  });
+
+  it("fromError should wrap a generic Error", () => {
+    const orig = new Error("Generic error");
+    orig.name = "SomeError";
+    const result = CustomError.fromError(orig, StatusCodes.UNAUTHORIZED, "Fallback message");
+    expect(result).toBeInstanceOf(CustomError);
+    expect(result.message).toBe("Fallback message");
+    expect(result.status).toBe(StatusCodes.UNAUTHORIZED);
+    expect(result.name).toBe("SomeError");
+    expect(result.payload).toBe(orig);
+    expect(result.stack).toBe(orig.stack);
+  });
+
+  it("fromError should use fallbackMessage if provided", () => {
+    const orig = new Error("Original error");
+    const result = CustomError.fromError(orig, StatusCodes.NOT_FOUND, "Not found fallback");
+    expect(result.message).toBe("Not found fallback");
+  });
+
+  it("fromError should use getReasonPhrase if fallbackMessage is not provided", () => {
+    const orig = new Error("Original error");
+    const status = StatusCodes.NOT_IMPLEMENTED;
+    const result = CustomError.fromError(orig, status);
+    expect(result.message).toBe(getReasonPhrase(status));
   });
 });

@@ -20,8 +20,25 @@ export type SchemaType =
   | ZodObject<z.ZodRawShape, "passthrough">
   | ZodObject<z.ZodRawShape, "strict">;
 
+export interface TokenPayload {
+  deviceId: string;
+  exp: number;
+  ipAddress: string;
+  sessionId: string;
+  type: TokenType;
+  userAgent: string;
+  userId: string;
+}
+
 export interface ValidationError {
   entity: string;
   message: string;
   path: string;
+}
+
+export interface VerificationTokenPayload extends TokenPayload {
+  authType: TokenAuthType;
+  bvn?: string;
+  email: string;
+  type: TokenType.VERIFICATION;
 }

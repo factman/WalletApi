@@ -33,6 +33,10 @@ export class SessionRepository {
     return await trx<SessionModel>(SCHEMA_TABLES.SESSIONS).where({ userId }).del("*").first();
   }
 
+  async getSessionById(id: string) {
+    return await this.db<SessionModel>(SCHEMA_TABLES.SESSIONS).select().where({ id }).first();
+  }
+
   async updateSession(
     trx: Knex.Knex.Transaction,
     id: string,

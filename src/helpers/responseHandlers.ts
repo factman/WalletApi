@@ -2,6 +2,8 @@
 import { Response } from "express";
 import { getReasonPhrase, StatusCodes } from "http-status-codes";
 
+import { CustomError } from "./errorInstance";
+
 export function errorResponse(
   res: Response,
   statusCode?: StatusCodes,
@@ -18,7 +20,8 @@ export function errorResponse(
     !message && errorData instanceof Error
       ? errorData.message
       : (message ?? getReasonPhrase(statusCode));
-  const error = errorData instanceof Error ? undefined : errorData;
+  let error = errorData instanceof CustomError ? (errorData.payload as unknown) : errorData;
+  error = error instanceof Error ? undefined : error;
 
   return res.status(statusCode).json({
     error,

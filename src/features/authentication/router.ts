@@ -29,19 +29,19 @@ export const router = Router()
   .post(
     AUTHENTICATION_ROUTES.POST_SIGNUP,
     validateRequest(signupRequestSchema, "body"),
-    controller.route.bind(controller),
+    controller.signup.bind(controller),
   )
   .patch(
     AUTHENTICATION_ROUTES.PATCH_VERIFY_EMAIL,
     authGuard,
     validateRequest(verifyEmailRequestSchema, "body"),
-    controller.route.bind(controller),
+    controller.verifyEmail.bind(controller),
   )
   .patch(
     AUTHENTICATION_ROUTES.PATCH_RESEND_EMAIL_VERIFICATION,
     authGuard,
     validateRequest(resendEmailVerificationRequestSchema, "body"),
-    controller.route.bind(controller),
+    controller.resendEmailVerification.bind(controller),
   )
   .post(
     AUTHENTICATION_ROUTES.POST_INITIATE_BVN_VERIFICATION,

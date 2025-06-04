@@ -1,3 +1,4 @@
+import { DateTime } from "luxon";
 import { describe, expect, it } from "vitest";
 
 import { TokenAuthType, TokenType } from "@/helpers/types";
@@ -51,6 +52,7 @@ describe("authorizationSchema", () => {
 describe("tokenSchema", () => {
   const validBase = {
     deviceId: "device-123",
+    exp: Date.now(),
     ipAddress: "192.168.1.1",
     sessionId: "550e8400-e29b-41d4-a716-446655440000",
     userAgent: "Mozilla/5.0",
@@ -108,7 +110,8 @@ describe("verificationTokenSchema", () => {
   const validBase = {
     deviceId: "device-123",
     email: "test@example.com",
-    ipAddress: "192.168.1.1",
+    exp: DateTime.now().plus({ hour: 6 }).toUnixInteger(),
+    ipAddress: "127.0.0.1",
     sessionId: "550e8400-e29b-41d4-a716-446655440000",
     type: TokenType.VERIFICATION,
     userAgent: "Mozilla/5.0",
