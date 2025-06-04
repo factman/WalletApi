@@ -4,24 +4,35 @@ import jwt from "jsonwebtoken";
 
 import { env } from "@/configs/env";
 import { errorResponse } from "@/helpers/responseHandlers";
-import { authorizationSchema } from "@/validations/validationSchemas";
+import { TokenType } from "@/helpers/types";
+import { authorizationSchema, tokenSchema } from "@/validations/validationSchemas";
 
 export const authGuard = (req: Request, res: Response, next: NextFunction) => {
   const authError = new Error("Access Denied / Unauthorized request");
-  const { data, error, success } = authorizationSchema(authError.message).safeParse(req.headers);
+  const { data, success } = authorizationSchema(authError.message).safeParse(req.headers);
 
-  if (!success) return errorResponse(res, StatusCodes.UNAUTHORIZED, new Error(error.errors[0].message));
+  if (!success) {
+    errorResponse(res, StatusCodes.UNAUTHORIZED, authError);
+  } else {
+    const authorization = data.authorization as string;
+    const token = authorization.split(" ")[1];
+    if (!token) {
+      errorResponse(res, StatusCodes.UNAUTHORIZED, authError);
+    } else {
+      try {
+        const validToken = jwt.verify(token, env.ACCESS_TOKEN_SECRET) as TokenPayload;
+        const result = tokenSchema(TokenType.ACCESS).safeParse(validToken);
 
-  const authorization = data.authorization as string;
-  const token = authorization.split(" ")[1];
-  if (!token) return errorResponse(res, StatusCodes.UNAUTHORIZED, authError);
-
-  try {
-    const validToken = jwt.verify(token, env.ACCESS_TOKEN_SECRET) as Record<string, unknown>;
-    req.accessTokenPayload = validToken;
-    next();
-  } catch (error) {
-    console.error("Token verification failed:", error);
-    return errorResponse(res, StatusCodes.UNAUTHORIZED, authError);
+        if (!result.success) {
+          errorResponse(res, StatusCodes.UNAUTHORIZED, authError);
+        } else {
+          req.accessTokenPayload = result.data;
+          next();
+        }
+      } catch (error) {
+        console.error("Token verification failed:", error);
+        errorResponse(res, StatusCodes.UNAUTHORIZED, authError);
+      }
+    }
   }
 };

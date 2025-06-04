@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-parameters */
 import { Response } from "express";
 import { getReasonPhrase, StatusCodes } from "http-status-codes";
 
@@ -26,15 +27,15 @@ export function errorResponse(
   });
 }
 
-export function successResponse(
+export function successResponse<T>(
   res: Response,
-  data: unknown,
+  data: T,
   message: string,
   statusCode?: StatusCodes,
 ): Response;
-export function successResponse(
+export function successResponse<T>(
   res: Response,
-  data: unknown,
+  data: T,
   message: string,
   statusCode: StatusCodes = StatusCodes.OK,
 ): Response {

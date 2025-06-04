@@ -27,7 +27,7 @@ export default interface WalletModel {
   accountName: string;
   accountNumber: string;
   balance: number;
-  createdAt: Date;
+  createdAt: string;
   currency: string;
   id: string;
   isSettlementAccountSet: boolean;
@@ -38,6 +38,6 @@ export default interface WalletModel {
   settlementBankCode: null | string;
   status: WalletStatus;
   transactionPin: null | string;
-  updatedAt: Date;
+  updatedAt: string;
   userId: string;
 }

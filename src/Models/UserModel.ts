@@ -25,8 +25,8 @@ enum UserStatus {
 }
 
 export default interface UserModel {
-  createdAt: Date;
-  deletedAt: Date | null;
+  createdAt: string;
+  deletedAt: null | string;
   email: string;
   id: string;
   isBlacklisted: boolean;
@@ -34,10 +34,10 @@ export default interface UserModel {
   isKycVerified: boolean;
   isPasswordResetRequired: boolean;
   isTwoFactorEnabled: boolean;
-  lastLogin: Date | null;
+  lastLogin: null | string;
   password: string;
   phone: string;
   status: UserStatus;
   timezone: string;
-  updatedAt: Date;
+  updatedAt: string;
 }

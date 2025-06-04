@@ -23,7 +23,7 @@ export default interface ProfileModel {
   bvn_email: string;
   bvn_phone: string;
   bvnMetadata: Record<string, unknown>;
-  createdAt: Date;
+  createdAt: string;
   dob: string;
   firstName: string;
   gender: string;
@@ -32,6 +32,6 @@ export default interface ProfileModel {
   lastName: string;
   middleName: null | string;
   state: string;
-  updatedAt: Date;
+  updatedAt: string;
   userId: string;
 }

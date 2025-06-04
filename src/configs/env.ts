@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 const variables = {
-  ACCESS_TOKEN_EXPIRATION: process.env.ACCESS_TOKEN_EXPIRATION!,
+  ACCESS_TOKEN_EXPIRATION: Number(process.env.ACCESS_TOKEN_EXPIRATION!),
   ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET!,
   DB_HOST: process.env.DB_HOST!,
   DB_NAME: process.env.DB_NAME!,
@@ -10,9 +10,11 @@ const variables = {
   DB_USER: process.env.DB_USER!,
   NODE_ENV: (process.env.NODE_ENV ?? "development") as "development" | "production" | "test",
   PORT: Number(process.env.PORT!),
-  REFRESH_TOKEN_EXPIRATION: process.env.REFRESH_TOKEN_EXPIRATION!,
+  REFRESH_TOKEN_EXPIRATION: Number(process.env.REFRESH_TOKEN_EXPIRATION!),
   REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET!,
-  VERIFICATION_TOKEN_EXPIRATION: process.env.VERIFICATION_TOKEN_EXPIRATION!,
+  RESEND_API_KEY: process.env.RESEND_API_KEY!,
+  RESEND_SENDER: process.env.RESEND_SENDER!,
+  VERIFICATION_TOKEN_EXPIRATION: Number(process.env.VERIFICATION_TOKEN_EXPIRATION!),
   VERIFICATION_TOKEN_SECRET: process.env.VERIFICATION_TOKEN_SECRET!,
 } as const;
 

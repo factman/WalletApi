@@ -19,19 +19,19 @@ export enum SessionTableColumns {
 
 export default interface SessionModel {
   accessToken: string;
-  accessTokenExpiresAt: Date;
-  createdAt: Date;
+  accessTokenExpiresAt: string;
+  createdAt: string;
   deviceId: string;
-  expiresAt: Date;
+  expiresAt: string;
   id: string;
   ipAddress: string;
   isTwoFactorVerified: boolean;
   refreshToken: string;
-  refreshTokenExpiresAt: Date;
+  refreshTokenExpiresAt: string;
   twoFactorCode: null | string;
-  twoFactorCodeExpiresAt: Date | null;
-  twoFactorVerifiedAt: Date | null;
-  updatedAt: Date;
+  twoFactorCodeExpiresAt: null | string;
+  twoFactorVerifiedAt: null | string;
+  updatedAt: string;
   userAgent: string;
   userId: string;
 }

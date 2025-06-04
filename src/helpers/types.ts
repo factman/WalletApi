@@ -1,9 +1,24 @@
 import { IncomingHttpHeaders } from "node:http";
-import { ZodObject, ZodRawShape, ZodTypeAny } from "zod";
+import { z, ZodObject } from "zod";
 
-export type HeaderSchemaType = Record<keyof IncomingHttpHeaders, ZodTypeAny> & ZodRawShape;
+export enum TokenAuthType {
+  BVN = "bvn",
+  EMAIL = "email",
+  FORGOT_PASSWORD = "forgot-password",
+  LOGIN = "login",
+}
 
-export type SchemaType = ZodObject<ZodRawShape, "passthrough"> | ZodObject<ZodRawShape, "strict">;
+export enum TokenType {
+  ACCESS = "access",
+  REFRESH = "refresh",
+  VERIFICATION = "verification",
+}
+
+export type HeaderSchemaType = Record<keyof IncomingHttpHeaders, z.ZodTypeAny> & z.ZodRawShape;
+
+export type SchemaType =
+  | ZodObject<z.ZodRawShape, "passthrough">
+  | ZodObject<z.ZodRawShape, "strict">;
 
 export interface ValidationError {
   entity: string;
