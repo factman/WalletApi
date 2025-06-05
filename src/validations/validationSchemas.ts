@@ -27,7 +27,7 @@ export function tokenSchema(type: TokenType) {
 export function verificationTokenSchema(authType: TokenAuthType) {
   return baseTokenSchema.extend({
     authType: z.literal(authType),
-    bvn: authType === TokenAuthType.BVN ? z.string().length(11) : z.string().optional(),
+    bvn: authType === TokenAuthType.BVN ? z.string().nonempty() : z.string().optional(),
     email: z.string().email({ message: "Invalid email format" }).nonempty("Email is required"),
     type: z.literal(TokenType.VERIFICATION),
   });

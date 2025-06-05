@@ -6,24 +6,6 @@ export enum UserStatus {
   VERIFIED = "verified",
 }
 
-export enum UserTableColumns {
-  CREATED_AT = "createdAt",
-  DELETED_AT = "deletedAt",
-  EMAIL = "email",
-  ID = "id",
-  IS_BLACKLISTED = "isBlacklisted",
-  IS_EMAIL_VERIFIED = "isEmailVerified",
-  IS_KYC_VERIFIED = "isKycVerified",
-  IS_PASSWORD_RESET_REQUIRED = "isPasswordResetRequired",
-  IS_TWO_FACTOR_ENABLED = "isTwoFactorEnabled",
-  LAST_LOGIN = "lastLogin",
-  PASSWORD = "password",
-  PHONE = "phone",
-  STATUS = "status",
-  TIMEZONE = "timezone",
-  UPDATED_AT = "updatedAt",
-}
-
 export default interface UserModel {
   createdAt: string;
   deletedAt: null | string;

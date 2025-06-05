@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-parameters */
 import { Response } from "express";
 import { getReasonPhrase, StatusCodes } from "http-status-codes";
 

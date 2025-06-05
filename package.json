@@ -42,6 +42,7 @@
   },
   "dependencies": {
     "@types/luxon": "^3.6.2",
+    "axios": "^1.9.0",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "express": "^5.1.0",
@@ -58,6 +59,7 @@
   "devDependencies": {
     "@dotenvx/dotenvx": "^1.44.1",
     "@eslint/js": "^9.27.0",
+    "@types/axios": "^0.9.36",
     "@types/cors": "^2.8.18",
     "@types/express": "^5.0.2",
     "@types/jsonwebtoken": "^9.0.9",

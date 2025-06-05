@@ -9,7 +9,7 @@ import { AuthenticationService } from "./service";
 import {
   forgetPasswordRequestSchema,
   initiateAuthenticationRequestSchema,
-  initiateBvnVerificationRequest,
+  initiateBvnVerificationRequestSchema,
   loginRequestSchema,
   logoutRequestSchema,
   refreshTokenRequestSchema,
@@ -46,14 +46,14 @@ export const router = Router()
   .post(
     AUTHENTICATION_ROUTES.POST_INITIATE_BVN_VERIFICATION,
     authGuard,
-    validateRequest(initiateBvnVerificationRequest, "body"),
-    controller.route.bind(controller),
+    validateRequest(initiateBvnVerificationRequestSchema, "body"),
+    controller.initiateBvnVerification.bind(controller),
   )
   .put(
     AUTHENTICATION_ROUTES.PUT_VERIFY_BVN,
     authGuard,
     validateRequest(verifyBvnRequestSchema, "body"),
-    controller.route.bind(controller),
+    controller.verifyBvn.bind(controller),
   )
   .post(
     AUTHENTICATION_ROUTES.POST_INITIATE_AUTH,

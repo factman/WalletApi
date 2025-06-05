@@ -10,5 +10,11 @@
     "source.organizeImports": "always",
     "source.sortImports": "always"
   },
-  "eslint.validate": ["javascript", "typescript"]
+  "eslint.validate": [
+    "javascript",
+    "typescript"
+  ],
+  "cSpell.words": [
+    "ADJUTOR"
+  ]
 }

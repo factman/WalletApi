@@ -9,33 +9,54 @@ import { env } from "@/configs/env";
 import { CustomError } from "@/helpers/errorInstance";
 import { TokenAuthType, TokenPayload, TokenType, VerificationTokenPayload } from "@/helpers/types";
 import AuthenticatedUserModel from "@/models/AuthenticatedUserModel";
+import ProfileModel from "@/models/ProfileModel";
 import SessionModel from "@/models/SessionModel";
 import UserModel, { UserStatus } from "@/models/UserModel";
+import WalletModel from "@/models/WalletModel";
 import { AuthenticatedUserRepository } from "@/repositories/AuthenticatedUserRepository";
+import { ProfileRepository } from "@/repositories/ProfileRepository";
 import { SessionRepository } from "@/repositories/SessionRepository";
 import { UserRepository } from "@/repositories/UserRepository";
+import { WalletRepository } from "@/repositories/WalletRepository";
+import { AdjutorBvnPayload, AdjutorService } from "@/services/AdjutorService";
 import { ResendService } from "@/services/ResendService";
-import { verificationTokenSchema } from "@/validations/validationSchemas";
+
+import { InitiateBvnVerificationRequest } from "./authenticationDTOs";
+import { generateOTP, getUsername } from "./helpers/utilities";
 
 export class AuthenticationService {
+  private adjutorService: AdjutorService;
   private authUserRepository: AuthenticatedUserRepository;
+  private profileRepository: ProfileRepository;
   private resendService: ResendService;
   private sessionRepository: SessionRepository;
   private userRepository: UserRepository;
+  private walletRepository: WalletRepository;
 
   constructor(
     userRepository = new UserRepository(),
     sessionRepository = new SessionRepository(),
     resendService = new ResendService(),
     authUserRepository = new AuthenticatedUserRepository(),
+    adjutorService = new AdjutorService(),
+    profileRepository = new ProfileRepository(),
+    walletRepository = new WalletRepository(),
   ) {
     this.userRepository = userRepository;
     this.sessionRepository = sessionRepository;
     this.resendService = resendService;
     this.authUserRepository = authUserRepository;
+    this.adjutorService = adjutorService;
+    this.profileRepository = profileRepository;
+    this.walletRepository = walletRepository;
   }
 
-  async checkIfUserExists(email: string, phone: string) {
+  async blackListUser(trx: Knex.Knex.Transaction, userId: UserModel["id"]) {
+    await this.deleteUserSession(trx, userId);
+    await this.userRepository.blacklistUserById(trx, userId);
+  }
+
+  async checkIfUserExists(email: UserModel["email"], phone: UserModel["phone"]) {
     const data = await this.userRepository.checkIfUserExist(email, phone);
     const found = {
       email: data.some((user) => user.email === email),
@@ -50,6 +71,71 @@ export class AuthenticationService {
     if (found.phone) return { found: true, message: "User with this phone number already exists." };
 
     return { found: false, message: "User does not exist." };
+  }
+
+  async checkUserKarma(bvn: ProfileModel["bvn"]) {
+    const userKarma = await this.adjutorService.karmaLookup(bvn);
+    if (userKarma.status !== "success")
+      throw new CustomError(userKarma.message, StatusCodes.BAD_REQUEST);
+
+    // I can't really tell what the response is supposed to be for users who are not blacklisted
+    // but I can tell that the blacklisted users must have a reason, default date and reporting entity
+    // so I will just assume that they are blacklisted and return true.
+    if (
+      typeof userKarma.data === "object" &&
+      (userKarma.data.reason || userKarma.data.default_date) &&
+      typeof userKarma.data.reporting_entity === "object" &&
+      userKarma.data.reporting_entity.name
+    )
+      return { isBlacklisted: true };
+
+    return { isBlacklisted: false };
+  }
+
+  async completeUserKyc(
+    trx: Knex.Knex.Transaction,
+    userId: UserModel["id"],
+    kycData: InitiateBvnVerificationRequest,
+    bvnProfile: AdjutorBvnPayload,
+  ) {
+    if (env.NODE_ENV === "production") {
+      if (
+        kycData.dob !== bvnProfile.dob ||
+        kycData.gender.toLowerCase() !== bvnProfile.gender.toLowerCase() ||
+        kycData.firstName !== bvnProfile.first_name ||
+        kycData.lastName !== bvnProfile.last_name
+      )
+        return { error: "Invalid KYC data provided. Please try again." };
+    }
+
+    const profile = await this.profileRepository.createUserProfile(trx, {
+      address: bvnProfile.residential_address,
+      bvn: kycData.bvn,
+      bvnEmail: bvnProfile.email,
+      bvnMetadata: Buffer.from(JSON.stringify(bvnProfile)).toString("base64"),
+      bvnPhone: bvnProfile.mobile,
+      dob: kycData.dob,
+      firstName: kycData.firstName,
+      gender: kycData.gender,
+      image: bvnProfile.image_url,
+      lastName: kycData.lastName,
+      middleName: bvnProfile.middle_name,
+      state: bvnProfile.state_of_origin,
+      userId,
+    });
+    if (!profile) {
+      return { error: "Failed to create user profile. Please try again." };
+    }
+
+    const user = await this.userRepository.updateUser(trx, userId, {
+      isKycVerified: true,
+      status: UserStatus.VERIFIED,
+    });
+    if (!user) {
+      return { error: "Failed to update user. Please try again." };
+    }
+
+    return { profile, user };
   }
 
   async createUser(
@@ -110,6 +196,20 @@ export class AuthenticationService {
     return { session };
   }
 
+  async createWallet(
+    trx: Knex.Knex.Transaction,
+    walletDate: Pick<WalletModel, "accountName" | "accountNumber" | "userId">,
+  ) {
+    const wallet = await this.walletRepository.createUserWallet(trx, {
+      ...walletDate,
+    });
+    if (!wallet) {
+      return { error: "Failed to create wallet. Please try again." };
+    }
+
+    return { wallet };
+  }
+
   async deleteUserSession(trx: Knex.Knex.Transaction, userId: SessionModel["userId"]) {
     return await this.sessionRepository.deleteSession(trx, userId);
   }
@@ -127,11 +227,18 @@ export class AuthenticationService {
     return { userData };
   }
 
+  async getBvnData(bvn: ProfileModel["bvn"], otp: string) {
+    const bvnData = await this.adjutorService.completeBvnVerification(bvn, otp);
+    if (bvnData.status !== "success") return { error: bvnData.message };
+
+    return { profile: bvnData.data };
+  }
+
   async initiateEmailVerification(
     trx: Knex.Knex.Transaction,
     sessionData: Omit<VerificationTokenPayload, "authType" | "bvn" | "exp" | "type">,
   ) {
-    const otp = this.generateOTP();
+    const otp = generateOTP();
     const tokenTime = DateTime.utc().plus({ seconds: env.VERIFICATION_TOKEN_EXPIRATION });
     const tokenPayload: VerificationTokenPayload = {
       ...sessionData,
@@ -146,7 +253,7 @@ export class AuthenticationService {
     });
     await this.resendService.sendEmailVerificationOTP(
       tokenPayload.email,
-      this.getUsername(sessionData.email),
+      getUsername(sessionData.email),
       otp,
       tokenTime,
     );
@@ -159,46 +266,31 @@ export class AuthenticationService {
     };
   }
 
-  async sendUserWelcomeEmail(email: string) {
-    await this.resendService.sendWelcomeEmail(email, this.getUsername(email));
+  async sendBvnConsent(bvn: ProfileModel["bvn"], phone: UserModel["phone"]) {
+    const concent = await this.adjutorService.initiateBvnConcent(bvn, phone);
+    if (concent.status === "otp") return { message: `${concent.message}: ${concent.data}` };
+
+    return { error: concent.message };
   }
 
-  validateVerificationToken(token: string, authType: TokenAuthType) {
-    const error = "Invalid or expired credentials";
-
-    try {
-      const validToken = jwt.verify(
-        token,
-        env.VERIFICATION_TOKEN_SECRET,
-      ) as VerificationTokenPayload;
-      const result = verificationTokenSchema(authType).safeParse(validToken);
-      if (!result.success) return { error };
-
-      return { tokenPayload: result.data };
-    } catch (err) {
-      console.log("Invalid verification token:", err);
-      return { error };
-    }
+  async sendUserWelcomeEmail(email: UserModel["email"]) {
+    await this.resendService.sendWelcomeEmail(email, getUsername(email));
   }
 
-  async verifyUserEmail(trx: Knex.Knex.Transaction, sessionId: string, userId: string) {
+  async verifyUserEmail(
+    trx: Knex.Knex.Transaction,
+    sessionId: SessionModel["id"],
+    userId: UserModel["id"],
+  ) {
     const session = await this.sessionRepository.updateSession(trx, sessionId, {
       twoFactorCode: null,
       twoFactorCodeExpiresAt: null,
     });
     const user = await this.userRepository.updateUser(trx, userId, {
       isEmailVerified: true,
-      status: UserStatus.VERIFIED,
+      isTwoFactorEnabled: true,
     });
 
     return { session, user };
-  }
-
-  private generateOTP(length = 6) {
-    return Math.random().toString().slice(-length);
-  }
-
-  private getUsername(email: string) {
-    return `@${email.split("@")[0]}`;
   }
 }

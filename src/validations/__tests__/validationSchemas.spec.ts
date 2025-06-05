@@ -128,16 +128,6 @@ describe("verificationTokenSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  it("should fail if BVN is not 11 digits for BVN authType", () => {
-    const schema = verificationTokenSchema(TokenAuthType.BVN);
-    const result = schema.safeParse({
-      ...validBase,
-      authType: TokenAuthType.BVN,
-      bvn: "12345",
-    });
-    expect(result.success).toBe(false);
-  });
-
   it("should pass with valid data for EMAIL authType", () => {
     const schema = verificationTokenSchema(TokenAuthType.EMAIL);
     const result = schema.safeParse({

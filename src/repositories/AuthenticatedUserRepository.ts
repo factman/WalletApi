@@ -2,15 +2,15 @@ import database from "@/configs/database";
 import { SCHEMA_VIEWS } from "@/helpers/constants";
 import AuthenticatedUserModel from "@/models/AuthenticatedUserModel";
 
-export class AuthenticatedUserRepository {
-  private db: typeof database;
+import { Repository } from "./Repository";
 
+export class AuthenticatedUserRepository extends Repository<AuthenticatedUserModel> {
   constructor(databaseInstance = database) {
-    this.db = databaseInstance;
+    super(SCHEMA_VIEWS.AUTHENTICATED_USERS, databaseInstance);
   }
 
   async getUserBySessionId(sessionId: AuthenticatedUserModel["userId"]) {
-    return await this.db(SCHEMA_VIEWS.AUTHENTICATED_USERS)
+    return await this.table
       .select<
         Omit<AuthenticatedUserModel, "sessionExpiresAt" | "sessionId">
       >("deviceId", "email", "ipAddress", "isBlacklisted", "isEmailVerified", "isKycVerified", "isPasswordResetRequired", "isTwoFactorEnabled", "lastLogin", "phone")

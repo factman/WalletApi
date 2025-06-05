@@ -4,11 +4,11 @@ import database from "@/configs/database";
 import { SCHEMA_TABLES } from "@/helpers/constants";
 import SessionModel from "@/models/SessionModel";
 
-export class SessionRepository {
-  private db: typeof database;
+import { Repository } from "./Repository";
 
+export class SessionRepository extends Repository<SessionModel> {
   constructor(databaseInstance = database) {
-    this.db = databaseInstance;
+    super(SCHEMA_TABLES.SESSIONS, databaseInstance);
   }
 
   async createSession(
@@ -23,27 +23,25 @@ export class SessionRepository {
       | "updatedAt"
     >,
   ) {
-    return await trx<SessionModel>(SCHEMA_TABLES.SESSIONS)
-      .insert(sessionData)
-      .returning("*")
-      .first();
+    return await this.table.transacting(trx).insert(sessionData, "*").first();
   }
 
   async deleteSession(trx: Knex.Knex.Transaction, userId: SessionModel["userId"]) {
-    return await trx<SessionModel>(SCHEMA_TABLES.SESSIONS).where({ userId }).del("*").first();
+    return await this.table.transacting(trx).where({ userId }).del("*").first();
   }
 
-  async getSessionById(id: string) {
-    return await this.db<SessionModel>(SCHEMA_TABLES.SESSIONS).select().where({ id }).first();
+  async getSessionById(id: SessionModel["id"]) {
+    return await this.table.select().where({ id }).first();
   }
 
   async updateSession(
     trx: Knex.Knex.Transaction,
-    id: string,
+    id: SessionModel["id"],
     sessionData: Partial<Omit<SessionModel, "createdAt" | "id" | "updatedAt" | "userId">>,
   ) {
-    return trx<SessionModel>(SCHEMA_TABLES.SESSIONS)
-      .update({ ...sessionData, updatedAt: this.db.fn.now() }, "*")
+    return this.table
+      .transacting(trx)
+      .update({ ...sessionData }, "*")
       .where({ id })
       .first();
   }

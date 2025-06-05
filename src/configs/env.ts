@@ -3,6 +3,8 @@
 const variables = {
   ACCESS_TOKEN_EXPIRATION: Number(process.env.ACCESS_TOKEN_EXPIRATION!),
   ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET!,
+  ADJUTOR_API_KEY: process.env.ADJUTOR_API_KEY!,
+  ADJUTOR_API_URL: process.env.ADJUTOR_API_URL!,
   DB_HOST: process.env.DB_HOST!,
   DB_NAME: process.env.DB_NAME!,
   DB_PASSWORD: process.env.DB_PASSWORD!,

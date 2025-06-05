@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { DateTime } from "luxon";

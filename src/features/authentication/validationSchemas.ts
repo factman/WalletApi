@@ -52,17 +52,18 @@ export const initiateAuthenticationRequestSchema = buildStrictSchema<InitiateAut
   },
 );
 
-export const initiateBvnVerificationRequest = buildStrictSchema<InitiateBvnVerificationRequest>({
-  bvn: bvnSchema,
-  dob: z.string().date(),
-  firstName: z.string().nonempty(),
-  gender: z
-    .string()
-    .nonempty()
-    .toUpperCase()
-    .refine((val) => ["FEMALE", "MALE"].includes(val)),
-  lastName: z.string().nonempty(),
-});
+export const initiateBvnVerificationRequestSchema =
+  buildStrictSchema<InitiateBvnVerificationRequest>({
+    bvn: bvnSchema,
+    dob: z.string().date(),
+    firstName: z.string().nonempty(),
+    gender: z
+      .string()
+      .nonempty()
+      .toUpperCase()
+      .refine((val) => ["FEMALE", "MALE"].includes(val)),
+    lastName: z.string().nonempty(),
+  });
 
 export const loginRequestSchema = buildStrictSchema<LoginRequest>({
   deviceId: z.string().nonempty(),

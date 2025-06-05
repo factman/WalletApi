@@ -9,14 +9,20 @@ import { TokenAuthType } from "@/helpers/types";
 import { UserStatus } from "@/models/UserModel";
 
 import {
+  InitiateBvnVerificationRequest,
+  InitiateBvnVerificationResponse,
   ResendEmailVerificationResponse,
   SignupResponse,
+  VerifyBvnResponse,
   VerifyEmailResponse,
 } from "./authenticationDTOs";
+import { generateBvnVerificationToken, validateVerificationToken } from "./helpers/utilities";
 import { AuthenticationService } from "./service";
 import {
+  initiateBvnVerificationRequestSchema,
   resendEmailVerificationRequestSchema,
   signupRequestSchema,
+  verifyBvnRequestSchema,
   verifyEmailRequestSchema,
 } from "./validationSchemas";
 
@@ -25,6 +31,51 @@ export class AuthenticationController {
 
   constructor(service: AuthenticationService) {
     this.service = service;
+  }
+
+  async initiateBvnVerification(req: Request, res: Response) {
+    const body = initiateBvnVerificationRequestSchema.parse(req.body);
+    const user = req.userPayload;
+    const session = req.sessionPayload;
+
+    try {
+      const karma = await this.service.checkUserKarma(body.bvn);
+      if (karma.isBlacklisted) {
+        await database.transaction(async (trx) => {
+          await this.service.blackListUser(trx, session.userId);
+        });
+        throw new CustomError("Verification failed", StatusCodes.BAD_REQUEST, {
+          message: "BVN blacklisted",
+        });
+      }
+
+      const bvnConsent = await this.service.sendBvnConsent(body.bvn, user.phone);
+      if (bvnConsent.error || !bvnConsent.message)
+        throw new CustomError("Verification failed", StatusCodes.BAD_REQUEST, {
+          message: bvnConsent.error,
+        });
+
+      const tokenData = generateBvnVerificationToken(
+        {
+          bvn: JSON.stringify(body),
+          deviceId: session.deviceId,
+          email: user.email,
+          ipAddress: session.ipAddress,
+          sessionId: session.id,
+          userAgent: session.userAgent,
+          userId: session.userId,
+        },
+        bvnConsent.message,
+      );
+      successResponse<InitiateBvnVerificationResponse>(
+        res,
+        { ...tokenData },
+        "Bvn concent initiated successfully",
+      );
+    } catch (err) {
+      const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
+      errorResponse(res, error.status, error);
+    }
   }
 
   async resendEmailVerification(req: Request, res: Response) {
@@ -141,6 +192,71 @@ export class AuthenticationController {
     }
   }
 
+  async verifyBvn(req: Request, res: Response) {
+    const body = verifyBvnRequestSchema.parse(req.body);
+    const message = "Unable to verify Bvn";
+    const session = req.sessionPayload;
+    const user = req.userPayload;
+
+    try {
+      if (user.isKycVerified) {
+        const authenticatedUser = await this.service.getAuthUserData(session.id);
+        successResponse<VerifyBvnResponse>(
+          res,
+          { userData: authenticatedUser.userData },
+          "Bvn already verified.",
+        );
+      } else {
+        const validToken = validateVerificationToken(body.verificationToken, TokenAuthType.BVN);
+        if (validToken.error || !validToken.tokenPayload?.bvn)
+          throw new CustomError(message, StatusCodes.BAD_REQUEST, {
+            message: validToken.error,
+          });
+
+        const bvnData = await this.service.getBvnData(validToken.tokenPayload.bvn, body.otp);
+        if (bvnData.error || !bvnData.profile)
+          throw new CustomError(message, StatusCodes.BAD_REQUEST, {
+            message: bvnData.error,
+          });
+
+        await database.transaction(async (trx) => {
+          const kycData: InitiateBvnVerificationRequest = JSON.parse(
+            validToken.tokenPayload.bvn ?? "{}",
+          );
+          const kyc = await this.service.completeUserKyc(trx, user.id, kycData, bvnData.profile);
+          if (kyc.error)
+            throw new CustomError(message, StatusCodes.INTERNAL_SERVER_ERROR, {
+              message: kyc.error,
+            });
+
+          const wallet = await this.service.createWallet(trx, {
+            accountName: [
+              bvnData.profile.first_name,
+              bvnData.profile.middle_name,
+              bvnData.profile.last_name,
+            ].join(""),
+            accountNumber: user.phone.slice(-10),
+            userId: user.id,
+          });
+          if (wallet.error)
+            throw new CustomError(message, StatusCodes.INTERNAL_SERVER_ERROR, {
+              message: wallet.error,
+            });
+        });
+
+        const authenticatedUser = await this.service.getAuthUserData(session.id);
+        successResponse<VerifyEmailResponse>(
+          res,
+          { userData: authenticatedUser.userData },
+          "Account verified successfully",
+        );
+      }
+    } catch (err) {
+      const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
+      errorResponse(res, error.status, error);
+    }
+  }
+
   async verifyEmail(req: Request, res: Response) {
     const body = verifyEmailRequestSchema.parse(req.body);
     const message = "Unable to verify email";
@@ -148,7 +264,7 @@ export class AuthenticationController {
     const user = req.userPayload;
 
     try {
-      if (user.isEmailVerified && user.status === UserStatus.VERIFIED) {
+      if (user.isEmailVerified && user.isTwoFactorEnabled) {
         const authenticatedUser = await this.service.getAuthUserData(session.id);
         successResponse<VerifyEmailResponse>(
           res,
@@ -156,10 +272,7 @@ export class AuthenticationController {
           "Account already verified.",
         );
       } else {
-        const validToken = this.service.validateVerificationToken(
-          body.verificationToken,
-          TokenAuthType.EMAIL,
-        );
+        const validToken = validateVerificationToken(body.verificationToken, TokenAuthType.EMAIL);
         if (validToken.error || !validToken.tokenPayload)
           throw new CustomError(message, StatusCodes.BAD_REQUEST, {
             message: validToken.error,

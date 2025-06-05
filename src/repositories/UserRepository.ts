@@ -2,42 +2,47 @@ import Knex from "knex";
 
 import database from "@/configs/database";
 import { SCHEMA_TABLES } from "@/helpers/constants";
-import UserModel from "@/models/UserModel";
+import UserModel, { UserStatus } from "@/models/UserModel";
 
-export class UserRepository {
-  private db: typeof database;
+import { Repository } from "./Repository";
 
+export class UserRepository extends Repository<UserModel> {
   constructor(databaseInstance = database) {
-    this.db = databaseInstance;
+    super(SCHEMA_TABLES.USERS, databaseInstance);
+  }
+
+  async blacklistUserById(trx: Knex.Knex.Transaction, id: UserModel["id"]) {
+    return await this.table
+      .transacting(trx)
+      .update({ isBlacklisted: true, status: UserStatus.BLACKLISTED }, "*")
+      .where({ id });
   }
 
   async checkIfUserExist(email: UserModel["email"], phone: UserModel["phone"]) {
-    return await this.db<UserModel>(SCHEMA_TABLES.USERS)
-      .select("email", "phone", "id")
-      .where({ email })
-      .orWhere({ phone });
+    return await this.table.select("email", "phone", "id").where({ email }).orWhere({ phone });
   }
 
   async createUser(
     trx: Knex.Knex.Transaction,
     param: Pick<UserModel, "email" | "password" | "phone" | "timezone">,
   ) {
-    return await trx<UserModel>(SCHEMA_TABLES.USERS).insert(param).returning("*").first();
+    return await this.table.transacting(trx).insert(param, "*").first();
   }
 
-  async getUserById(id: string) {
-    return await this.db<UserModel>(SCHEMA_TABLES.USERS).select().where({ id }).first();
+  async getUserById(id: UserModel["id"]) {
+    return await this.table.select().where({ id }).first();
   }
 
   async updateUser(
     trx: Knex.Knex.Transaction,
-    id: string,
+    id: UserModel["id"],
     userData: Partial<
       Omit<UserModel, "createdAt" | "deletedAt" | "email" | "id" | "phone" | "updatedAt">
     >,
   ) {
-    return trx<UserModel>(SCHEMA_TABLES.USERS)
-      .update({ ...userData, updatedAt: this.db.fn.now() }, "*")
+    return this.table
+      .transacting(trx)
+      .update({ ...userData }, "*")
       .where({ id })
       .first();
   }
