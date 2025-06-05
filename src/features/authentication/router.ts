@@ -1,13 +1,15 @@
 import { Router } from "express";
 
+import { TokenAuthType } from "@/helpers/types";
 import { authGuard } from "@/middlewares/authMiddleware";
 import { validateRequest } from "@/middlewares/validationMiddleware";
 
 import { AuthenticationController } from "./controller";
 import { AUTHENTICATION_ROUTES } from "./helpers/constants";
+import { validateOtpVerification } from "./middlewares";
 import { AuthenticationService } from "./service";
 import {
-  forgetPasswordRequestSchema,
+  forgotPasswordRequestSchema,
   initiateAuthenticationRequestSchema,
   initiateBvnVerificationRequestSchema,
   loginRequestSchema,
@@ -16,7 +18,6 @@ import {
   resendEmailVerificationRequestSchema,
   resetPasswordRequestSchema,
   signupRequestSchema,
-  updatePasswordRequestSchema,
   verifyBvnRequestSchema,
   verifyEmailRequestSchema,
   verifyForgotPasswordRequestSchema,
@@ -35,6 +36,7 @@ export const router = Router()
     AUTHENTICATION_ROUTES.PATCH_VERIFY_EMAIL,
     authGuard,
     validateRequest(verifyEmailRequestSchema, "body"),
+    validateOtpVerification(TokenAuthType.EMAIL),
     controller.verifyEmail.bind(controller),
   )
   .patch(
@@ -53,6 +55,7 @@ export const router = Router()
     AUTHENTICATION_ROUTES.PUT_VERIFY_BVN,
     authGuard,
     validateRequest(verifyBvnRequestSchema, "body"),
+    validateOtpVerification(TokenAuthType.BVN),
     controller.verifyBvn.bind(controller),
   )
   .post(
@@ -63,37 +66,40 @@ export const router = Router()
   .post(
     AUTHENTICATION_ROUTES.POST_LOGIN,
     validateRequest(loginRequestSchema, "body"),
+    validateOtpVerification(TokenAuthType.LOGIN),
     controller.login.bind(controller),
   )
   .post(
     AUTHENTICATION_ROUTES.POST_REFRESH_TOKEN,
     validateRequest(refreshTokenRequestSchema, "body"),
-    controller.route.bind(controller),
+    controller.refreshToken.bind(controller),
   )
-  .patch(
-    AUTHENTICATION_ROUTES.PATCH_UPDATE_PASSWORD,
-    authGuard,
-    validateRequest(updatePasswordRequestSchema, "body"),
-    controller.route.bind(controller),
-  )
+  // .patch(
+  //   AUTHENTICATION_ROUTES.PATCH_UPDATE_PASSWORD,
+  //   authGuard,
+  //   validateRequest(updatePasswordRequestSchema, "body"),
+  //   controller.updatePassword.bind(controller),
+  // )
   .delete(
     AUTHENTICATION_ROUTES.DELETE_LOGOUT,
     authGuard,
     validateRequest(logoutRequestSchema, "body"),
-    controller.route.bind(controller),
+    controller.logout.bind(controller),
   )
   .post(
     AUTHENTICATION_ROUTES.POST_FORGOT_PASSWORD,
-    validateRequest(forgetPasswordRequestSchema, "body"),
-    controller.route.bind(controller),
+    validateRequest(forgotPasswordRequestSchema, "body"),
+    controller.forgotPassword.bind(controller),
   )
   .patch(
     AUTHENTICATION_ROUTES.PATCH_VERIFY_FORGOT_PASSWORD,
     validateRequest(verifyForgotPasswordRequestSchema, "body"),
-    controller.route.bind(controller),
+    validateOtpVerification(TokenAuthType.FORGOT_PASSWORD),
+    controller.verifyForgotPassword.bind(controller),
   )
   .put(
     AUTHENTICATION_ROUTES.PUT_RESET_PASSWORD,
     validateRequest(resetPasswordRequestSchema, "body"),
+    validateOtpVerification(TokenAuthType.FORGOT_PASSWORD),
     controller.route.bind(controller),
   );

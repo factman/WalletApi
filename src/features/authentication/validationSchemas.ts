@@ -3,7 +3,7 @@ import { z } from "zod";
 import { buildStrictSchema } from "@/helpers/validations";
 
 import {
-  ForgetPasswordRequest,
+  ForgotPasswordRequest,
   InitiateAuthenticationRequest,
   InitiateBvnVerificationRequest,
   LoginRequest,
@@ -17,7 +17,7 @@ import {
   VerifyForgotPasswordRequest,
 } from "./authenticationDTOs";
 
-export const forgetPasswordRequestSchema = buildStrictSchema<ForgetPasswordRequest>({
+export const forgotPasswordRequestSchema = buildStrictSchema<ForgotPasswordRequest>({
   deviceId: z.string().nonempty(),
   email: z.string().email(),
 });

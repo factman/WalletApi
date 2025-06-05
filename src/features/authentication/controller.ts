@@ -6,10 +6,10 @@ import database from "@/configs/database";
 import { env } from "@/configs/env";
 import { CustomError } from "@/helpers/errorInstance";
 import { errorResponse, successResponse } from "@/helpers/responseHandlers";
-import { TokenAuthType } from "@/helpers/types";
 import { UserStatus } from "@/models/UserModel";
 
 import {
+  ForgotPasswordResponse,
   InitiateAuthenticationResponse,
   InitiateBvnVerificationRequest,
   InitiateBvnVerificationResponse,
@@ -19,16 +19,20 @@ import {
   VerifyBvnResponse,
   VerifyEmailResponse,
 } from "./authenticationDTOs";
-import { generateBvnVerificationToken, validateVerificationToken } from "./helpers/utilities";
+import { generateBvnVerificationToken, validateRefreshToken } from "./helpers/utilities";
 import { AuthenticationService } from "./service";
 import {
+  forgotPasswordRequestSchema,
   initiateAuthenticationRequestSchema,
   initiateBvnVerificationRequestSchema,
   loginRequestSchema,
+  refreshTokenRequestSchema,
   resendEmailVerificationRequestSchema,
+  resetPasswordRequestSchema,
   signupRequestSchema,
   verifyBvnRequestSchema,
   verifyEmailRequestSchema,
+  verifyForgotPasswordRequestSchema,
 } from "./validationSchemas";
 
 export class AuthenticationController {
@@ -36,6 +40,45 @@ export class AuthenticationController {
 
   constructor(service: AuthenticationService) {
     this.service = service;
+  }
+
+  async forgotPassword(req: Request, res: Response) {
+    const body = forgotPasswordRequestSchema.parse(req.body);
+
+    try {
+      const foundUser = await this.service.findUserByEmail(body.email);
+      if (foundUser.error || !foundUser.user)
+        throw new CustomError("Account not found", StatusCodes.BAD_REQUEST, {
+          message: foundUser.error,
+        });
+
+      const otpData = await database.transaction(async (trx) => {
+        const ipAddress = req.ip ?? req.ips[0];
+        const userAgent = req.headers["user-agent"] ?? "Unknown";
+        const otp = await this.service.generateForgotPasswordOtp(trx, {
+          deviceId: body.deviceId,
+          email: foundUser.user.email,
+          ipAddress,
+          userAgent,
+          userId: foundUser.user.id,
+        });
+        if (otp.error || !otp.verificationToken)
+          throw new CustomError(
+            "Something went wrong, try again later",
+            StatusCodes.INTERNAL_SERVER_ERROR,
+            {
+              message: otp.error,
+            },
+          );
+
+        return otp;
+      });
+
+      successResponse<ForgotPasswordResponse>(res, otpData, "OTP sent successfully");
+    } catch (err) {
+      const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
+      errorResponse(res, error.status, error);
+    }
   }
 
   async initiateAuth(req: Request, res: Response) {
@@ -132,17 +175,13 @@ export class AuthenticationController {
   async login(req: Request, res: Response) {
     const message = "Login failed";
     const body = loginRequestSchema.parse(req.body);
-    try {
-      const validToken = validateVerificationToken(body.verificationToken, TokenAuthType.EMAIL);
-      if (validToken.error || !validToken.tokenPayload)
-        throw new CustomError(message, StatusCodes.BAD_REQUEST, {
-          message: validToken.error,
-        });
+    const tokenPayload = req.verificationTokenPayload;
 
+    try {
       const validSession = await this.service.getValidatedUserSession({
-        deviceId: validToken.tokenPayload.deviceId,
-        id: validToken.tokenPayload.sessionId,
-        userId: validToken.tokenPayload.userId,
+        deviceId: tokenPayload.deviceId,
+        id: tokenPayload.sessionId,
+        userId: tokenPayload.userId,
       });
       if (validSession.error || !validSession.session)
         throw new CustomError(message, StatusCodes.BAD_REQUEST, {
@@ -155,7 +194,7 @@ export class AuthenticationController {
         });
 
       await database.transaction(async (trx) => {
-        await this.service.completeLogin2Fa(trx, validSession.session.id);
+        await this.service.completeLogin(trx, validSession.session.id, validSession.session.userId);
       });
 
       const authenticatedUser = await this.service.getAuthUserData(validSession.session.id);
@@ -173,6 +212,69 @@ export class AuthenticationController {
           userData: authenticatedUser.userData,
         },
         "Login successfully",
+      );
+    } catch (err) {
+      const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
+      errorResponse(res, error.status, error);
+    }
+  }
+
+  async logout(req: Request, res: Response) {
+    const session = req.sessionPayload;
+
+    try {
+      await database.transaction(async (trx) => {
+        await this.service.deleteUserSession(trx, session.id);
+      });
+      successResponse(res, null, "Logout successfully");
+    } catch (err) {
+      const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
+      errorResponse(res, error.status, error);
+    }
+  }
+
+  async refreshToken(req: Request, res: Response) {
+    const body = refreshTokenRequestSchema.parse(req.body);
+    const message = "Error refreshing token";
+    try {
+      const token = validateRefreshToken(body.refreshToken);
+      if (token.error || !token.tokenPayload)
+        throw new CustomError(message, StatusCodes.BAD_REQUEST, {
+          message: token.error,
+        });
+
+      const { session } = await database.transaction(async (trx) => {
+        const ipAddress = req.ip ?? req.ips[0];
+        const userAgent = req.headers["user-agent"] ?? "Unknown";
+        const userSession = await this.service.refreshSessionTokens(
+          trx,
+          token.tokenPayload.sessionId,
+          {
+            deviceId: body.deviceId,
+            ipAddress,
+            userAgent,
+            userId: token.tokenPayload.userId,
+          },
+        );
+        if (userSession.error || !userSession.session)
+          throw new CustomError("Error refreshing token", StatusCodes.INTERNAL_SERVER_ERROR, {
+            message: userSession.error,
+          });
+
+        return { session: userSession.session };
+      });
+
+      const authenticatedUser = await this.service.getAuthUserData(session.id);
+      successResponse<LoginResponse>(
+        res,
+        {
+          accessToken: session.accessToken,
+          accessTokenExpiresAt: DateTime.fromSQL(session.accessTokenExpiresAt).toMillis(),
+          refreshToken: session.refreshToken,
+          refreshTokenExpiresAt: DateTime.fromSQL(session.refreshTokenExpiresAt).toMillis(),
+          userData: authenticatedUser.userData,
+        },
+        "Token refreshed successfully",
       );
     } catch (err) {
       const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
@@ -217,6 +319,32 @@ export class AuthenticationController {
         },
         "Verification sent successfully",
       );
+    } catch (err) {
+      const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
+      errorResponse(res, error.status, error);
+    }
+  }
+
+  async resetPassword(req: Request, res: Response) {
+    const body = resetPasswordRequestSchema.parse(req.body);
+    const session = req.sessionPayload;
+    const tokenPayload = req.verificationTokenPayload;
+
+    try {
+      const { error, user } = await this.service.verifyUserLogin(
+        tokenPayload.email,
+        body.oldPassword,
+      );
+      if (error || !user || body.deviceId !== session.deviceId || !user.isPasswordResetRequired)
+        throw new CustomError("Invalid credentials", StatusCodes.BAD_REQUEST, {
+          message: "Invalid credentials. check and try again",
+        });
+
+      await database.transaction(async (trx) => {
+        await this.service.resetUserPassword(trx, user.id, body.newPassword);
+      });
+
+      successResponse(res, null, "Password reset successfully, login again");
     } catch (err) {
       const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
       errorResponse(res, error.status, error);
@@ -299,6 +427,7 @@ export class AuthenticationController {
     const message = "Unable to verify Bvn";
     const session = req.sessionPayload;
     const user = req.userPayload;
+    const tokenPayload = req.verificationTokenPayload;
 
     try {
       if (user.isKycVerified) {
@@ -309,22 +438,14 @@ export class AuthenticationController {
           "Bvn already verified.",
         );
       } else {
-        const validToken = validateVerificationToken(body.verificationToken, TokenAuthType.BVN);
-        if (validToken.error || !validToken.tokenPayload?.bvn)
-          throw new CustomError(message, StatusCodes.BAD_REQUEST, {
-            message: validToken.error,
-          });
-
-        const bvnData = await this.service.getBvnData(validToken.tokenPayload.bvn, body.otp);
+        const bvnData = await this.service.getBvnData(tokenPayload.bvn ?? "", body.otp);
         if (bvnData.error || !bvnData.profile)
           throw new CustomError(message, StatusCodes.BAD_REQUEST, {
             message: bvnData.error,
           });
 
         await database.transaction(async (trx) => {
-          const kycData: InitiateBvnVerificationRequest = JSON.parse(
-            validToken.tokenPayload.bvn ?? "{}",
-          );
+          const kycData: InitiateBvnVerificationRequest = JSON.parse(tokenPayload.bvn ?? "{}");
           const kyc = await this.service.completeUserKyc(trx, user.id, kycData, bvnData.profile);
           if (kyc.error || !kyc.profile)
             throw new CustomError(message, StatusCodes.INTERNAL_SERVER_ERROR, {
@@ -368,6 +489,7 @@ export class AuthenticationController {
     const message = "Unable to verify email";
     const session = req.sessionPayload;
     const user = req.userPayload;
+    const tokenPayload = req.verificationTokenPayload;
 
     try {
       if (user.isEmailVerified && user.isTwoFactorEnabled) {
@@ -378,13 +500,7 @@ export class AuthenticationController {
           "Account already verified.",
         );
       } else {
-        const validToken = validateVerificationToken(body.verificationToken, TokenAuthType.EMAIL);
-        if (validToken.error || !validToken.tokenPayload)
-          throw new CustomError(message, StatusCodes.BAD_REQUEST, {
-            message: validToken.error,
-          });
-
-        if (body.otp !== session.twoFactorCode || validToken.tokenPayload.sessionId !== session.id)
+        if (body.otp !== session.twoFactorCode || tokenPayload.sessionId !== session.id)
           throw new CustomError(message, StatusCodes.BAD_REQUEST, {
             message: "Invalid OTP, try again",
           });
@@ -411,6 +527,27 @@ export class AuthenticationController {
           "Account verified successfully",
         );
       }
+    } catch (err) {
+      const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
+      errorResponse(res, error.status, error);
+    }
+  }
+
+  async verifyForgotPassword(req: Request, res: Response) {
+    const body = verifyForgotPasswordRequestSchema.parse(req.body);
+    const session = req.sessionPayload;
+
+    try {
+      if (body.otp !== session.twoFactorCode)
+        throw new CustomError("Invalid OTP, try again", StatusCodes.BAD_REQUEST, {
+          message: "Unable to verify OTP, try again",
+        });
+
+      await database.transaction(async (trx) => {
+        await this.service.enablePasswordReset(trx, session.userId);
+      });
+
+      successResponse(res, null, "Verification successful, reset password now");
     } catch (err) {
       const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
       errorResponse(res, error.status, error);

@@ -1,11 +1,11 @@
 import AuthenticatedUserModel from "@/models/AuthenticatedUserModel";
 
-export interface ForgetPasswordRequest {
+export interface ForgotPasswordRequest {
   deviceId: string;
   email: string;
 }
 
-export interface ForgetPasswordResponse {
+export interface ForgotPasswordResponse {
   otpExpiresAt: number;
   otpMessage: string;
   verificationToken: string;

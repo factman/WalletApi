@@ -1,13 +1,11 @@
 import { StatusCodes } from "http-status-codes";
-import jwt from "jsonwebtoken";
 import Knex from "knex";
-import { DateTime } from "luxon";
 import { randomUUID } from "node:crypto";
 
 import database from "@/configs/database";
 import { env } from "@/configs/env";
 import { CustomError } from "@/helpers/errorInstance";
-import { TokenAuthType, TokenPayload, TokenType, VerificationTokenPayload } from "@/helpers/types";
+import { TokenAuthType, VerificationTokenPayload } from "@/helpers/types";
 import AuthenticatedUserModel from "@/models/AuthenticatedUserModel";
 import ProfileModel from "@/models/ProfileModel";
 import SessionModel from "@/models/SessionModel";
@@ -22,7 +20,14 @@ import { AdjutorBvnPayload, AdjutorService } from "@/services/AdjutorService";
 import { ResendService } from "@/services/ResendService";
 
 import { InitiateBvnVerificationRequest } from "./authenticationDTOs";
-import { generateOTP, getUsername, hashPassword } from "./helpers/utilities";
+import {
+  generateAccessToken,
+  generateOTP,
+  generateRefreshToken,
+  generateVerificationToken,
+  getUsername,
+  hashPassword,
+} from "./helpers/utilities";
 
 export class AuthenticationService {
   private adjutorService: AdjutorService;
@@ -92,12 +97,19 @@ export class AuthenticationService {
     return { isBlacklisted: false };
   }
 
-  async completeLogin2Fa(trx: Knex.Knex.Transaction, sessionId: SessionModel["id"]) {
+  async completeLogin(
+    trx: Knex.Knex.Transaction,
+    sessionId: SessionModel["id"],
+    userId: UserModel["id"],
+  ) {
     await this.sessionRepository.updateSession(trx, sessionId, {
       isTwoFactorVerified: true,
       twoFactorCode: null,
       twoFactorCodeExpiresAt: null,
       twoFactorVerifiedAt: database.fn.now() as unknown as string,
+    });
+    await this.userRepository.updateUser(trx, userId, {
+      lastLogin: database.fn.now() as unknown as string,
     });
   }
 
@@ -169,30 +181,15 @@ export class AuthenticationService {
   ) {
     await this.deleteUserSession(trx, sessionData.userId);
 
-    const accessTokenTime = DateTime.utc().plus({ seconds: env.ACCESS_TOKEN_EXPIRATION });
-    const refreshTokenTime = DateTime.utc().plus({ seconds: env.REFRESH_TOKEN_EXPIRATION });
-    const tokenPayload: TokenPayload = {
-      deviceId: sessionData.deviceId,
-      exp: accessTokenTime.toUnixInteger(),
-      ipAddress: sessionData.ipAddress,
-      sessionId: randomUUID(),
-      type: TokenType.ACCESS,
-      userAgent: sessionData.userAgent,
-      userId: sessionData.userId,
-    };
-
-    const accessToken = jwt.sign(tokenPayload, env.ACCESS_TOKEN_SECRET);
-    const refreshToken = jwt.sign(
-      { ...tokenPayload, exp: refreshTokenTime.toUnixInteger(), type: TokenType.REFRESH },
-      env.REFRESH_TOKEN_SECRET,
-    );
-
+    const sessionId = randomUUID();
+    const { accessToken, accessTokenTime } = generateAccessToken(sessionId, sessionData);
+    const { refreshToken, refreshTokenTime } = generateRefreshToken(sessionId, sessionData);
     const session = await this.sessionRepository.createSession(trx, {
       ...sessionData,
       accessToken,
       accessTokenExpiresAt: accessTokenTime.toSQL({ includeOffset: false }),
       expiresAt: refreshTokenTime.toSQL({ includeOffset: false }),
-      id: tokenPayload.sessionId,
+      id: sessionId,
       refreshToken,
       refreshTokenExpiresAt: refreshTokenTime.toSQL({ includeOffset: false }),
     });
@@ -222,19 +219,58 @@ export class AuthenticationService {
     return await this.sessionRepository.deleteSession(trx, userId);
   }
 
+  async enablePasswordReset(trx: Knex.Knex.Transaction, userId: SessionModel["userId"]) {
+    return await this.userRepository.updateUser(trx, userId, {
+      isPasswordResetRequired: true,
+    });
+  }
+
+  async findUserByEmail(email: UserModel["email"]) {
+    const user = await this.userRepository.getUserByEmail(email);
+    if (!user) return { error: "No account with this email found." };
+
+    return { user };
+  }
+
+  async generateForgotPasswordOtp(
+    trx: Knex.Knex.Transaction,
+    sessionData: Omit<VerificationTokenPayload, "authType" | "bvn" | "exp" | "sessionId" | "type">,
+  ) {
+    const otp = generateOTP();
+    const { error, session } = await this.createUserSession(trx, {
+      deviceId: sessionData.deviceId,
+      ipAddress: sessionData.ipAddress,
+      userAgent: sessionData.userAgent,
+      userId: sessionData.userId,
+    });
+    if (error || !session) {
+      return { error };
+    }
+
+    const { tokenTime, verificationToken } = generateVerificationToken({
+      ...sessionData,
+      authType: TokenAuthType.FORGOT_PASSWORD,
+      sessionId: session.id,
+    });
+
+    await this.resendService.sendVerificationOTP(sessionData.email, otp, tokenTime);
+
+    return {
+      otpExpiresAt: tokenTime.toMillis(),
+      otpMessage: `OTP sent to ${sessionData.email}, please check your email`,
+      verificationToken,
+    };
+  }
+
   async generateLoginOtp(
     trx: Knex.Knex.Transaction,
     sessionData: Omit<VerificationTokenPayload, "authType" | "bvn" | "exp" | "type">,
   ) {
     const otp = generateOTP();
-    const tokenTime = DateTime.utc().plus({ seconds: env.VERIFICATION_TOKEN_EXPIRATION });
-    const tokenPayload: VerificationTokenPayload = {
+    const { tokenTime, verificationToken } = generateVerificationToken({
       ...sessionData,
-      authType: TokenAuthType.EMAIL,
-      exp: tokenTime.toUnixInteger(),
-      type: TokenType.VERIFICATION,
-    };
-    const verificationToken = jwt.sign(tokenPayload, env.VERIFICATION_TOKEN_SECRET);
+      authType: TokenAuthType.LOGIN,
+    });
     await this.sessionRepository.updateSession(trx, sessionData.sessionId, {
       isTwoFactorVerified: false,
       twoFactorCode: otp,
@@ -242,7 +278,7 @@ export class AuthenticationService {
       twoFactorVerifiedAt: null,
     });
 
-    await this.resendService.sendVerificationOTP(tokenPayload.email, otp, tokenTime);
+    await this.resendService.sendVerificationOTP(sessionData.email, otp, tokenTime);
 
     return {
       otpExpiresAt: tokenTime.toMillis(),
@@ -284,20 +320,16 @@ export class AuthenticationService {
     sessionData: Omit<VerificationTokenPayload, "authType" | "bvn" | "exp" | "type">,
   ) {
     const otp = generateOTP();
-    const tokenTime = DateTime.utc().plus({ seconds: env.VERIFICATION_TOKEN_EXPIRATION });
-    const tokenPayload: VerificationTokenPayload = {
+    const { tokenTime, verificationToken } = generateVerificationToken({
       ...sessionData,
       authType: TokenAuthType.EMAIL,
-      exp: tokenTime.toUnixInteger(),
-      type: TokenType.VERIFICATION,
-    };
-    const verificationToken = jwt.sign(tokenPayload, env.VERIFICATION_TOKEN_SECRET);
+    });
     await this.sessionRepository.updateSession(trx, sessionData.sessionId, {
       twoFactorCode: otp,
       twoFactorCodeExpiresAt: tokenTime.toSQL({ includeOffset: false }),
     });
     await this.resendService.sendEmailVerificationOTP(
-      tokenPayload.email,
+      sessionData.email,
       getUsername(sessionData.email),
       otp,
       tokenTime,
@@ -309,6 +341,39 @@ export class AuthenticationService {
         "A One-Time Password (OTP) has been sent to your email address. Please check your inbox and verify your email using the OTP.",
       verificationToken,
     };
+  }
+
+  async refreshSessionTokens(
+    trx: Knex.Knex.Transaction,
+    sessionId: SessionModel["id"],
+    sessionData: Pick<SessionModel, "deviceId" | "ipAddress" | "userAgent" | "userId">,
+  ) {
+    const { accessToken, accessTokenTime } = generateAccessToken(sessionId, sessionData);
+    const { refreshToken, refreshTokenTime } = generateRefreshToken(sessionId, sessionData);
+    const session = await this.sessionRepository.updateSession(trx, sessionId, {
+      accessToken,
+      accessTokenExpiresAt: accessTokenTime.toSQL({ includeOffset: false }),
+      expiresAt: refreshTokenTime.toSQL({ includeOffset: false }),
+      refreshToken,
+      refreshTokenExpiresAt: refreshTokenTime.toSQL({ includeOffset: false }),
+    });
+    if (!session) {
+      return { error: "Failed to refresh user token. Please try again." };
+    }
+
+    return { session };
+  }
+
+  async resetUserPassword(
+    trx: Knex.Knex.Transaction,
+    userId: UserModel["id"],
+    password: UserModel["password"],
+  ) {
+    const hashedPassword = await hashPassword(password);
+    await this.userRepository.updateUser(trx, userId, {
+      isPasswordResetRequired: false,
+      password: hashedPassword,
+    });
   }
 
   async sendBvnConsent(bvn: ProfileModel["bvn"], phone: UserModel["phone"]) {

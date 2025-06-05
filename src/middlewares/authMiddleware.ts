@@ -58,7 +58,7 @@ export async function authGuard(req: Request, res: Response, next: NextFunction)
           .as("milliseconds");
         if (accessTokenExpireTime < 0) throw authError;
 
-        // retrieve and validating user
+        // retrieving and validating user
         const user = await new UserRepository().getUserById(session.userId);
         if (
           !user ||
