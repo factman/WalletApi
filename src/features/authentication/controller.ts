@@ -3,14 +3,17 @@ import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
 
 import database from "@/configs/database";
+import { env } from "@/configs/env";
 import { CustomError } from "@/helpers/errorInstance";
 import { errorResponse, successResponse } from "@/helpers/responseHandlers";
 import { TokenAuthType } from "@/helpers/types";
 import { UserStatus } from "@/models/UserModel";
 
 import {
+  InitiateAuthenticationResponse,
   InitiateBvnVerificationRequest,
   InitiateBvnVerificationResponse,
+  LoginResponse,
   ResendEmailVerificationResponse,
   SignupResponse,
   VerifyBvnResponse,
@@ -19,7 +22,9 @@ import {
 import { generateBvnVerificationToken, validateVerificationToken } from "./helpers/utilities";
 import { AuthenticationService } from "./service";
 import {
+  initiateAuthenticationRequestSchema,
   initiateBvnVerificationRequestSchema,
+  loginRequestSchema,
   resendEmailVerificationRequestSchema,
   signupRequestSchema,
   verifyBvnRequestSchema,
@@ -31,6 +36,52 @@ export class AuthenticationController {
 
   constructor(service: AuthenticationService) {
     this.service = service;
+  }
+
+  async initiateAuth(req: Request, res: Response) {
+    const body = initiateAuthenticationRequestSchema.parse(req.body);
+    try {
+      const verifiedData = await this.service.verifyUserLogin(body.email, body.password);
+      if (verifiedData.error || !verifiedData.user)
+        throw new CustomError("Login error", StatusCodes.BAD_REQUEST, {
+          message: verifiedData.error,
+        });
+
+      const { otpData, user } = await database.transaction(async (trx) => {
+        const ipAddress = req.ip ?? req.ips[0];
+        const userAgent = req.headers["user-agent"] ?? "Unknown";
+        const userSession = await this.service.createUserSession(trx, {
+          deviceId: body.deviceId,
+          ipAddress,
+          userAgent,
+          userId: verifiedData.user.id,
+        });
+        if (userSession.error || !userSession.session)
+          throw new CustomError("Session error", StatusCodes.INTERNAL_SERVER_ERROR, {
+            message: userSession.error,
+          });
+
+        const otpData = await this.service.generateLoginOtp(trx, {
+          deviceId: body.deviceId,
+          email: verifiedData.user.email,
+          ipAddress,
+          sessionId: userSession.session.id,
+          userAgent,
+          userId: verifiedData.user.id,
+        });
+
+        return { otpData, user: verifiedData.user };
+      });
+
+      successResponse<InitiateAuthenticationResponse>(
+        res,
+        { email: user.email, ...otpData },
+        "Authentication successful",
+      );
+    } catch (err) {
+      const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
+      errorResponse(res, error.status, error);
+    }
   }
 
   async initiateBvnVerification(req: Request, res: Response) {
@@ -71,6 +122,57 @@ export class AuthenticationController {
         res,
         { ...tokenData },
         "Bvn concent initiated successfully",
+      );
+    } catch (err) {
+      const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
+      errorResponse(res, error.status, error);
+    }
+  }
+
+  async login(req: Request, res: Response) {
+    const message = "Login failed";
+    const body = loginRequestSchema.parse(req.body);
+    try {
+      const validToken = validateVerificationToken(body.verificationToken, TokenAuthType.EMAIL);
+      if (validToken.error || !validToken.tokenPayload)
+        throw new CustomError(message, StatusCodes.BAD_REQUEST, {
+          message: validToken.error,
+        });
+
+      const validSession = await this.service.getValidatedUserSession({
+        deviceId: validToken.tokenPayload.deviceId,
+        id: validToken.tokenPayload.sessionId,
+        userId: validToken.tokenPayload.userId,
+      });
+      if (validSession.error || !validSession.session)
+        throw new CustomError(message, StatusCodes.BAD_REQUEST, {
+          message: validSession.error,
+        });
+
+      if (body.otp !== validSession.session.twoFactorCode)
+        throw new CustomError(message, StatusCodes.BAD_REQUEST, {
+          message: "Invalid OTP, try again",
+        });
+
+      await database.transaction(async (trx) => {
+        await this.service.completeLogin2Fa(trx, validSession.session.id);
+      });
+
+      const authenticatedUser = await this.service.getAuthUserData(validSession.session.id);
+      successResponse<LoginResponse>(
+        res,
+        {
+          accessToken: validSession.session.accessToken,
+          accessTokenExpiresAt: DateTime.fromSQL(
+            validSession.session.accessTokenExpiresAt,
+          ).toMillis(),
+          refreshToken: validSession.session.refreshToken,
+          refreshTokenExpiresAt: DateTime.fromSQL(
+            validSession.session.refreshTokenExpiresAt,
+          ).toMillis(),
+          userData: authenticatedUser.userData,
+        },
+        "Login successfully",
       );
     } catch (err) {
       const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
@@ -224,17 +326,21 @@ export class AuthenticationController {
             validToken.tokenPayload.bvn ?? "{}",
           );
           const kyc = await this.service.completeUserKyc(trx, user.id, kycData, bvnData.profile);
-          if (kyc.error)
+          if (kyc.error || !kyc.profile)
             throw new CustomError(message, StatusCodes.INTERNAL_SERVER_ERROR, {
               message: kyc.error,
             });
 
+          const accountNames =
+            env.NODE_ENV === "development"
+              ? [kyc.profile.firstName, kyc.profile.lastName]
+              : [
+                  bvnData.profile.first_name,
+                  bvnData.profile.middle_name,
+                  bvnData.profile.last_name,
+                ];
           const wallet = await this.service.createWallet(trx, {
-            accountName: [
-              bvnData.profile.first_name,
-              bvnData.profile.middle_name,
-              bvnData.profile.last_name,
-            ].join(""),
+            accountName: accountNames.join(""),
             accountNumber: user.phone.slice(-10),
             userId: user.id,
           });

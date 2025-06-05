@@ -29,6 +29,10 @@ export class UserRepository extends Repository<UserModel> {
     return await this.table.transacting(trx).insert(param, "*").first();
   }
 
+  async getUserByEmailAndPassword(email: UserModel["email"], password: UserModel["password"]) {
+    return await this.table.select().where({ email, password }).first();
+  }
+
   async getUserById(id: UserModel["id"]) {
     return await this.table.select().where({ id }).first();
   }

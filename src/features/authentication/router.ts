@@ -58,12 +58,12 @@ export const router = Router()
   .post(
     AUTHENTICATION_ROUTES.POST_INITIATE_AUTH,
     validateRequest(initiateAuthenticationRequestSchema, "body"),
-    controller.route.bind(controller),
+    controller.initiateAuth.bind(controller),
   )
   .post(
     AUTHENTICATION_ROUTES.POST_LOGIN,
     validateRequest(loginRequestSchema, "body"),
-    controller.route.bind(controller),
+    controller.login.bind(controller),
   )
   .post(
     AUTHENTICATION_ROUTES.POST_REFRESH_TOKEN,

@@ -1,3 +1,4 @@
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { DateTime } from "luxon";
 
@@ -32,6 +33,11 @@ export function generateOTP(length = 6) {
 
 export function getUsername(email: UserModel["email"]) {
   return `@${email.split("@")[0]}`;
+}
+
+export async function hashPassword(password: UserModel["password"]) {
+  const salt = await bcrypt.genSalt(12);
+  return await bcrypt.hash(password, salt);
 }
 
 export function validateVerificationToken(token: string, authType: TokenAuthType) {

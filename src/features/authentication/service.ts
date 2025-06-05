@@ -1,10 +1,10 @@
-import bcrypt from "bcryptjs";
 import { StatusCodes } from "http-status-codes";
 import jwt from "jsonwebtoken";
 import Knex from "knex";
 import { DateTime } from "luxon";
 import { randomUUID } from "node:crypto";
 
+import database from "@/configs/database";
 import { env } from "@/configs/env";
 import { CustomError } from "@/helpers/errorInstance";
 import { TokenAuthType, TokenPayload, TokenType, VerificationTokenPayload } from "@/helpers/types";
@@ -22,7 +22,7 @@ import { AdjutorBvnPayload, AdjutorService } from "@/services/AdjutorService";
 import { ResendService } from "@/services/ResendService";
 
 import { InitiateBvnVerificationRequest } from "./authenticationDTOs";
-import { generateOTP, getUsername } from "./helpers/utilities";
+import { generateOTP, getUsername, hashPassword } from "./helpers/utilities";
 
 export class AuthenticationService {
   private adjutorService: AdjutorService;
@@ -92,6 +92,15 @@ export class AuthenticationService {
     return { isBlacklisted: false };
   }
 
+  async completeLogin2Fa(trx: Knex.Knex.Transaction, sessionId: SessionModel["id"]) {
+    await this.sessionRepository.updateSession(trx, sessionId, {
+      isTwoFactorVerified: true,
+      twoFactorCode: null,
+      twoFactorCodeExpiresAt: null,
+      twoFactorVerifiedAt: database.fn.now() as unknown as string,
+    });
+  }
+
   async completeUserKyc(
     trx: Knex.Knex.Transaction,
     userId: UserModel["id"],
@@ -142,8 +151,7 @@ export class AuthenticationService {
     trx: Knex.Knex.Transaction,
     userData: Pick<UserModel, "email" | "password" | "phone" | "timezone">,
   ) {
-    const salt = await bcrypt.genSalt(12);
-    const hashedPassword = await bcrypt.hash(userData.password, salt);
+    const hashedPassword = await hashPassword(userData.password);
     const user = await this.userRepository.createUser(trx, {
       ...userData,
       password: hashedPassword,
@@ -214,6 +222,35 @@ export class AuthenticationService {
     return await this.sessionRepository.deleteSession(trx, userId);
   }
 
+  async generateLoginOtp(
+    trx: Knex.Knex.Transaction,
+    sessionData: Omit<VerificationTokenPayload, "authType" | "bvn" | "exp" | "type">,
+  ) {
+    const otp = generateOTP();
+    const tokenTime = DateTime.utc().plus({ seconds: env.VERIFICATION_TOKEN_EXPIRATION });
+    const tokenPayload: VerificationTokenPayload = {
+      ...sessionData,
+      authType: TokenAuthType.EMAIL,
+      exp: tokenTime.toUnixInteger(),
+      type: TokenType.VERIFICATION,
+    };
+    const verificationToken = jwt.sign(tokenPayload, env.VERIFICATION_TOKEN_SECRET);
+    await this.sessionRepository.updateSession(trx, sessionData.sessionId, {
+      isTwoFactorVerified: false,
+      twoFactorCode: otp,
+      twoFactorCodeExpiresAt: tokenTime.toSQL({ includeOffset: false }),
+      twoFactorVerifiedAt: null,
+    });
+
+    await this.resendService.sendVerificationOTP(tokenPayload.email, otp, tokenTime);
+
+    return {
+      otpExpiresAt: tokenTime.toMillis(),
+      otpMessage: `OTP sent to ${sessionData.email}, please check your email`,
+      verificationToken,
+    };
+  }
+
   async getAuthUserData(sessionId: AuthenticatedUserModel["userId"]) {
     const userData = await this.authUserRepository.getUserBySessionId(sessionId);
     if (!userData)
@@ -232,6 +269,14 @@ export class AuthenticationService {
     if (bvnData.status !== "success") return { error: bvnData.message };
 
     return { profile: bvnData.data };
+  }
+
+  async getValidatedUserSession(sessionData: Pick<SessionModel, "deviceId" | "id" | "userId">) {
+    const session = await this.sessionRepository.getActiveSession(sessionData);
+    if (!session) return { error: "Invalid credentials" };
+    if (session.isTwoFactorVerified) return { error: "Session already verified" };
+
+    return { session };
   }
 
   async initiateEmailVerification(
@@ -292,5 +337,13 @@ export class AuthenticationService {
     });
 
     return { session, user };
+  }
+
+  async verifyUserLogin(email: UserModel["email"], password: UserModel["password"]) {
+    const hashedPassword = await hashPassword(password);
+    const user = await this.userRepository.getUserByEmailAndPassword(email, hashedPassword);
+    if (!user) return { error: "Invalid email or password" };
+
+    return { user };
   }
 }

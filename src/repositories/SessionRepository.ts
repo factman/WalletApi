@@ -30,6 +30,15 @@ export class SessionRepository extends Repository<SessionModel> {
     return await this.table.transacting(trx).where({ userId }).del("*").first();
   }
 
+  async getActiveSession(session: Pick<SessionModel, "deviceId" | "id" | "userId">) {
+    return await this.table
+      .select()
+      .where({ ...session })
+      .where("accessTokenExpiresAt", "<", this.knex.fn.now())
+      .where("expiresAt", "<", this.knex.fn.now())
+      .first();
+  }
+
   async getSessionById(id: SessionModel["id"]) {
     return await this.table.select().where({ id }).first();
   }
