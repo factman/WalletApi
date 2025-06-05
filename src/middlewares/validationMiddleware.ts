@@ -1,25 +1,29 @@
-import { errorResponse } from "@/helpers/responseHandlers";
-import { SchemaType, ValidationError } from "@/helpers/types";
 import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
-export function validateRequest(schema: SchemaType, dataPath: "query" | "body" | "params" | "headers") {
+import { errorResponse } from "@/helpers/responseHandlers";
+import { SchemaType, ValidationError } from "@/helpers/types";
+
+export function validateRequest(
+  schema: SchemaType,
+  dataPath: "body" | "headers" | "params" | "query",
+) {
   return (req: Request, res: Response, next: NextFunction) => {
     const errors: ValidationError[] = [];
-    const { success, error } = schema.safeParse(req[dataPath]);
+    const { error, success } = schema.safeParse(req[dataPath]);
 
     if (!success) {
       error.errors.forEach((errorItem) => {
         errors.push({
+          entity: dataPath,
           message: errorItem.message,
           path: errorItem.path.join("."),
-          entity: dataPath,
         });
       });
 
-      return errorResponse(res, StatusCodes.BAD_REQUEST, errors, "Validation Error");
+      errorResponse(res, StatusCodes.BAD_REQUEST, errors, "Validation Error");
+    } else {
+      next();
     }
-
-    next();
   };
 }

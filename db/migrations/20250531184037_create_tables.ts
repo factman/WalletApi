@@ -17,7 +17,10 @@ export async function up(knex: Knex): Promise<void> {
         table.uuid("id").primary().unique().defaultTo(knex.fn.uuid());
         table.string("email").notNullable().unique();
         table.string("phone", 20).notNullable().unique();
-        table.enum("status", ["blacklisted", "deleted", "suspended", "verified", "unverified"]).notNullable().defaultTo("unverified");
+        table
+          .enum("status", ["blacklisted", "deleted", "suspended", "verified", "unverified"])
+          .notNullable()
+          .defaultTo("unverified");
         table.string("password").notNullable();
         table.string("timezone").notNullable();
         table.boolean("isEmailVerified").notNullable().defaultTo(false);
@@ -26,7 +29,10 @@ export async function up(knex: Knex): Promise<void> {
         table.boolean("isTwoFactorEnabled").notNullable().defaultTo(false);
         table.boolean("isBlacklisted").notNullable().defaultTo(false);
         table.datetime("createdAt").notNullable().defaultTo(knex.raw("CURRENT_TIMESTAMP"));
-        table.datetime("updatedAt").notNullable().defaultTo(knex.raw("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"));
+        table
+          .datetime("updatedAt")
+          .notNullable()
+          .defaultTo(knex.raw("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"));
         table.datetime("deletedAt").nullable();
         table.datetime("lastLogin").nullable();
         table.index(["email", "phone"], "idx_users_email_phone");
@@ -35,28 +41,45 @@ export async function up(knex: Knex): Promise<void> {
       // Create sessions table
       .createTable("sessions", (table) => {
         table.uuid("id").primary().unique().defaultTo(knex.fn.uuid());
-        table.uuid("userId").notNullable().unique().references("id").inTable("users").onDelete("CASCADE").onUpdate("CASCADE");
+        table
+          .uuid("userId")
+          .notNullable()
+          .unique()
+          .references("id")
+          .inTable("users")
+          .onDelete("CASCADE")
+          .onUpdate("CASCADE");
         table.string("ipAddress", 45).notNullable();
         table.string("userAgent").notNullable();
         table.string("deviceId").notNullable();
         table.datetime("expiresAt").notNullable();
-        table.string("accessToken", 510).notNullable();
+        table.string("accessToken").notNullable();
         table.datetime("accessTokenExpiresAt").notNullable();
-        table.string("refreshToken", 510).notNullable();
+        table.string("refreshToken").notNullable();
         table.datetime("refreshTokenExpiresAt").notNullable();
         table.string("twoFactorCode", 6).nullable();
         table.datetime("twoFactorCodeExpiresAt").nullable();
         table.datetime("twoFactorVerifiedAt").nullable();
         table.boolean("isTwoFactorVerified").notNullable().defaultTo(false);
         table.datetime("createdAt").notNullable().defaultTo(knex.raw("CURRENT_TIMESTAMP"));
-        table.datetime("updatedAt").notNullable().defaultTo(knex.raw("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"));
+        table
+          .datetime("updatedAt")
+          .notNullable()
+          .defaultTo(knex.raw("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"));
         table.index(["userId", "deviceId"], "idx_sessions_user_device");
         table.index("expiresAt", "idx_sessions_expiresAt");
       })
       // Create profiles table
       .createTable("profiles", (table) => {
         table.uuid("id").primary().unique().defaultTo(knex.fn.uuid());
-        table.uuid("userId").notNullable().unique().references("id").inTable("users").onDelete("CASCADE").onUpdate("CASCADE");
+        table
+          .uuid("userId")
+          .notNullable()
+          .unique()
+          .references("id")
+          .inTable("users")
+          .onDelete("CASCADE")
+          .onUpdate("CASCADE");
         table.string("firstName").notNullable();
         table.string("lastName").notNullable();
         table.string("middleName").nullable();
@@ -65,12 +88,15 @@ export async function up(knex: Knex): Promise<void> {
         table.string("state").nullable();
         table.string("address").nullable();
         table.string("bvn", 11).notNullable();
-        table.string("bvn_email").nullable();
-        table.string("bvn_phone", 20).nullable();
-        table.json("bvnMetadata").notNullable();
-        table.string("image", 510).nullable();
+        table.string("bvnEmail").nullable();
+        table.string("bvnPhone", 20).nullable();
+        table.string("bvnMetadata").notNullable();
+        table.string("image").nullable();
         table.datetime("createdAt").notNullable().defaultTo(knex.raw("CURRENT_TIMESTAMP"));
-        table.datetime("updatedAt").notNullable().defaultTo(knex.raw("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"));
+        table
+          .datetime("updatedAt")
+          .notNullable()
+          .defaultTo(knex.raw("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"));
         table.index("userId", "idx_profiles_userId");
         table.index(["firstName", "lastName"], "idx_profiles_name");
         table.index("bvn", "idx_profiles_bvn");
@@ -78,7 +104,14 @@ export async function up(knex: Knex): Promise<void> {
       // Create wallets table
       .createTable("wallets", (table) => {
         table.uuid("id").primary().unique().defaultTo(knex.fn.uuid());
-        table.uuid("userId").notNullable().unique().references("id").inTable("users").onDelete("CASCADE").onUpdate("CASCADE");
+        table
+          .uuid("userId")
+          .notNullable()
+          .unique()
+          .references("id")
+          .inTable("users")
+          .onDelete("CASCADE")
+          .onUpdate("CASCADE");
         table.string("accountName").notNullable();
         table.string("accountNumber", 10).notNullable().unique();
         table.decimal("balance", 11, 2).notNullable().defaultTo(0.0);
@@ -92,7 +125,10 @@ export async function up(knex: Knex): Promise<void> {
         table.string("transactionPin", 6).nullable();
         table.enum("status", ["active", "blocked", "inactive"]).notNullable().defaultTo("inactive");
         table.datetime("createdAt").notNullable().defaultTo(knex.raw("CURRENT_TIMESTAMP"));
-        table.datetime("updatedAt").notNullable().defaultTo(knex.raw("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"));
+        table
+          .datetime("updatedAt")
+          .notNullable()
+          .defaultTo(knex.raw("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"));
         table.index("userId", "idx_wallets_userId");
         table.index(["accountName", "accountNumber"], "idx_wallets_account");
         table.index("status", "idx_wallets_status");
@@ -100,8 +136,20 @@ export async function up(knex: Knex): Promise<void> {
       // Create transactions table
       .createTable("transactions", (table) => {
         table.uuid("id").primary().unique().defaultTo(knex.fn.uuid());
-        table.uuid("userId").notNullable().references("id").inTable("users").onDelete("CASCADE").onUpdate("CASCADE");
-        table.uuid("walletId").notNullable().references("id").inTable("wallets").onDelete("CASCADE").onUpdate("CASCADE");
+        table
+          .uuid("userId")
+          .notNullable()
+          .references("id")
+          .inTable("users")
+          .onDelete("CASCADE")
+          .onUpdate("CASCADE");
+        table
+          .uuid("walletId")
+          .notNullable()
+          .references("id")
+          .inTable("wallets")
+          .onDelete("CASCADE")
+          .onUpdate("CASCADE");
         table.string("sessionId", 30).notNullable().unique();
         table.decimal("amount", 11, 2).notNullable();
         table.string("currency", 3).notNullable().defaultTo("NGN");
@@ -115,7 +163,10 @@ export async function up(knex: Knex): Promise<void> {
         table.json("metadata").notNullable();
         table.date("settlementDate").nullable();
         table.datetime("createdAt").notNullable().defaultTo(knex.raw("CURRENT_TIMESTAMP"));
-        table.datetime("updatedAt").notNullable().defaultTo(knex.raw("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"));
+        table
+          .datetime("updatedAt")
+          .notNullable()
+          .defaultTo(knex.raw("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"));
         table.index("userId", "idx_transactions_userId");
         table.index("walletId", "idx_transactions_walletId");
         table.index("sessionId", "idx_transactions_sessionId");

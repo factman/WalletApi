@@ -10,12 +10,13 @@ export function gracefulShutdown(server: Server, cleanUp?: () => Promise<void>) 
       }
     });
 
+    console.log("Graceful shutdown initiated. Exiting process...");
+
     if (cleanUp) await cleanUp();
 
-    console.log("Graceful shutdown initiated. Exiting process...");
     process.exitCode = 0; // Set exit code to 0 to indicate success
   };
 
-  process.on("SIGINT", listener);
-  process.on("SIGTERM", listener);
+  process.on("SIGINT", listener as never);
+  process.on("SIGTERM", listener as never);
 }

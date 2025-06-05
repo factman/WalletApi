@@ -52,9 +52,181 @@ Refer to the `package.json` for more details and additional scripts.
 
 ## Database Entity Relationship Diagram
 
-> Click on the Image below to view the diagram in details
+<details>
+  <summary>Preview ER Diagram (Mermaid)</summary>
+
+> Click the link below to view the mermaid file <br /> [View Mermaid File](./ER_Diagram.mermaid)
+
+```mermaid
+---
+title: Demo Wallet Database Tables
+config:
+    theme: dark
+    darkMode: true
+    themeVariables:
+        lineColor: white
+---
+erDiagram
+    Users_Table {
+        CHAR(36) id pk, uk "NOT NULL UUID"
+        VARCHAR(255) email uk "NOT NULL"
+        VARCHAR(20) phone uk "NOT NULL"
+        ENUM status "NOT NULL ENUM(blacklisted, deleted, suspended, verified, unverified)"
+        VARCHAR password "NOT NULL"
+        VARCHAR(255) timezone "NOT NULL"
+        BOOLEAN isBlacklisted "NOT NULL"
+        BOOLEAN isEmailVerified "NOT NULL"
+        BOOLEAN isKycVerified "NOT NULL"
+        BOOLEAN isPasswordResetRequired "NOT NULL"
+        BOOLEAN isTwoFactorEnabled "NOT NULL"
+        DATETIME lastLogin "NULL"
+        DATETIME updatedAt "NOT NULL"
+        DATETIME createdAt "NOT NULL"
+        DATETIME deletedAt "NULL"
+    }
+
+    Sessions_Table {
+        CHAR(36) id pk, uk "NOT NULL UUID"
+        CHAR(36) userId fk, uk "NOT NULL REFERENCE Users_Table.id"
+        VARCHAR userAgent "NOT NULL"
+        VARCHAR accessToken "NOT NULL"
+        DATETIME accessTokenExpiresAt "NOT NULL"
+        VARCHAR(255) deviceId "NOT NULL"
+        DATETIME expiresAt "NOT NULL"
+        VARCHAR(45) ipAddress "NOT NULL"
+        BOOLEAN isTwoFactorVerified "NOT NULL"
+        VARCHAR refreshToken "NOT NULL"
+        VARCHAR refreshTokenExpiresAt "NOT NULL"
+        CHAR(6) twoFactorCode "NULL"
+        DATETIME twoFactorCodeExpiresAt "NULL"
+        DATETIME twoFactorVerifiedAt "NULL"
+        DATETIME createdAt "NOT NULL"
+        DATETIME updatedAt "NOT NULL"
+    }
+    Sessions_Table 1--1 Users_Table : "One to One"
+
+    Profiles_Table {
+        CHAR(36) id pk, uk "NOT NULL UUID"
+        CHAR(36) userId fk, uk "NOT NULL REFERENCE Users_Table.id"
+        VARCHAR image "NULL"
+        VARCHAR(255) firstName "NOT NULL"
+        VARCHAR(255) lastName "NOT NULL"
+        VARCHAR(255) middleName "NULL"
+        VARCHAR(6) gender "NOT NULL"
+        VARCHAR(255) state "NULL"
+        VARCHAR address "NULL"
+        CHAR(11) bvn "NOT NULL"
+        VARCHAR(255) bvn_email "NULL"
+        VARCHAR(20) bvn_phone "NULL"
+        JSON bvnMetadata "NOT NULL"
+        DATE dob "NOT NULL"
+        DATETIME createdAt "NOT NULL"
+        DATETIME updatedAt "NOT NULL"
+    }
+    Profiles_Table 1--1 Users_Table : "One to One"
+
+    Wallets_Table {
+        CHAR(36) id pk, uk "NOT NULL UUID"
+        CHAR(36) userId fk, uk "NOT NULL REFERENCE Users_Table.id"
+        VARCHAR(255) accountName "NOT NULL"
+        CHAR(10) accountNumber uk "NOT NULL"
+        DECIMAL(11_2) balance "NOT NULL"
+        DECIMAL(11_2) lienBalance "NOT NULL"
+        CHAR(3) currency "NOT NULL"
+        BOOLEAN isTransactionPinSet "NOT NULL"
+        CHAR(4) transactionPin "NULL"
+        BOOLEAN isSettlementAccountSet "NOT NULL"
+        VARCHAR(255) settlementAccountName "NULL"
+        CHAR(10) settlementAccountNumber "NULL"
+        VARCHAR(10) settlementBankCode "NULL"
+        ENUM status "NOT NULL ENUM(active, blocked, inactive)"
+        DATETIME createdAt "NOT NULL"
+        DATETIME updatedAt "NOT NULL"
+    }
+    Wallets_Table 1--1 Users_Table : "One to One"
+
+    Transactions_Table {
+        CHAR(36) id pk, uk "NOT NULL UUID"
+        CHAR(36) userId fk "NOT NULL REFERENCE Users_Table.id"
+        CHAR(36) walletId fk "NOT NULL REFERENCE Wallets_Table.id"
+        CHAR(30) sessionId uk "NOT NULL"
+        DECIMAL(11_2) amount "NOT NULL"
+        DECIMAL(11_2) fee "NOT NULL"
+        DECIMAL(11_2) closingBalance "NOT NULL"
+        DECIMAL(11_2) openingBalance "NOT NULL"
+        CHAR(3) currency "NOT NULL"
+        ENUM channel "NOT NULL ENUM(bank_transfer, wallet)"
+        DATETIME settlementDate "NULL"
+        ENUM status "NOT NULL ENUM(completed, failed, pending)"
+        ENUM type "NOT NULL ENUM(credit, debit)"
+        JSON metadata "NULL"
+        VARCHAR remark "NOT NULL"
+        DATETIME createdAt "NOT NULL"
+        DATETIME updatedAt "NOT NULL"
+
+    }
+    Transactions_Table 1+--1 Users_Table : "One to Many"
+    Transactions_Table 1+--1 Wallets_Table : "One to Many"
+
+    AuthenticatedUsers_View {
+        VARCHAR(255) deviceId "Sessions_Table.deviceId"
+        VARCHAR(255) email "Users_Table.email"
+        VARCHAR(45) ipAddress "Sessions_Table.ipAddress"
+        BOOLEAN isBlacklisted "Users_Table.isBlacklisted"
+        BOOLEAN isEmailVerified "Users_Table.isEmailVerified"
+        BOOLEAN isKycVerified "Users_Table.isKycVerified"
+        BOOLEAN isPasswordResetRequired "Users_Table.isPasswordResetRequired"
+        BOOLEAN isTwoFactorEnabled "Sessions_Table.isTwoFactorEnabled"
+        DATETIME lastLogin "Users_Table.lastLogin"
+        VARCHAR(20) phone "Users_Table.phone"
+        DATETIME sessionExpiresAt "Sessions_Table.expiresAt"
+        CHAR(36) sessionId "Sessions_Table.id"
+        ENUM status "Users_Table.status"
+        VARCHAR(255) timezone "Users_Table.timezone"
+        VARCHAR userAgent "Sessions_Table.userAgent"
+        CHAR(36) userId "Users_Table.id"
+    }
+    AuthenticatedUsers_View 1--1 Sessions_Table : "One to One"
+    AuthenticatedUsers_View 1--1 Users_Table : "One to One"
+
+    UserProfiles_View {
+        VARCHAR address "Profiles_Table.address"
+        CHAR(11) bvn "Profiles_Table.bvn"
+        DATE dob "Profiles_Table.dob"
+        VARCHAR(255) email "Users_Table.email"
+        VARCHAR(255) firstName "Profiles_Table.firstName"
+        VARCHAR(6) gender "Profiles_Table.gender"
+        VARCHAR image "Profiles_Table.image"
+        BOOLEAN isBlacklisted "Users_Table.isBlacklisted"
+        BOOLEAN isEmailVerified "Users_Table.isEmailVerified"
+        BOOLEAN isKycVerified "Users_Table.isKycVerified"
+        BOOLEAN isTwoFactorEnabled "Users_Table.isTwoFactorEnabled"
+        DATETIME lastLogin "Users_Table.lastLogin"
+        VARCHAR(255) lastName "Profiles_Table.lastName"
+        VARCHAR(255) middleName "Profiles_Table.middleName"
+        VARCHAR(20) phone "Users_Table.phone"
+        CHAR(36) profileId "Profiles_Table.id"
+        VARCHAR(255) state "Profiles_Table.state"
+        ENUM status "Users_Table.status"
+        VARCHAR(255) timezone "Users_Table.timezone"
+        CHAR(36) userId "Users_Table.id"
+    }
+    UserProfiles_View 1--1 Users_Table : "One to One"
+    UserProfiles_View 1--1 Profiles_Table : "One to One"
+```
+
+</details>
+
+<br/>
+
+<details>
+  <summary>Preview ER Diagram (PNG)</summary>
+
+> Click on the image to preview the diagram in a Live Editor
 
 [![Database Entity Relationship Diagram](https://mermaid.ink/img/pako:eNrdWVtP4zgU_itWnqbaUjWlFOhboRktu7SgUlhpVQm5idtaTeyu48B0EP99j51eco_RDKvR8tJgf9_xyfG5-Dhvlss9YvWtk5OTGZNU-qSPhiTg6C_s-0SiIZZ4jkOCpnjuk3DGXM4WdNmfMQR_ckUCIHhYrOMB9TQCiX0kRUQSoCcsqJawY6o_nzJyzX0u-uh1RSXAtRZEDCleChzEyMeQiPBZL4_ejuTr3weTL6e9BqIe2qybKFqjmTW-m6Lx4-0teny8Gc6sI_ppMNGEztlZA5EAUz9NKMS2G2iz4oyUQ53x4wiFEssoTK6uhr_MfeyufRpK4jWRR8CY6iGMwg1hnnp8IYIuqHqK2P65UaAI2uAwfOXCq9NXvZukAfmudC7GXt3d3TqDMaLh1VG9WqyjDPa0U7EW_efWNcbe715tQkIiJ-SfiAoD1vSVf8Wu5MJhyi3KCMPB1JnejBzk41De8iVlClgGijYeBmMMZJ00VxAz4G7TY2AC9D5j8cMDCUPK2Q979wEdQazceGiRY0ycr87EGV87yXBqUa_I3ZSQwZIwWe1vCLsu6D_la8LqLJGAOt82sMfhQJp4s0deqEtuajeYGArtgky6GXgegENzN6tx571BBFmA3FWVRYqgdRbRmsPmyr0615Bgqzw5BUxJr2Xs37QabhwBVTH1XhgD9smJnUr5faDeQT6THMGPIse8e8EXFOrJrxU7NMDLor1JefWCilCOcUBMQkDlLlNsQD3PJ3t0CRJedakqkDCRqGpbhTCEj6FU5LW23UDzF2ayEsCe48JcYb12jIurch73x8PdWAFGRGJwPFzhnsjj85-W6A3cPOOuxm4eH8N-LS-PNwxyOo9YlW_GLtA-QqNgDm5XepoaOtc3o8EteM1zBzYa-5i5xAjrU8KuKvGxARrIjYQgzN3WJ3-BWQg5EXLTPWUPpDI7dyE7p_AFznkUDcLgnB1AhR3EhimXng7GLK8k0g92zxPiHSiPsDTrCrN1SbGpOvkqK7yQJpr73F2r8y1l8VDj08MsHS7GUZbY7E8ItY-G2UHCq36bChmp1y2UovdTV1gQYxh5OFC-YgRdELMAdX0eUra8-kBMc-iTaimGYa291V1hxoifb9TAy591-C6IaO6MXuyqx9AYFtfFqrBwebDZdYELqHPqV7WC8I6NnAi53ZC8AOiNqFTN5JymFdSFL0hUvdJjZwAN-qfXvVRIFsSW_VtFYI4w2-5XK-Wm47yAHfMHkVzBZlFXqRmv90TJazK4y_qN9Lm0tZ-puVSYWcmw1mMmfUhmscOUSeueyiPJObNePk1PzZq092l6Yu5j_X5aTCHK-Coga8wcpvaOIKnNYbz6iihN0mMlGUQrl-zKMvoeetnCknBM5vkX9cozUVK5eNDkBinJ2g_X3RhklDpMVZXIzP57maJeFsW6vGf6x3yFr5VgckBQmMMRviSFJJqh9Gm_hfPRnGmPMgQYLGlYMkAY_DkZKdeYZhY6TNW1lBlePF7VKmcIevh_l_cK0lRawifmqMwtQsbe-xmzS4UM-Tj3Q9nxkA82sXidErJ-4dVeUmQYevi_TokfTG35vGKQkiqImWuGPNdqWktBPau_wH5ImlZABLg-_G_phDazfLzlEWRrRfXwUgCrGc_o7zj7CbFW0t5B3AazvzkPrL764tO0BI-Wq4P4-IS4-55zgOiccK2aDKtvdzvdUy3F6r9Z36x-r9tq273LTrt3etk973UvmtYWYOeXrc7Zee_01L6w271e5_y9aX3X69otu925sM8u2u1zu3thXzYtdU7mYhR_2tJfuN7_BYOi-uU?type=png)](https://mermaid.live/edit#pako:eNrdWVtP4zgU_itWnqbaUjWlFOhboRktu7SgUlhpVQm5idtaTeyu48B0EP99j51eco_RDKvR8tJgf9_xyfG5-Dhvlss9YvWtk5OTGZNU-qSPhiTg6C_s-0SiIZZ4jkOCpnjuk3DGXM4WdNmfMQR_ckUCIHhYrOMB9TQCiX0kRUQSoCcsqJawY6o_nzJyzX0u-uh1RSXAtRZEDCleChzEyMeQiPBZL4_ejuTr3weTL6e9BqIe2qybKFqjmTW-m6Lx4-0teny8Gc6sI_ppMNGEztlZA5EAUz9NKMS2G2iz4oyUQ53x4wiFEssoTK6uhr_MfeyufRpK4jWRR8CY6iGMwg1hnnp8IYIuqHqK2P65UaAI2uAwfOXCq9NXvZukAfmudC7GXt3d3TqDMaLh1VG9WqyjDPa0U7EW_efWNcbe715tQkIiJ-SfiAoD1vSVf8Wu5MJhyi3KCMPB1JnejBzk41De8iVlClgGijYeBmMMZJ00VxAz4G7TY2AC9D5j8cMDCUPK2Q979wEdQazceGiRY0ycr87EGV87yXBqUa_I3ZSQwZIwWe1vCLsu6D_la8LqLJGAOt82sMfhQJp4s0deqEtuajeYGArtgky6GXgegENzN6tx571BBFmA3FWVRYqgdRbRmsPmyr0615Bgqzw5BUxJr2Xs37QabhwBVTH1XhgD9smJnUr5faDeQT6THMGPIse8e8EXFOrJrxU7NMDLor1JefWCilCOcUBMQkDlLlNsQD3PJ3t0CRJedakqkDCRqGpbhTCEj6FU5LW23UDzF2ayEsCe48JcYb12jIurch73x8PdWAFGRGJwPFzhnsjj85-W6A3cPOOuxm4eH8N-LS-PNwxyOo9YlW_GLtA-QqNgDm5XepoaOtc3o8EteM1zBzYa-5i5xAjrU8KuKvGxARrIjYQgzN3WJ3-BWQg5EXLTPWUPpDI7dyE7p_AFznkUDcLgnB1AhR3EhimXng7GLK8k0g92zxPiHSiPsDTrCrN1SbGpOvkqK7yQJpr73F2r8y1l8VDj08MsHS7GUZbY7E8ItY-G2UHCq36bChmp1y2UovdTV1gQYxh5OFC-YgRdELMAdX0eUra8-kBMc-iTaimGYa291V1hxoifb9TAy591-C6IaO6MXuyqx9AYFtfFqrBwebDZdYELqHPqV7WC8I6NnAi53ZC8AOiNqFTN5JymFdSFL0hUvdJjZwAN-qfXvVRIFsSW_VtFYI4w2-5XK-Wm47yAHfMHkVzBZlFXqRmv90TJazK4y_qN9Lm0tZ-puVSYWcmw1mMmfUhmscOUSeueyiPJObNePk1PzZq092l6Yu5j_X5aTCHK-Coga8wcpvaOIKnNYbz6iihN0mMlGUQrl-zKMvoeetnCknBM5vkX9cozUVK5eNDkBinJ2g_X3RhklDpMVZXIzP57maJeFsW6vGf6x3yFr5VgckBQmMMRviSFJJqh9Gm_hfPRnGmPMgQYLGlYMkAY_DkZKdeYZhY6TNW1lBlePF7VKmcIevh_l_cK0lRawifmqMwtQsbe-xmzS4UM-Tj3Q9nxkA82sXidErJ-4dVeUmQYevi_TokfTG35vGKQkiqImWuGPNdqWktBPau_wH5ImlZABLg-_G_phDazfLzlEWRrRfXwUgCrGc_o7zj7CbFW0t5B3AazvzkPrL764tO0BI-Wq4P4-IS4-55zgOiccK2aDKtvdzvdUy3F6r9Z36x-r9tq273LTrt3etk973UvmtYWYOeXrc7Zee_01L6w271e5_y9aX3X69otu925sM8u2u1zu3thXzYtdU7mYhR_2tJfuN7_BYOi-uU)
+
+</details>
 
 ### Tables
 
@@ -100,6 +272,9 @@ Refer to the `package.json` for more details and additional scripts.
 
 This project follows a **Modular Feature Isolation** pattern to organize its codebase for scalability, maintainability, and clear separation of concerns.
 
+<details>
+  <summary>View Folder Structure</summary>
+
 ```bash
 WalletApi/
 ├── @types                # Custom TypeScript type definitions for the project
@@ -133,6 +308,8 @@ WalletApi/
 ├── vitest.config.js      # Configuration for Vitest testing framework
 └── ...                   # Other files and folders (e.g., tsconfig.json, .gitignore, etc...)
 ```
+
+</details>
 
 ### Modular Feature Isolation Pattern
 

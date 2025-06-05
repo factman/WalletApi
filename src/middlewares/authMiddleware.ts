@@ -1,23 +1,84 @@
-import { env } from "@/configs/env";
-import { errorResponse } from "@/helpers/responseHandlers";
-import { authorizationSchema } from "@/validations/validationSchemas";
 import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
+import { DateTime } from "luxon";
 
-export const authGuard = (req: Request, res: Response, next: NextFunction) => {
-  const authError = new Error("Access Denied / Unauthorized request");
-  const { success, error, data } = authorizationSchema(authError.message).safeParse(req.headers);
+import database from "@/configs/database";
+import { env } from "@/configs/env";
+import { CustomError } from "@/helpers/errorInstance";
+import { errorResponse } from "@/helpers/responseHandlers";
+import { TokenPayload, TokenType } from "@/helpers/types";
+import { UserStatus } from "@/models/UserModel";
+import { SessionRepository } from "@/repositories/SessionRepository";
+import { UserRepository } from "@/repositories/UserRepository";
+import { authorizationSchema, tokenSchema } from "@/validations/validationSchemas";
 
-  if (!success) return errorResponse(res, StatusCodes.UNAUTHORIZED, new Error(error.errors[0].message));
+export async function authGuard(req: Request, res: Response, next: NextFunction) {
+  // Auth error
+  const authError = new CustomError(
+    "Access Denied / Unauthorized request",
+    StatusCodes.UNAUTHORIZED,
+  );
+  // validating authorization header
+  const { data, success } = authorizationSchema(authError.message).safeParse(req.headers);
 
-  const authorization = data.authorization as string;
-  const token = authorization.split(" ")[1];
-  if (!token) return errorResponse(res, StatusCodes.UNAUTHORIZED, authError);
+  if (!success) {
+    errorResponse(res, authError.status, authError);
+  } else {
+    const authorization = data.authorization as string;
+    const token = authorization.split(" ")[1];
+    if (!token) {
+      errorResponse(res, authError.status, authError);
+    } else {
+      try {
+        // verify token
+        const validToken = jwt.verify(token, env.ACCESS_TOKEN_SECRET) as TokenPayload;
+        const result = tokenSchema(TokenType.ACCESS).safeParse(validToken);
 
-  const validToken = jwt.verify(token, env.ACCESS_TOKEN_SECRET) as JwtPayload;
-  if (!validToken) return errorResponse(res, StatusCodes.UNAUTHORIZED, authError);
+        if (!result.success) throw authError;
 
-  req.accessTokenPayload = validToken;
-  next();
-};
+        // retrieve user session
+        const sessionRepository = new SessionRepository();
+        const session = await sessionRepository.getSessionById(result.data.sessionId);
+        if (!session) throw authError;
+
+        // validating refreshToken validity
+        const refreshTokenExpireTime = DateTime.fromSQL(session.refreshTokenExpiresAt)
+          .diffNow()
+          .as("milliseconds");
+        if (refreshTokenExpireTime < 0) {
+          const trx = await database.transaction();
+          await sessionRepository.deleteSession(trx, session.userId).catch(trx.rollback);
+          throw authError;
+        }
+
+        // validating accessToken validity
+        const accessTokenExpireTime = DateTime.fromSQL(session.accessTokenExpiresAt)
+          .diffNow()
+          .as("milliseconds");
+        if (accessTokenExpireTime < 0) throw authError;
+
+        // retrieving and validating user
+        const user = await new UserRepository().getUserById(session.userId);
+        if (
+          !user ||
+          [UserStatus.BLACKLISTED, UserStatus.DELETED, UserStatus.SUSPENDED].includes(user.status)
+        )
+          throw authError;
+
+        req.sessionPayload = session;
+        req.userPayload = user;
+        req.accessTokenPayload = result.data;
+        next();
+      } catch (err) {
+        const error = CustomError.fromError(
+          err as Error,
+          StatusCodes.UNAUTHORIZED,
+          authError.message,
+        );
+        console.error("Token verification failed:", error.payload ?? error);
+        errorResponse(res, error.status, error);
+      }
+    }
+  }
+}

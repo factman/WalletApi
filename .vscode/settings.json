@@ -10,5 +10,15 @@
     "source.organizeImports": "always",
     "source.sortImports": "always"
   },
-  "eslint.validate": ["javascript", "typescript"]
+  "eslint.validate": [
+    "javascript",
+    "typescript"
+  ],
+  "cSpell.words": [
+    "ADJUTOR"
+  ],
+  "codemetrics.basics.ComplexityLevelExtreme": 35,
+  "codemetrics.basics.ComplexityLevelHigh": 25,
+  "codemetrics.basics.ComplexityLevelLow": 5,
+  "codemetrics.basics.ComplexityLevelNormal": 15
 }

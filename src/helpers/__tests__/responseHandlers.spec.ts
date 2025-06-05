@@ -1,19 +1,24 @@
 import type { Response } from "express";
-import { StatusCodes, getReasonPhrase } from "http-status-codes";
+
+import { getReasonPhrase, StatusCodes } from "http-status-codes";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { errorResponse, successResponse } from "../responseHandlers";
 
 function createResponseMock() {
   const res: Partial<Response> = {};
-  res.status = vi.fn().mockImplementation(function (this: any, code: number) {
+  res.status = vi.fn().mockImplementation(function (this: Response, code: number) {
     this.statusCode = code;
     return this;
   });
-  res.json = vi.fn().mockImplementation(function (this: any, data: any) {
+  res.json = vi.fn().mockImplementation(function (
+    this: Response & { body: unknown },
+    data: unknown,
+  ) {
     this.body = data;
     return this;
   });
-  return res as Response & { statusCode?: number; body?: any };
+  return res as Response & { body?: unknown; statusCode?: number };
 }
 
 describe("responseHandlers", () => {

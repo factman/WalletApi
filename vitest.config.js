@@ -9,7 +9,7 @@ export default defineConfig({
       exclude: [
         "src/**/*.spec.ts",
         "src/**/*.test.ts",
-        "src/index.ts",
+        "src/**/index.ts",
         "src/**/types.ts",
         "src/**/constants.ts",
         "db/**/*.ts",

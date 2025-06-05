@@ -1,12 +1,44 @@
 import { IncomingHttpHeaders } from "node:http";
-import { ZodObject, ZodRawShape, ZodTypeAny } from "zod";
+import { z, ZodObject } from "zod";
 
-export type HeaderSchemaType = ZodRawShape & Record<keyof IncomingHttpHeaders, ZodTypeAny>;
+export enum TokenAuthType {
+  BVN = "bvn",
+  EMAIL = "email",
+  FORGOT_PASSWORD = "forgot-password",
+  LOGIN = "login",
+}
 
-export type SchemaType = ZodObject<ZodRawShape, "strict"> | ZodObject<ZodRawShape, "passthrough">;
+export enum TokenType {
+  ACCESS = "access",
+  REFRESH = "refresh",
+  VERIFICATION = "verification",
+}
+
+export type HeaderSchemaType = Record<keyof IncomingHttpHeaders, z.ZodTypeAny> & z.ZodRawShape;
+
+export type SchemaType =
+  | ZodObject<z.ZodRawShape, "passthrough">
+  | ZodObject<z.ZodRawShape, "strict">;
+
+export interface TokenPayload {
+  deviceId: string;
+  exp: number;
+  ipAddress: string;
+  sessionId: string;
+  type: TokenType;
+  userAgent: string;
+  userId: string;
+}
 
 export interface ValidationError {
+  entity: string;
   message: string;
   path: string;
-  entity: string;
+}
+
+export interface VerificationTokenPayload extends TokenPayload {
+  authType: TokenAuthType;
+  bvn?: string;
+  email: string;
+  type: TokenType.VERIFICATION;
 }

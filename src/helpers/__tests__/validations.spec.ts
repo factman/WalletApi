@@ -1,19 +1,20 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
+
 import { HeaderSchemaType } from "../types";
 import { buildHeaderSchema, buildStrictSchema } from "../validations";
 
 describe("buildStrictSchema", () => {
   it("should create a strict schema that only allows defined properties", () => {
     const schema = buildStrictSchema({
-      foo: z.string(),
       bar: z.number(),
+      foo: z.string(),
     });
 
-    expect(schema.parse({ foo: "hello", bar: 42 })).toEqual({ foo: "hello", bar: 42 });
+    expect(schema.parse({ bar: 42, foo: "hello" })).toEqual({ bar: 42, foo: "hello" });
 
     // Should fail if extra property is present
-    expect(() => schema.parse({ foo: "hello", bar: 42, extra: true })).toThrow();
+    expect(() => schema.parse({ bar: 42, extra: true, foo: "hello" })).toThrow();
     // Should fail if missing property
     expect(() => schema.parse({ foo: "hello" })).toThrow();
   });
@@ -28,9 +29,9 @@ describe("buildHeaderSchema", () => {
     const schema = buildHeaderSchema(headerShape);
 
     const input = {
-      "x-api-key": "abc123",
       authorization: "Bearer token",
       extra: "allowed",
+      "x-api-key": "abc123",
     };
 
     const result = schema.parse(input);

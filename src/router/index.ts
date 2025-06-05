@@ -1,6 +1,9 @@
-import { env } from "@/configs/env";
-import { successResponse } from "@/helpers/responseHandlers";
 import { Router } from "express";
+
+import { env } from "@/configs/env";
+import { authenticationRouter } from "@/features/authentication";
+import { successResponse } from "@/helpers/responseHandlers";
+
 import packageJson from "../../package.json";
 
 export function appRouter() {
@@ -10,22 +13,22 @@ export function appRouter() {
     successResponse(
       res,
       {
+        apiUrl: `${req.protocol}://${req.get("host") ?? ""}${req.originalUrl}`,
         appName: packageJson.name,
-        version: packageJson.version,
+        author: packageJson.author,
         description: packageJson.description,
         environment: env.NODE_ENV,
-        port: env.PORT,
-        apiUrl: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
-        author: packageJson.author,
         license: packageJson.license,
+        port: env.PORT,
         repository: packageJson.repository,
+        version: packageJson.version,
       },
       "Welcome to the API!",
     );
   });
 
   // Add other routes here
-  // Example: router.use("/auth", authRouter());
+  router.use("/auth", authenticationRouter);
 
   return router;
 }

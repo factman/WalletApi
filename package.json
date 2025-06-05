@@ -41,6 +41,8 @@
     "seed": "dotenvx run -- knex seed:run"
   },
   "dependencies": {
+    "@types/luxon": "^3.6.2",
+    "axios": "^1.9.0",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "express": "^5.1.0",
@@ -48,13 +50,16 @@
     "http-status-codes": "^2.3.0",
     "jsonwebtoken": "^9.0.2",
     "knex": "^3.1.0",
+    "luxon": "^3.6.1",
     "morgan": "^1.10.0",
     "mysql2": "^3.14.1",
+    "resend": "^4.5.1",
     "zod": "^3.25.46"
   },
   "devDependencies": {
     "@dotenvx/dotenvx": "^1.44.1",
     "@eslint/js": "^9.27.0",
+    "@types/axios": "^0.9.36",
     "@types/cors": "^2.8.18",
     "@types/express": "^5.0.2",
     "@types/jsonwebtoken": "^9.0.9",
