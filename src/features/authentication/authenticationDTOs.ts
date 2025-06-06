@@ -1,4 +1,4 @@
-import AuthenticatedUserModel from "@/models/AuthenticatedUserModel";
+import AuthenticatedUserModel from "../../models/AuthenticatedUserModel.js";
 
 export interface ForgotPasswordRequest {
   deviceId: string;

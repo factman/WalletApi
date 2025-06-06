@@ -4,11 +4,8 @@ import helmet from "helmet";
 import { StatusCodes } from "http-status-codes";
 import morgan from "morgan";
 
-import database from "./configs/database";
-import { env } from "./configs/env";
-import { errorResponse } from "./helpers/responseHandlers";
-import { gracefulShutdown } from "./helpers/utilities";
-import { appRouter } from "./router";
+import { errorResponse } from "./helpers/responseHandlers.js";
+import { appRouter } from "./router/index.js";
 
 const app = express();
 
@@ -44,23 +41,6 @@ app.use((err: Error, req: Request, res: Response, _: NextFunction) => {
     null,
     "Something went wrong: Internal Server Error",
   );
-});
-
-// Start the server
-const server = app.listen(env.PORT, () => {
-  console.log(`
-======================================
-  🚀 Server started successfully! 🚀
-  🌟 API is running on port: ${env.PORT.toString()} 🌟
-======================================
-`);
-});
-
-// Graceful shutdown
-gracefulShutdown(server, async () => {
-  console.log("Cleaning up resources before shutdown...");
-  await database.destroy();
-  console.log("Database connection closed.");
 });
 
 // Export the app for testing or further configuration

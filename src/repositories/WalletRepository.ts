@@ -1,10 +1,9 @@
 import Knex from "knex";
 
-import database from "@/configs/database";
-import { SCHEMA_TABLES } from "@/helpers/constants";
-import WalletModel from "@/models/WalletModel";
-
-import { Repository } from "./Repository";
+import database from "../configs/database.js";
+import { SCHEMA_TABLES } from "../helpers/constants.js";
+import WalletModel from "../models/WalletModel.js";
+import { Repository } from "./Repository.js";
 
 export class WalletRepository extends Repository<WalletModel> {
   constructor(databaseInstance = database) {

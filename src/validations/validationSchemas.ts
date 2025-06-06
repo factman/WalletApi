@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-import { TokenAuthType, TokenType } from "@/helpers/types";
-import { buildHeaderSchema } from "@/helpers/validations";
+import { TokenAuthType, TokenType } from "../helpers/types.js";
+import { buildHeaderSchema } from "../helpers/validations.js";
 
 export function authorizationSchema(message: string) {
   return buildHeaderSchema({

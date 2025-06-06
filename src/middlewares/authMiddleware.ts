@@ -3,15 +3,15 @@ import { StatusCodes } from "http-status-codes";
 import jwt from "jsonwebtoken";
 import { DateTime } from "luxon";
 
-import database from "@/configs/database";
-import { env } from "@/configs/env";
-import { CustomError } from "@/helpers/errorInstance";
-import { errorResponse } from "@/helpers/responseHandlers";
-import { TokenPayload, TokenType } from "@/helpers/types";
-import { UserStatus } from "@/models/UserModel";
-import { SessionRepository } from "@/repositories/SessionRepository";
-import { UserRepository } from "@/repositories/UserRepository";
-import { authorizationSchema, tokenSchema } from "@/validations/validationSchemas";
+import database from "../configs/database.js";
+import { env } from "../configs/env.js";
+import { CustomError } from "../helpers/errorInstance.js";
+import { errorResponse } from "../helpers/responseHandlers.js";
+import { TokenPayload, TokenType } from "../helpers/types.js";
+import { UserStatus } from "../models/UserModel.js";
+import { SessionRepository } from "../repositories/SessionRepository.js";
+import { UserRepository } from "../repositories/UserRepository.js";
+import { authorizationSchema, tokenSchema } from "../validations/validationSchemas.js";
 
 export async function authGuard(req: Request, res: Response, next: NextFunction) {
   // Auth error

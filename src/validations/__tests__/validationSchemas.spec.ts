@@ -1,9 +1,8 @@
 import { DateTime } from "luxon";
 import { describe, expect, it } from "vitest";
 
-import { TokenAuthType, TokenType } from "@/helpers/types";
-
-import { authorizationSchema, tokenSchema, verificationTokenSchema } from "../validationSchemas";
+import { TokenAuthType, TokenType } from "../../helpers/types.js";
+import { authorizationSchema, tokenSchema, verificationTokenSchema } from "../validationSchemas.js";
 
 describe("authorizationSchema", () => {
   const message = "Authorization header is required";

@@ -1,5 +1,5 @@
-import ProfileModel from "./ProfileModel";
-import UserModel from "./UserModel";
+import ProfileModel from "./ProfileModel.js";
+import UserModel from "./UserModel.js";
 
 export default interface UserProfileModel {
   address: ProfileModel["address"];

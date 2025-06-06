@@ -3,7 +3,7 @@ import type { Response } from "express";
 import { getReasonPhrase, StatusCodes } from "http-status-codes";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { errorResponse, successResponse } from "../responseHandlers";
+import { errorResponse, successResponse } from "../responseHandlers.js";
 
 function createResponseMock() {
   const res: Partial<Response> = {};

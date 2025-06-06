@@ -1,10 +1,9 @@
 import Knex from "knex";
 
-import database from "@/configs/database";
-import { SCHEMA_TABLES } from "@/helpers/constants";
-import ProfileModel from "@/models/ProfileModel";
-
-import { Repository } from "./Repository";
+import database from "../configs/database.js";
+import { SCHEMA_TABLES } from "../helpers/constants.js";
+import ProfileModel from "../models/ProfileModel.js";
+import { Repository } from "./Repository.js";
 
 export class ProfileRepository extends Repository<ProfileModel> {
   constructor(databaseInstance = database) {

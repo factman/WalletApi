@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { HeaderSchemaType } from "./types";
+import { HeaderSchemaType } from "./types.js";
 
 export function buildHeaderSchema(schemaObject: Partial<HeaderSchemaType>) {
   return z.object(schemaObject as HeaderSchemaType).passthrough();
