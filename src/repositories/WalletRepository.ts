@@ -14,9 +14,8 @@ export class WalletRepository extends Repository<WalletModel> {
     trx: Knex.Knex.Transaction,
     walletData: Pick<WalletModel, "accountName" | "accountNumber" | "userId">,
   ) {
-    return await this.table
-      .transacting(trx)
-      .insert({ ...walletData }, "*")
-      .first();
+    const id = this.uuid;
+    await this.table.insert({ ...walletData, id }).transacting(trx);
+    return await this.table.where({ id }).transacting(trx).first();
   }
 }

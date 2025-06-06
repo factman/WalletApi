@@ -23,7 +23,7 @@ app.use(express.urlencoded({ extended: true, limit: "5mb" }));
 app.use(morgan("dev"));
 
 // Application routes
-app.use(appRouter());
+app.use("/api", appRouter());
 
 // 404 and error handling middleware
 app.use((req, res, _: NextFunction) => {

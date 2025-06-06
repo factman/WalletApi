@@ -14,6 +14,8 @@ export class ProfileRepository extends Repository<ProfileModel> {
     trx: Knex.Knex.Transaction,
     profile: Omit<ProfileModel, "createdAt" | "id" | "updatedAt">,
   ) {
-    return await this.table.transacting(trx).insert(profile, "*").first();
+    const id = this.uuid;
+    await this.table.insert({ ...profile, id }).transacting(trx);
+    return await this.table.where({ id }).transacting(trx).first();
   }
 }

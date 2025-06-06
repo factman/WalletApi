@@ -22,11 +22,12 @@ export class SessionRepository extends Repository<SessionModel> {
       | "updatedAt"
     >,
   ) {
-    return await this.table.transacting(trx).insert(sessionData, "*").first();
+    const session = await this.table.transacting(trx).insert(sessionData);
+    return await this.table.where("id", session[0]).transacting(trx).first();
   }
 
   async deleteSession(trx: Knex.Knex.Transaction, userId: SessionModel["userId"]) {
-    return await this.table.transacting(trx).where({ userId }).del("*").first();
+    await this.table.where({ userId }).del().transacting(trx);
   }
 
   async getActiveSession(session: Pick<SessionModel, "deviceId" | "id" | "userId">) {
@@ -47,10 +48,11 @@ export class SessionRepository extends Repository<SessionModel> {
     id: SessionModel["id"],
     sessionData: Partial<Omit<SessionModel, "createdAt" | "id" | "updatedAt" | "userId">>,
   ) {
-    return this.table
-      .transacting(trx)
-      .update({ ...sessionData }, "*")
+    await this.table
+      .update({ ...sessionData })
       .where({ id })
-      .first();
+      .transacting(trx);
+
+    return await this.table.where({ id }).transacting(trx).first();
   }
 }
