@@ -1,7 +1,7 @@
 import { Server } from "node:http";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { gracefulShutdown } from "../utilities";
+import { gracefulShutdown } from "../utilities.js";
 
 describe("gracefulShutdown", () => {
   let server: Server;

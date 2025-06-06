@@ -1,10 +1,9 @@
 import { Router } from "express";
 
-import { env } from "@/configs/env";
-import { authenticationRouter } from "@/features/authentication";
-import { successResponse } from "@/helpers/responseHandlers";
-
-import packageJson from "../../package.json";
+import packageJson from "../../package.json" with { type: "json" };
+import { env } from "../configs/env.js";
+import { authenticationRouter } from "../features/authentication/index.js";
+import { successResponse } from "../helpers/responseHandlers.js";
 
 export function appRouter() {
   const router = Router();

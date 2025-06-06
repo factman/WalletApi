@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
-import { errorResponse } from "@/helpers/responseHandlers";
-import { SchemaType, ValidationError } from "@/helpers/types";
+import { errorResponse } from "../helpers/responseHandlers.js";
+import { SchemaType, ValidationError } from "../helpers/types.js";
 
 export function validateRequest(
   schema: SchemaType,

@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
 import { Resend } from "resend";
 
-import { env } from "@/configs/env";
+import { env } from "../configs/env.js";
 
 export class ResendService {
   private resend: Resend;

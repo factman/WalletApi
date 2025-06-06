@@ -1,5 +1,5 @@
-import database from "@/configs/database";
-import { SCHEMA_TABLES, SCHEMA_VIEWS } from "@/helpers/constants";
+import database from "../configs/database.js";
+import { SCHEMA_TABLES, SCHEMA_VIEWS } from "../helpers/constants.js";
 
 export abstract class Repository<ModelInterface extends object> {
   protected knex: typeof database;

@@ -1,6 +1,6 @@
-import { TokenPayload, VerificationTokenPayload } from "@/helpers/types";
-import SessionModel from "@/models/SessionModel";
-import UserModel from "@/models/UserModel";
+import { TokenPayload, VerificationTokenPayload } from "../../src/helpers/types";
+import SessionModel from "../../src/models/SessionModel";
+import UserModel from "../../src/models/UserModel";
 
 export {};
 

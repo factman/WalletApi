@@ -3,9 +3,8 @@ import { StatusCodes } from "http-status-codes";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { unknown } from "zod";
 
-import { SchemaType } from "@/helpers/types";
-
-import { validateRequest } from "../validationMiddleware";
+import { SchemaType } from "../../helpers/types.js";
+import { validateRequest } from "../validationMiddleware.js";
 
 const mockSchema = {
   safeParse: vi.fn(),

@@ -1,7 +1,7 @@
 import { Response } from "express";
 import { getReasonPhrase, StatusCodes } from "http-status-codes";
 
-import { CustomError } from "./errorInstance";
+import { CustomError } from "./errorInstance.js";
 
 export function errorResponse(
   res: Response,

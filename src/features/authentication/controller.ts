@@ -2,12 +2,11 @@ import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
 
-import database from "@/configs/database";
-import { env } from "@/configs/env";
-import { CustomError } from "@/helpers/errorInstance";
-import { errorResponse, successResponse } from "@/helpers/responseHandlers";
-import { UserStatus } from "@/models/UserModel";
-
+import database from "../../configs/database.js";
+import { env } from "../../configs/env.js";
+import { CustomError } from "../../helpers/errorInstance.js";
+import { errorResponse, successResponse } from "../../helpers/responseHandlers.js";
+import { UserStatus } from "../../models/UserModel.js";
 import {
   ForgotPasswordResponse,
   InitiateAuthenticationResponse,
@@ -18,9 +17,9 @@ import {
   SignupResponse,
   VerifyBvnResponse,
   VerifyEmailResponse,
-} from "./authenticationDTOs";
-import { generateBvnVerificationToken, validateRefreshToken } from "./helpers/utilities";
-import { AuthenticationService } from "./service";
+} from "./authenticationDTOs.js";
+import { generateBvnVerificationToken, validateRefreshToken } from "./helpers/utilities.js";
+import { AuthenticationService } from "./service.js";
 import {
   forgotPasswordRequestSchema,
   initiateAuthenticationRequestSchema,
@@ -33,7 +32,7 @@ import {
   verifyBvnRequestSchema,
   verifyEmailRequestSchema,
   verifyForgotPasswordRequestSchema,
-} from "./validationSchemas";
+} from "./validationSchemas.js";
 
 export class AuthenticationController {
   private service: AuthenticationService;

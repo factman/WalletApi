@@ -1,26 +1,13 @@
 {
-  "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "Node 22",
-  "_version": "22.0.0",
+  "extends": "@tsconfig/node22/tsconfig.json",
   "compilerOptions": {
-    "lib": ["DOM", "ES6"],
     "resolveJsonModule": true,
-    "module": "CommonJS",
-    "target": "ES2021",
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
     "sourceMap": true,
-    "esModuleInterop": true,
-    "moduleResolution": "node",
-    "skipLibCheck": true,
     "outDir": "./dist",
-    "rootDir": "./",
+    "rootDir": ".",
     "allowJs": true,
-    "paths": {
-      "@/*": ["./src/*"]
-    },
     "typeRoots": ["./@types", "./node_modules/@types"]
   },
-  "include": ["**/*.ts", "src/**/*.ts"],
+  "include": ["**/*.ts"],
   "exclude": ["dist", "node_modules", "coverage", "docs"]
 }

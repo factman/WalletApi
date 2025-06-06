@@ -5,12 +5,11 @@ import { DateTime } from "luxon";
 import { randomUUID } from "node:crypto";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { TokenPayload, TokenType } from "@/helpers/types";
-import { UserStatus } from "@/models/UserModel";
-import { SessionRepository } from "@/repositories/SessionRepository";
-import { UserRepository } from "@/repositories/UserRepository";
-
-import { authGuard } from "../authMiddleware";
+import { TokenPayload, TokenType } from "../../helpers/types.js";
+import { UserStatus } from "../../models/UserModel.js";
+import { SessionRepository } from "../../repositories/SessionRepository.js";
+import { UserRepository } from "../../repositories/UserRepository.js";
+import { authGuard } from "../authMiddleware.js";
 
 // Mocks
 vi.mock("@/repositories/SessionRepository");
@@ -76,7 +75,7 @@ describe("authGuard middleware", () => {
     req = mockReq({ authorization: "Bearer validtoken" });
     vi.spyOn(jwt, "verify").mockReturnValue({ sessionId: "sid" } as never);
     // Patch tokenSchema to fail
-    const { tokenSchema } = await import("@/validations/validationSchemas");
+    const { tokenSchema } = await import("../../validations/validationSchemas.js");
     vi.spyOn(tokenSchema(TokenType.ACCESS), "safeParse").mockReturnValue({
       success: false,
     } as never);
@@ -110,7 +109,7 @@ describe("authGuard middleware", () => {
       userId: "uid",
     });
     const trx = { rollback: vi.fn() };
-    const db = (await import("@/configs/database")).default;
+    const db = (await import("../../configs/database.js")).default;
     (db.transaction as any).mockResolvedValue(trx);
     (
       SessionRepository as unknown as { prototype: Record<string, unknown> }
@@ -164,7 +163,7 @@ describe("authGuard middleware", () => {
       .fn()
       .mockResolvedValue(userData);
     // Patch tokenSchema to succeed
-    const { tokenSchema } = await import("@/validations/validationSchemas");
+    const { tokenSchema } = await import("../../validations/validationSchemas.js");
     vi.spyOn(tokenSchema(TokenType.ACCESS), "safeParse").mockReturnValue({
       data: tokenPayload,
       success: true,
