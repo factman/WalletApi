@@ -53,9 +53,9 @@ export async function up(knex: Knex): Promise<void> {
         table.string("userAgent").notNullable();
         table.string("deviceId").notNullable();
         table.datetime("expiresAt").notNullable();
-        table.string("accessToken").notNullable();
+        table.text("accessToken").notNullable();
         table.datetime("accessTokenExpiresAt").notNullable();
-        table.string("refreshToken").notNullable();
+        table.text("refreshToken").notNullable();
         table.datetime("refreshTokenExpiresAt").notNullable();
         table.string("twoFactorCode", 6).nullable();
         table.datetime("twoFactorCodeExpiresAt").nullable();
@@ -90,7 +90,7 @@ export async function up(knex: Knex): Promise<void> {
         table.string("bvn", 11).notNullable();
         table.string("bvnEmail").nullable();
         table.string("bvnPhone", 20).nullable();
-        table.string("bvnMetadata").notNullable();
+        table.text("bvnMetadata").notNullable();
         table.string("image").nullable();
         table.datetime("createdAt").notNullable().defaultTo(knex.raw("CURRENT_TIMESTAMP"));
         table

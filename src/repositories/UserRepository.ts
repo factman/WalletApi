@@ -11,10 +11,12 @@ export class UserRepository extends Repository<UserModel> {
   }
 
   async blacklistUserById(trx: Knex.Knex.Transaction, id: UserModel["id"]) {
-    return await this.table
-      .transacting(trx)
-      .update({ isBlacklisted: true, status: UserStatus.BLACKLISTED }, "*")
-      .where({ id });
+    await this.table
+      .update({ isBlacklisted: true, status: UserStatus.BLACKLISTED })
+      .where({ id })
+      .transacting(trx);
+
+    return await this.table.select().where({ id }).first();
   }
 
   async checkIfUserExist(email: UserModel["email"], phone: UserModel["phone"]) {
@@ -25,7 +27,9 @@ export class UserRepository extends Repository<UserModel> {
     trx: Knex.Knex.Transaction,
     param: Pick<UserModel, "email" | "password" | "phone" | "timezone">,
   ) {
-    return await this.table.transacting(trx).insert(param, "*").first();
+    const id = this.uuid;
+    await this.table.insert({ ...param, id }).transacting(trx);
+    return await this.table.select().where({ id }).transacting(trx).first();
   }
 
   async getUserByEmail(email: UserModel["email"]) {
@@ -47,10 +51,11 @@ export class UserRepository extends Repository<UserModel> {
       Omit<UserModel, "createdAt" | "deletedAt" | "email" | "id" | "phone" | "updatedAt">
     >,
   ) {
-    return this.table
-      .transacting(trx)
-      .update({ ...userData }, "*")
+    await this.table
+      .update({ ...userData })
       .where({ id })
-      .first();
+      .transacting(trx);
+
+    return await this.table.select().where({ id }).transacting(trx).first();
   }
 }

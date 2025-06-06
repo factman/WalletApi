@@ -167,6 +167,7 @@ export class AuthenticationService {
       ...userData,
       password: hashedPassword,
     });
+    console.log({ user });
 
     if (!user) {
       return { error: "Failed to create user. Please try again." };
@@ -215,7 +216,7 @@ export class AuthenticationService {
   }
 
   async deleteUserSession(trx: Knex.Knex.Transaction, userId: SessionModel["userId"]) {
-    return await this.sessionRepository.deleteSession(trx, userId);
+    await this.sessionRepository.deleteSession(trx, userId);
   }
 
   async enablePasswordReset(trx: Knex.Knex.Transaction, userId: SessionModel["userId"]) {

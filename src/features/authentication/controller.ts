@@ -416,6 +416,7 @@ export class AuthenticationController {
         StatusCodes.CREATED,
       );
     } catch (err) {
+      console.log(err);
       const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
       errorResponse(res, error.status, error);
     }
