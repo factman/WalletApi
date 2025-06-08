@@ -32,6 +32,18 @@ export class UserRepository extends Repository<UserModel> {
     return await this.table.select().where({ id }).transacting(trx).first();
   }
 
+  async deleteUserById(trx: Knex.Knex.Transaction, id: UserModel["id"]) {
+    await this.table
+      .update({
+        deletedAt: this.knex.fn.now(),
+        status: UserStatus.DELETED,
+      })
+      .where({ id })
+      .transacting(trx);
+
+    return await this.table.select().where({ id }).transacting(trx).first();
+  }
+
   async getUserByEmail(email: UserModel["email"]) {
     return await this.table.select().where({ email }).first();
   }

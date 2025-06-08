@@ -73,12 +73,6 @@ export const router = Router()
     validateRequest(refreshTokenRequestSchema, "body"),
     controller.refreshToken.bind(controller),
   )
-  // .patch(
-  //   AUTHENTICATION_ROUTES.PATCH_UPDATE_PASSWORD,
-  //   authGuard,
-  //   validateRequest(updatePasswordRequestSchema, "body"),
-  //   controller.updatePassword.bind(controller),
-  // )
   .delete(
     AUTHENTICATION_ROUTES.DELETE_LOGOUT,
     authGuard,
@@ -100,5 +94,5 @@ export const router = Router()
     AUTHENTICATION_ROUTES.PUT_RESET_PASSWORD,
     validateRequest(resetPasswordRequestSchema, "body"),
     validateOtpVerification(TokenAuthType.FORGOT_PASSWORD),
-    controller.route.bind(controller),
+    controller.resetPassword.bind(controller),
   );

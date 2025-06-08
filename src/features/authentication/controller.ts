@@ -350,17 +350,13 @@ export class AuthenticationController {
     }
   }
 
-  route(req: Request, res: Response) {
-    successResponse(res, { url: req.url }, "Message");
-  }
-
   async signup(req: Request, res: Response) {
     const body = signupRequestSchema.parse(req.body);
 
     try {
       const findUser = await this.service.checkIfUserExists(body.email, body.phone);
       if (findUser.found)
-        throw new CustomError("User already exist", StatusCodes.CONFLICT, {
+        throw new CustomError("User already exist", StatusCodes.BAD_REQUEST, {
           message: findUser.message,
         });
 

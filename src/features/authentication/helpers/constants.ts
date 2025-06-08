@@ -1,7 +1,6 @@
 export enum AUTHENTICATION_ROUTES {
   DELETE_LOGOUT = "/logout",
   PATCH_RESEND_EMAIL_VERIFICATION = "/resend-email-verification",
-  PATCH_UPDATE_PASSWORD = "/update-password",
   PATCH_VERIFY_EMAIL = "/verify-email",
   PATCH_VERIFY_FORGOT_PASSWORD = "/verify-forgot-password",
   POST_FORGOT_PASSWORD = "/forgot-password",

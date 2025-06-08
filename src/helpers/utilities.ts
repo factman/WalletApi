@@ -1,4 +1,7 @@
+import bcrypt from "bcryptjs";
 import { Server } from "node:http";
+
+import UserModel from "../models/UserModel.js";
 
 export function gracefulShutdown(server: Server, cleanUp?: () => Promise<void>) {
   const listener = async () => {
@@ -19,4 +22,9 @@ export function gracefulShutdown(server: Server, cleanUp?: () => Promise<void>) 
 
   process.on("SIGINT", listener as never);
   process.on("SIGTERM", listener as never);
+}
+
+export async function hashPassword(password: UserModel["password"]) {
+  const salt = await bcrypt.genSalt(12);
+  return await bcrypt.hash(password, salt);
 }
