@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { buildStrictSchema } from "../../helpers/validations.js";
+import { passwordSchema } from "../../validations/validationSchemas.js";
 import {
   ForgotPasswordRequest,
   InitiateAuthenticationRequest,
@@ -20,17 +21,6 @@ export const forgotPasswordRequestSchema = buildStrictSchema<ForgotPasswordReque
   deviceId: z.string().nonempty(),
   email: z.string().email(),
 });
-
-const passwordSchema = z
-  .string()
-  .min(8, { message: "Password must be at least 8 characters long" })
-  .max(32, { message: "Password must be no more than 32 characters long" })
-  .regex(/[A-Z]/, { message: "Password must contain at least one uppercase letter" })
-  .regex(/[a-z]/, { message: "Password must contain at least one lowercase letter" })
-  .regex(/[0-9]/, { message: "Password must contain at least one number" })
-  .regex(/[!@#$%^&*(),.?":{}|<>~`[\]\-=+_]/, {
-    message: "Password must contain at least one special character",
-  });
 
 const bvnSchema = z
   .string()
@@ -90,10 +80,6 @@ export const resetPasswordRequestSchema = buildStrictSchema<ResetPasswordRequest
   newPassword: passwordSchema,
   oldPassword: z.string().nonempty(),
   verificationToken: z.string().jwt(),
-});
-
-export const updatePasswordRequestSchema = resetPasswordRequestSchema.omit({
-  verificationToken: true,
 });
 
 const phoneNumberSchema = z

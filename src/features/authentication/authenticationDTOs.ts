@@ -105,12 +105,6 @@ export interface SignupResponse {
   verificationToken: string;
 }
 
-export interface UpdatePasswordRequest {
-  deviceId: string;
-  newPassword: string;
-  oldPassword: string;
-}
-
 export interface VerifyBvnRequest {
   otp: string;
   verificationToken: string;

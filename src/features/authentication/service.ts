@@ -6,6 +6,7 @@ import database from "../../configs/database.js";
 import { env } from "../../configs/env.js";
 import { CustomError } from "../../helpers/errorInstance.js";
 import { TokenAuthType, VerificationTokenPayload } from "../../helpers/types.js";
+import { hashPassword } from "../../helpers/utilities.js";
 import AuthenticatedUserModel from "../../models/AuthenticatedUserModel.js";
 import ProfileModel from "../../models/ProfileModel.js";
 import SessionModel from "../../models/SessionModel.js";
@@ -25,7 +26,6 @@ import {
   generateRefreshToken,
   generateVerificationToken,
   getUsername,
-  hashPassword,
 } from "./helpers/utilities.js";
 
 export class AuthenticationService {
@@ -167,7 +167,6 @@ export class AuthenticationService {
       ...userData,
       password: hashedPassword,
     });
-    console.log({ user });
 
     if (!user) {
       return { error: "Failed to create user. Please try again." };
