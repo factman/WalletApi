@@ -9,8 +9,9 @@ import { WalletService } from "./service.js";
 import {
   addSettlementAccountRequestSchema,
   createTransactionPinRequestSchema,
+  nameEnquiryRequestSchema,
 } from "./validationSchemas.js";
-import { GetWalletResponse } from "./walletsDTO.js";
+import { GetWalletResponse, NameEnquiryResponse } from "./walletsDTO.js";
 
 export class WalletController {
   private service: WalletService;
@@ -59,6 +60,21 @@ export class WalletController {
         throw new CustomError("Not Found", StatusCodes.NOT_FOUND, { message: error });
 
       successResponse<GetWalletResponse>(res, { ...wallet }, "Fetched User Wallet");
+    } catch (err) {
+      const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
+      errorResponse(res, error.status, error);
+    }
+  }
+
+  async nameEnquiry(req: Request, res: Response) {
+    const params = nameEnquiryRequestSchema.parse(req.params);
+
+    try {
+      const { account, error } = await this.service.getAccountDetails(params.accountNumber);
+      if (error || !account)
+        throw new CustomError("Not Found", StatusCodes.NOT_FOUND, { message: error });
+
+      successResponse<NameEnquiryResponse>(res, { ...account }, "Fetched Account Details");
     } catch (err) {
       const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
       errorResponse(res, error.status, error);
