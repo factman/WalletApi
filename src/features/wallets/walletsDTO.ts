@@ -11,3 +11,12 @@ export interface CreateTransactionPinRequest {
 }
 
 export type GetWalletResponse = Omit<WalletModel, "transactionPin">;
+
+export interface NameEnquiryRequestParams {
+  accountNumber: string;
+}
+
+export interface NameEnquiryResponse {
+  accountName: string;
+  accountNumber: string;
+}

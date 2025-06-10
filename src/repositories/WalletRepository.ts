@@ -76,6 +76,10 @@ export class WalletRepository extends Repository<WalletModel> {
       .first();
   }
 
+  async getWalletByAccountNumber(accountNumber: WalletModel["accountNumber"]) {
+    return await this.table.select("accountName", "accountNumber").where({ accountNumber }).first();
+  }
+
   async getWalletByIdAndUserId(id: WalletModel["id"], userId: WalletModel["userId"]) {
     return await this.table
       .select<Omit<WalletModel, "transactionPin">>(walletColumns)

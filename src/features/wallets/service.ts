@@ -19,6 +19,13 @@ export class WalletService {
     return { wallet };
   }
 
+  async getAccountDetails(accountNumber: WalletModel["accountNumber"]) {
+    const account = await this.walletRepository.getWalletByAccountNumber(accountNumber);
+    if (!account) return { error: "Account not found" };
+
+    return { account };
+  }
+
   async getUserWallet(id: WalletModel["id"], userId: WalletModel["userId"]) {
     const wallet = await this.walletRepository.getWalletByIdAndUserId(id, userId);
     if (!wallet) return { error: "Wallet not found" };
