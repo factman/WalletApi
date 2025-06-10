@@ -1,4 +1,3 @@
-import UserModel from "../../models/UserModel.js";
 import UserProfileModel from "../../models/UserProfileModel.js";
 
 export interface ChangePasswordRequest {
@@ -8,7 +7,3 @@ export interface ChangePasswordRequest {
 }
 
 export type GetUserResponse = UserProfileModel;
-
-export interface UserIdParam {
-  id: UserModel["id"];
-}

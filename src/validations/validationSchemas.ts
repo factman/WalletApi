@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { TokenAuthType, TokenType } from "../helpers/types.js";
-import { buildHeaderSchema } from "../helpers/validations.js";
+import { buildHeaderSchema, buildStrictSchema } from "../helpers/validations.js";
 
 export function authorizationSchema(message: string) {
   return buildHeaderSchema({
@@ -43,3 +43,7 @@ export const passwordSchema = z
   .regex(/[!@#$%^&*(),.?":{}|<>~`[\]\-=+_]/, {
     message: "Password must contain at least one special character",
   });
+
+export const idParamSchema = buildStrictSchema<{ id: string }>({
+  id: z.string().uuid(),
+});

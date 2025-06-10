@@ -4,9 +4,10 @@ import { StatusCodes } from "http-status-codes";
 import database from "../../configs/database.js";
 import { CustomError } from "../../helpers/errorInstance.js";
 import { errorResponse, successResponse } from "../../helpers/responseHandlers.js";
+import { idParamSchema } from "../../validations/validationSchemas.js";
 import { UsersService } from "./service.js";
 import { GetUserResponse } from "./usersDTO.js";
-import { changePasswordRequestSchema, userIdParamSchema } from "./validationSchemas.js";
+import { changePasswordRequestSchema } from "./validationSchemas.js";
 
 export class UsersController {
   private service: UsersService;
@@ -18,7 +19,7 @@ export class UsersController {
   async changePassword(req: Request, res: Response) {
     const body = changePasswordRequestSchema.parse(req.body);
     const user = req.userPayload;
-    const params = userIdParamSchema.parse(req.params);
+    const params = idParamSchema.parse(req.params);
 
     try {
       const password = await this.service.verifyOldPassword(user, body.oldPassword);
@@ -39,7 +40,7 @@ export class UsersController {
   }
 
   async deleteAccount(req: Request, res: Response) {
-    const params = userIdParamSchema.parse(req.params);
+    const params = idParamSchema.parse(req.params);
 
     try {
       await database.transaction(async (trx) => {
@@ -56,7 +57,7 @@ export class UsersController {
   }
 
   async getUser(req: Request, res: Response) {
-    const params = userIdParamSchema.parse(req.params);
+    const params = idParamSchema.parse(req.params);
 
     try {
       const { error, profile } = await this.service.getUserProfile(params.id);
@@ -68,9 +69,5 @@ export class UsersController {
       const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
       errorResponse(res, error.status, error);
     }
-  }
-
-  route(req: Request, res: Response) {
-    successResponse(res, { url: req.url }, "Message");
   }
 }
