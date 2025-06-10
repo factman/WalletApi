@@ -12,9 +12,9 @@ import { UserRepository } from "../../repositories/UserRepository.js";
 import { authGuard } from "../authMiddleware.js";
 
 // Mocks
-vi.mock("@/repositories/SessionRepository");
-vi.mock("@/repositories/UserRepository");
-vi.mock("@/configs/database", () => ({
+vi.mock("../../repositories/SessionRepository.js");
+vi.mock("../../repositories/UserRepository.js");
+vi.mock("../../configs/database.js", () => ({
   default: { transaction: vi.fn() },
 }));
 

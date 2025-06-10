@@ -114,15 +114,15 @@ export async function up(knex: Knex): Promise<void> {
           .onUpdate("CASCADE");
         table.string("accountName").notNullable();
         table.string("accountNumber", 10).notNullable().unique();
-        table.decimal("balance", 11, 2).notNullable().defaultTo(0.0);
-        table.decimal("lienBalance", 11, 2).notNullable().defaultTo(0.0);
+        table.decimal("balance", 11, 2).unsigned().notNullable().defaultTo(0.0);
+        table.decimal("lienBalance", 11, 2).unsigned().notNullable().defaultTo(0.0);
         table.string("currency", 3).notNullable().defaultTo("NGN");
         table.boolean("isSettlementAccountSet").notNullable().defaultTo(false);
         table.boolean("isTransactionPinSet").notNullable().defaultTo(false);
         table.string("settlementAccountName").nullable();
         table.string("settlementAccountNumber", 10).nullable();
         table.string("settlementBankCode", 10).nullable();
-        table.string("transactionPin", 6).nullable();
+        table.string("transactionPin", 4).nullable();
         table.enum("status", ["active", "blocked", "inactive"]).notNullable().defaultTo("inactive");
         table.datetime("createdAt").notNullable().defaultTo(knex.raw("CURRENT_TIMESTAMP"));
         table
@@ -151,14 +151,14 @@ export async function up(knex: Knex): Promise<void> {
           .onDelete("CASCADE")
           .onUpdate("CASCADE");
         table.string("sessionId", 30).notNullable().unique();
-        table.decimal("amount", 11, 2).notNullable();
+        table.decimal("amount", 11, 2).unsigned().notNullable();
         table.string("currency", 3).notNullable().defaultTo("NGN");
         table.enum("channel", ["bank_transfer", "wallet"]).notNullable();
         table.enum("type", ["credit", "debit"]).notNullable();
         table.enum("status", ["completed", "failed", "pending"]).notNullable().defaultTo("pending");
-        table.decimal("fee", 11, 2).notNullable().defaultTo(0.0);
-        table.decimal("openingBalance", 11, 2).notNullable();
-        table.decimal("closingBalance", 11, 2).notNullable();
+        table.decimal("fee", 11, 2).unsigned().notNullable().defaultTo(0.0);
+        table.decimal("openingBalance", 11, 2).unsigned().notNullable();
+        table.decimal("closingBalance", 11, 2).unsigned().notNullable();
         table.string("remark").nullable();
         table.json("metadata").notNullable();
         table.date("settlementDate").nullable();
