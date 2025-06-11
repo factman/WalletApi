@@ -9,6 +9,7 @@ import { WalletService } from "./service.js";
 import {
   addSettlementAccountRequestSchema,
   createTransactionPinRequestSchema,
+  fundWalletRequestSchema,
   nameEnquiryRequestSchema,
 } from "./validationSchemas.js";
 import { GetWalletResponse, NameEnquiryResponse } from "./walletsDTO.js";
@@ -38,6 +39,21 @@ export class WalletController {
       });
 
       successResponse(res, null, "Transaction Pin created successfully");
+    } catch (err) {
+      const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
+      errorResponse(res, error.status, error);
+    }
+  }
+
+  async fundWallet(req: Request, res: Response) {
+    const params = idParamSchema.parse(req.params);
+    const body = fundWalletRequestSchema.parse(req.body);
+
+    try {
+      await database.transaction(async (trx) => {
+        await this.service.fundUserWallet(trx, params.id, body);
+      });
+      successResponse(res, null, "Funded Wallet Successfully");
     } catch (err) {
       const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
       errorResponse(res, error.status, error);

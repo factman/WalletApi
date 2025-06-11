@@ -9,6 +9,7 @@ import { WalletService } from "./service.js";
 import {
   addSettlementAccountRequestSchema,
   createTransactionPinRequestSchema,
+  fundWalletRequestSchema,
   nameEnquiryRequestSchema,
 } from "./validationSchemas.js";
 
@@ -41,4 +42,11 @@ export const router = Router()
     authGuard,
     validateRequest(nameEnquiryRequestSchema, "params"),
     controller.nameEnquiry.bind(controller),
+  )
+  .post(
+    WALLETS_ROUTES.POST_FUND_WALLET,
+    authGuard,
+    validateRequest(idParamSchema, "params"),
+    validateRequest(fundWalletRequestSchema, "body"),
+    controller.fundWallet.bind(controller),
   );

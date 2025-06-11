@@ -10,6 +10,13 @@ export interface CreateTransactionPinRequest {
   pin: string;
 }
 
+export interface FundWalletRequest {
+  amount: number;
+  senderAccountName: string;
+  senderAccountNumber: string;
+  senderBankCode: string;
+}
+
 export type GetWalletResponse = Omit<WalletModel, "transactionPin">;
 
 export interface NameEnquiryRequestParams {
