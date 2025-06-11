@@ -68,13 +68,19 @@ export class AuthenticationService {
     };
 
     if (found.email && found.phone)
-      return { found: true, message: "User with this email and phone number already exists." };
+      throw new CustomError("User already exist", StatusCodes.BAD_REQUEST, {
+        message: "User with this email and phone number already exists.",
+      });
 
-    if (found.email) return { found: true, message: "User with this email already exists." };
+    if (found.email)
+      throw new CustomError("User already exist", StatusCodes.BAD_REQUEST, {
+        message: "User with this email already exists.",
+      });
 
-    if (found.phone) return { found: true, message: "User with this phone number already exists." };
-
-    return { found: false, message: "User does not exist." };
+    if (found.phone)
+      throw new CustomError("User already exist", StatusCodes.BAD_REQUEST, {
+        message: "User with this phone number already exists.",
+      });
   }
 
   async checkUserKarma(bvn: ProfileModel["bvn"]) {
@@ -125,7 +131,9 @@ export class AuthenticationService {
         kycData.firstName !== bvnProfile.first_name ||
         kycData.lastName !== bvnProfile.last_name
       )
-        return { error: "Invalid KYC data provided. Please try again." };
+        throw new CustomError("Unable to verify Bvn", StatusCodes.BAD_REQUEST, {
+          message: "Invalid KYC data provided. Please try again.",
+        });
     }
 
     const profile = await this.profileRepository.createUserProfile(trx, {
@@ -143,17 +151,19 @@ export class AuthenticationService {
       state: bvnProfile.state_of_origin,
       userId,
     });
-    if (!profile) {
-      return { error: "Failed to create user profile. Please try again." };
-    }
+    if (!profile)
+      throw new CustomError("Unable to verify Bvn", StatusCodes.INTERNAL_SERVER_ERROR, {
+        message: "Failed to create user profile. Please try again.",
+      });
 
     const user = await this.userRepository.updateUser(trx, userId, {
       isKycVerified: true,
       status: UserStatus.VERIFIED,
     });
-    if (!user) {
-      return { error: "Failed to update user. Please try again." };
-    }
+    if (!user)
+      throw new CustomError("Unable to verify Bvn", StatusCodes.INTERNAL_SERVER_ERROR, {
+        message: "Failed to update user. Please try again.",
+      });
 
     return { profile, user };
   }
@@ -168,9 +178,11 @@ export class AuthenticationService {
       password: hashedPassword,
     });
 
-    if (!user) {
-      return { error: "Failed to create user. Please try again." };
-    }
+    if (!user)
+      throw new CustomError("Unable to create user", StatusCodes.INTERNAL_SERVER_ERROR, {
+        message: "Failed to create user. Please try again.",
+      });
+
     return { user };
   }
 
@@ -193,9 +205,10 @@ export class AuthenticationService {
       refreshTokenExpiresAt: refreshTokenTime.toSQL({ includeOffset: false }),
     });
 
-    if (!session) {
-      return { error: "Failed to create user session. Please try again." };
-    }
+    if (!session)
+      throw new CustomError("Unable to create user session", StatusCodes.INTERNAL_SERVER_ERROR, {
+        message: "Failed to create user session. Please try again.",
+      });
 
     return { session };
   }
@@ -207,9 +220,10 @@ export class AuthenticationService {
     const wallet = await this.walletRepository.createUserWallet(trx, {
       ...walletDate,
     });
-    if (!wallet) {
-      return { error: "Failed to create wallet. Please try again." };
-    }
+    if (!wallet)
+      throw new CustomError("Unable to create wallet", StatusCodes.INTERNAL_SERVER_ERROR, {
+        message: "Failed to create wallet. Please try again.",
+      });
 
     return { wallet };
   }
@@ -226,7 +240,10 @@ export class AuthenticationService {
 
   async findUserByEmail(email: UserModel["email"]) {
     const user = await this.userRepository.getUserByEmail(email);
-    if (!user) return { error: "No account with this email found." };
+    if (!user)
+      throw new CustomError("Account not found", StatusCodes.BAD_REQUEST, {
+        message: "No account with this email found.",
+      });
 
     return { user };
   }
@@ -236,15 +253,12 @@ export class AuthenticationService {
     sessionData: Omit<VerificationTokenPayload, "authType" | "bvn" | "exp" | "sessionId" | "type">,
   ) {
     const otp = generateOTP();
-    const { error, session } = await this.createUserSession(trx, {
+    const { session } = await this.createUserSession(trx, {
       deviceId: sessionData.deviceId,
       ipAddress: sessionData.ipAddress,
       userAgent: sessionData.userAgent,
       userId: sessionData.userId,
     });
-    if (error || !session) {
-      return { error };
-    }
 
     const { tokenTime, verificationToken } = generateVerificationToken({
       ...sessionData,
@@ -301,15 +315,25 @@ export class AuthenticationService {
 
   async getBvnData(bvn: ProfileModel["bvn"], otp: string) {
     const bvnData = await this.adjutorService.completeBvnVerification(bvn, otp);
-    if (bvnData.status !== "success") return { error: bvnData.message };
+    if (bvnData.status !== "success")
+      throw new CustomError("Unable to verify Bvn", StatusCodes.BAD_REQUEST, {
+        message: bvnData.message,
+      });
 
     return { profile: bvnData.data };
   }
 
   async getValidatedUserSession(sessionData: Pick<SessionModel, "deviceId" | "id" | "userId">) {
     const session = await this.sessionRepository.getActiveSession(sessionData);
-    if (!session) return { error: "Invalid credentials" };
-    if (session.isTwoFactorVerified) return { error: "Session already verified" };
+    if (!session)
+      throw new CustomError("Login failed", StatusCodes.BAD_REQUEST, {
+        message: "Invalid credentials",
+      });
+
+    if (session.isTwoFactorVerified)
+      throw new CustomError("Login failed", StatusCodes.BAD_REQUEST, {
+        message: "Session already verified",
+      });
 
     return { session };
   }
@@ -356,9 +380,10 @@ export class AuthenticationService {
       refreshToken,
       refreshTokenExpiresAt: refreshTokenTime.toSQL({ includeOffset: false }),
     });
-    if (!session) {
-      return { error: "Failed to refresh user token. Please try again." };
-    }
+    if (!session)
+      throw new CustomError("Error refreshing token", StatusCodes.INTERNAL_SERVER_ERROR, {
+        message: "Failed to refresh user token. Please try again.",
+      });
 
     return { session };
   }
@@ -379,7 +404,9 @@ export class AuthenticationService {
     const concent = await this.adjutorService.initiateBvnConcent(bvn, phone);
     if (concent.status === "otp") return { message: `${concent.message}: ${concent.data}` };
 
-    return { error: concent.message };
+    throw new CustomError("Verification failed", StatusCodes.BAD_REQUEST, {
+      message: concent.message,
+    });
   }
 
   async sendUserWelcomeEmail(email: UserModel["email"]) {
@@ -399,6 +426,10 @@ export class AuthenticationService {
       isEmailVerified: true,
       isTwoFactorEnabled: true,
     });
+    if (!session || !user)
+      throw new CustomError("Failed to verify email", StatusCodes.INTERNAL_SERVER_ERROR, {
+        message: "Failed to verify email address. Please try again.",
+      });
 
     return { session, user };
   }
@@ -406,7 +437,10 @@ export class AuthenticationService {
   async verifyUserLogin(email: UserModel["email"], password: UserModel["password"]) {
     const hashedPassword = await hashPassword(password);
     const user = await this.userRepository.getUserByEmailAndPassword(email, hashedPassword);
-    if (!user) return { error: "Invalid email or password" };
+    if (!user)
+      throw new CustomError("Invalid credentials", StatusCodes.BAD_REQUEST, {
+        message: "Invalid credentials. check and try again",
+      });
 
     return { user };
   }

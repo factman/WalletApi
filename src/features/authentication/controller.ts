@@ -46,10 +46,6 @@ export class AuthenticationController {
 
     try {
       const foundUser = await this.service.findUserByEmail(body.email);
-      if (foundUser.error || !foundUser.user)
-        throw new CustomError("Account not found", StatusCodes.BAD_REQUEST, {
-          message: foundUser.error,
-        });
 
       const otpData = await database.transaction(async (trx) => {
         const ipAddress = req.ip ?? req.ips[0];
@@ -61,14 +57,6 @@ export class AuthenticationController {
           userAgent,
           userId: foundUser.user.id,
         });
-        if (otp.error || !otp.verificationToken)
-          throw new CustomError(
-            "Something went wrong, try again later",
-            StatusCodes.INTERNAL_SERVER_ERROR,
-            {
-              message: otp.error,
-            },
-          );
 
         return otp;
       });
@@ -84,10 +72,6 @@ export class AuthenticationController {
     const body = initiateAuthenticationRequestSchema.parse(req.body);
     try {
       const verifiedData = await this.service.verifyUserLogin(body.email, body.password);
-      if (verifiedData.error || !verifiedData.user)
-        throw new CustomError("Login error", StatusCodes.BAD_REQUEST, {
-          message: verifiedData.error,
-        });
 
       const { otpData, user } = await database.transaction(async (trx) => {
         const ipAddress = req.ip ?? req.ips[0];
@@ -98,10 +82,6 @@ export class AuthenticationController {
           userAgent,
           userId: verifiedData.user.id,
         });
-        if (userSession.error || !userSession.session)
-          throw new CustomError("Session error", StatusCodes.INTERNAL_SERVER_ERROR, {
-            message: userSession.error,
-          });
 
         const otpData = await this.service.generateLoginOtp(trx, {
           deviceId: body.deviceId,
@@ -143,11 +123,6 @@ export class AuthenticationController {
       }
 
       const bvnConsent = await this.service.sendBvnConsent(body.bvn, user.phone);
-      if (bvnConsent.error || !bvnConsent.message)
-        throw new CustomError("Verification failed", StatusCodes.BAD_REQUEST, {
-          message: bvnConsent.error,
-        });
-
       const tokenData = generateBvnVerificationToken(
         {
           bvn: JSON.stringify(body),
@@ -182,10 +157,6 @@ export class AuthenticationController {
         id: tokenPayload.sessionId,
         userId: tokenPayload.userId,
       });
-      if (validSession.error || !validSession.session)
-        throw new CustomError(message, StatusCodes.BAD_REQUEST, {
-          message: validSession.error,
-        });
 
       if (body.otp !== validSession.session.twoFactorCode)
         throw new CustomError(message, StatusCodes.BAD_REQUEST, {
@@ -255,10 +226,6 @@ export class AuthenticationController {
             userId: token.tokenPayload.userId,
           },
         );
-        if (userSession.error || !userSession.session)
-          throw new CustomError("Error refreshing token", StatusCodes.INTERNAL_SERVER_ERROR, {
-            message: userSession.error,
-          });
 
         return { session: userSession.session };
       });
@@ -330,11 +297,8 @@ export class AuthenticationController {
     const tokenPayload = req.verificationTokenPayload;
 
     try {
-      const { error, user } = await this.service.verifyUserLogin(
-        tokenPayload.email,
-        body.oldPassword,
-      );
-      if (error || !user || body.deviceId !== session.deviceId || !user.isPasswordResetRequired)
+      const { user } = await this.service.verifyUserLogin(tokenPayload.email, body.oldPassword);
+      if (body.deviceId !== session.deviceId || !user.isPasswordResetRequired)
         throw new CustomError("Invalid credentials", StatusCodes.BAD_REQUEST, {
           message: "Invalid credentials. check and try again",
         });
@@ -354,11 +318,7 @@ export class AuthenticationController {
     const body = signupRequestSchema.parse(req.body);
 
     try {
-      const findUser = await this.service.checkIfUserExists(body.email, body.phone);
-      if (findUser.found)
-        throw new CustomError("User already exist", StatusCodes.BAD_REQUEST, {
-          message: findUser.message,
-        });
+      await this.service.checkIfUserExists(body.email, body.phone);
 
       const { session, user, verificationData } = await database.transaction(async (trx) => {
         const createdUser = await this.service.createUser(trx, {
@@ -367,10 +327,6 @@ export class AuthenticationController {
           phone: body.phone,
           timezone: body.timezone,
         });
-        if (createdUser.error || !createdUser.user)
-          throw new CustomError("Server error, try again", StatusCodes.INTERNAL_SERVER_ERROR, {
-            message: createdUser.error,
-          });
 
         const userSession = await this.service.createUserSession(trx, {
           deviceId: body.deviceId,
@@ -378,10 +334,6 @@ export class AuthenticationController {
           userAgent: req.headers["user-agent"] ?? "Unknown",
           userId: createdUser.user.id,
         });
-        if (userSession.error || !userSession.session)
-          throw new CustomError("Server error, try again", StatusCodes.INTERNAL_SERVER_ERROR, {
-            message: userSession.error,
-          });
 
         const verificationData = await this.service.initiateEmailVerification(trx, {
           deviceId: userSession.session.deviceId,
@@ -420,7 +372,6 @@ export class AuthenticationController {
 
   async verifyBvn(req: Request, res: Response) {
     const body = verifyBvnRequestSchema.parse(req.body);
-    const message = "Unable to verify Bvn";
     const session = req.sessionPayload;
     const user = req.userPayload;
     const tokenPayload = req.verificationTokenPayload;
@@ -435,18 +386,10 @@ export class AuthenticationController {
         );
       } else {
         const bvnData = await this.service.getBvnData(tokenPayload.bvn ?? "", body.otp);
-        if (bvnData.error || !bvnData.profile)
-          throw new CustomError(message, StatusCodes.BAD_REQUEST, {
-            message: bvnData.error,
-          });
 
         await database.transaction(async (trx) => {
           const kycData: InitiateBvnVerificationRequest = JSON.parse(tokenPayload.bvn ?? "{}");
           const kyc = await this.service.completeUserKyc(trx, user.id, kycData, bvnData.profile);
-          if (kyc.error || !kyc.profile)
-            throw new CustomError(message, StatusCodes.INTERNAL_SERVER_ERROR, {
-              message: kyc.error,
-            });
 
           const accountNames =
             env.NODE_ENV === "development"
@@ -456,15 +399,12 @@ export class AuthenticationController {
                   bvnData.profile.middle_name,
                   bvnData.profile.last_name,
                 ];
-          const wallet = await this.service.createWallet(trx, {
+
+          await this.service.createWallet(trx, {
             accountName: accountNames.join(""),
             accountNumber: user.phone.slice(-10),
             userId: user.id,
           });
-          if (wallet.error)
-            throw new CustomError(message, StatusCodes.INTERNAL_SERVER_ERROR, {
-              message: wallet.error,
-            });
         });
 
         const authenticatedUser = await this.service.getAuthUserData(session.id);
@@ -507,11 +447,6 @@ export class AuthenticationController {
             session.id,
             session.userId,
           );
-
-          if (!verifiedUserData.user || !verifiedUserData.session)
-            throw new CustomError(message, StatusCodes.INTERNAL_SERVER_ERROR, {
-              message: "Unable to verify email address, try again",
-            });
 
           return { session: verifiedUserData.session, user: verifiedUserData.user };
         });
