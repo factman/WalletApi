@@ -19,4 +19,5 @@ export interface NameEnquiryRequestParams {
 export interface NameEnquiryResponse {
   accountName: string;
   accountNumber: string;
+  id: string;
 }
