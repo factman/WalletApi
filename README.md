@@ -348,3 +348,69 @@ WalletApi/
   Features can be tested independently, with clear boundaries and minimal mocking required.
 
 This structure encourages clean architecture, enforces clear boundaries, and supports long-term growth and refactoring of the codebase.
+
+## Features and Endpoints
+
+Each feature is implemented as an isolated module under `src/features/`, following the Modular Feature Isolation pattern.
+
+---
+
+### **Authentication**
+
+Handles user registration, login, logout, password management, email verification, and session management.
+
+| Endpoint                              | Method | Description                         | Auth Required |
+| ------------------------------------- | ------ | ----------------------------------- | ------------- |
+| `/api/auth/signup`                    | POST   | Register a new user                 | No            |
+| `/api/auth/login`                     | POST   | User login                          | No            |
+| `/api/auth/logout`                    | DELETE | Logout user and invalidate session  | Yes           |
+| `/api/auth/refresh-token`             | POST   | Refresh authentication tokens       | No            |
+| `/api/auth/forgot-password`           | POST   | Initiate password reset             | No            |
+| `/api/auth/reset-password`            | POST   | Reset password using token          | No            |
+| `/api/auth/verify-email`              | PATCH  | Verify user email address           | No            |
+| `/api/auth/resend-email-verification` | PATCH  | Resend email verification OTP       | No            |
+| `/api/auth/verify-forgot-password`    | PATCH  | Verify password reset code          | No            |
+| `/api/auth/initiate-auth`             | POST   | Initiate authentication (e.g., 2FA) | No            |
+| `/api/auth/initiate-bvn-verification` | POST   | Start BVN verification              | Yes           |
+| `/api/auth/verify-bvn`                | PUT    | Complete BVN verification           | Yes           |
+
+---
+
+### Users
+
+The Users feature provides endpoints for managing user accounts, including retrieving user details, changing passwords, and deleting accounts. All endpoints require authentication and a valid user ID parameter.
+
+| Endpoint                         | Method | Description               | Auth Required | Request Validation      |
+| -------------------------------- | ------ | ------------------------- | ------------- | ----------------------- |
+| `/api/users/:id`                 | GET    | Get user details by ID    | Yes           | `id` param (UUID)       |
+| `/api/users/:id/change-password` | PATCH  | Change user password      | Yes           | `id` param, body schema |
+| `/api/users/:id/delete-account`  | DELETE | Delete user account by ID | Yes           | `id` param (UUID)       |
+
+---
+
+### Wallets Feature
+
+The Wallets feature provides endpoints for managing user wallets, including retrieving wallet details, adding settlement accounts, setting transaction PINs, performing name enquiries, and funding wallets. All endpoints require authentication and appropriate request validation.
+
+| Endpoint                                   | Method | Description                      | Auth Required | Request Validation      |
+| ------------------------------------------ | ------ | -------------------------------- | ------------- | ----------------------- |
+| `/api/wallets/:id`                         | GET    | Get wallet details by wallet ID  | Yes           | `id` param (UUID)       |
+| `/api/wallets/:id/settlement-account`      | POST   | Add or update settlement account | Yes           | `id` param, body schema |
+| `/api/wallets/:id/transaction-pin`         | POST   | Create or update transaction PIN | Yes           | `id` param, body schema |
+| `/api/wallets/name-enquiry/:accountNumber` | GET    | Perform name enquiry for account | Yes           | query params schema     |
+| `/api/wallets/:id/fund-wallet`             | POST   | Fund wallet by wallet ID         | Yes           | `id` param, body schema |
+
+---
+
+### Transactions Feature
+
+The Transactions feature provides endpoints for managing wallet transactions, including retrieving transaction details, viewing transaction history, transferring funds, and withdrawing funds. All endpoints require proper request validation.
+
+| Endpoint                                             | Method | Description                           | Auth Required | Request Validation                    |
+| ---------------------------------------------------- | ------ | ------------------------------------- | ------------- | ------------------------------------- |
+| `/api/transactions/:transactionId/wallets/:walletId` | GET    | Get details of a specific transaction | Yes           | `walletId` and `transactionId` params |
+| `/api/transactions/Wallets/:walletId/history`        | GET    | Get transaction history for a wallet  | Yes           | `walletId` param                      |
+| `/api/transactions/:walletId/transfer`               | POST   | Transfer funds from a wallet          | Yes           | `walletId` param, body schema         |
+| `/api/transactions/:walletId/withdraw`               | POST   | Withdraw funds from a wallet          | Yes           | `walletId` param, body schema         |
+
+---
