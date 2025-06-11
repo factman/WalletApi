@@ -47,3 +47,22 @@ export const passwordSchema = z
 export const idParamSchema = buildStrictSchema<{ id: string }>({
   id: z.string().uuid(),
 });
+
+export const accountNumberSchema = z
+  .string()
+  .nonempty()
+  .length(10)
+  .regex(/^\d+$/, { message: "Account number must contain only digits" });
+
+export const transactionPinSchema = z
+  .string()
+  .nonempty()
+  .length(4)
+  .regex(/^\d+$/, { message: "Pin must contain only digits" });
+
+export const amountSchema = z.number({ coerce: true }).positive().safe().finite();
+
+export const paginationSchema = z.object({
+  limit: z.number({ coerce: true }).min(1).max(100).positive().default(10),
+  page: z.number({ coerce: true }).min(1).positive().safe().finite().default(1),
+});

@@ -3,6 +3,7 @@ import { Router } from "express";
 import packageJson from "../../package.json" with { type: "json" };
 import { env } from "../configs/env.js";
 import { authenticationRouter } from "../features/authentication/index.js";
+import { transactionRouter } from "../features/transactions/index.js";
 import { usersRouter } from "../features/users/index.js";
 import { walletsRouter } from "../features/wallets/index.js";
 import { successResponse } from "../helpers/responseHandlers.js";
@@ -31,5 +32,6 @@ export function appRouter() {
       .use("/auth", authenticationRouter)
       .use("/users", usersRouter)
       .use("/wallets", walletsRouter)
+      .use("/transactions", transactionRouter)
   );
 }

@@ -1,17 +1,28 @@
-enum TransactionChannel {
+export enum TransactionChannel {
   BANK_TRANSFER = "bank_transfer",
   WALLET = "wallet",
 }
 
-enum TransactionStatus {
+export enum TransactionStatus {
   COMPLETED = "completed",
   FAILED = "failed",
   PENDING = "pending",
 }
 
-enum TransactionType {
+export enum TransactionType {
   CREDIT = "credit",
   DEBIT = "debit",
+}
+
+export interface TransactionMetaData {
+  receiver: {
+    accountName: string;
+    accountNumber: string;
+  };
+  sender: {
+    accountName: string;
+    accountNumber: string;
+  };
 }
 
 export default interface TransactionModel {
@@ -22,7 +33,7 @@ export default interface TransactionModel {
   currency: string;
   fee: number;
   id: string;
-  metadata: Record<string, unknown>;
+  metadata: TransactionMetaData;
   openingBalance: number;
   remark: string;
   sessionId: string;

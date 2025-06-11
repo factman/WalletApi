@@ -76,8 +76,19 @@ export class WalletRepository extends Repository<WalletModel> {
       .first();
   }
 
+  async decreaseWalletBalance(trx: Knex.Knex.Transaction, id: WalletModel["id"], amount: number) {
+    await this.table.decrement("balance", amount).where({ id }).transacting(trx);
+  }
+
   async getWalletByAccountNumber(accountNumber: WalletModel["accountNumber"]) {
-    return await this.table.select("accountName", "accountNumber").where({ accountNumber }).first();
+    return await this.table
+      .select("accountName", "accountNumber", "id")
+      .where({ accountNumber })
+      .first();
+  }
+
+  async getWalletById(trx: Knex.Knex.Transaction, id: WalletModel["id"]) {
+    return await this.table.transacting(trx).forUpdate().where({ id }).first();
   }
 
   async getWalletByIdAndUserId(id: WalletModel["id"], userId: WalletModel["userId"]) {
@@ -85,5 +96,17 @@ export class WalletRepository extends Repository<WalletModel> {
       .select<Omit<WalletModel, "transactionPin">>(walletColumns)
       .where({ id, userId })
       .first();
+  }
+
+  async getWalletByPinAndId(
+    trx: Knex.Knex.Transaction,
+    id: WalletModel["id"],
+    pin: WalletModel["transactionPin"],
+  ) {
+    return await this.table.transacting(trx).forUpdate().where({ id, transactionPin: pin }).first();
+  }
+
+  async increaseWalletBalance(trx: Knex.Knex.Transaction, id: WalletModel["id"], amount: number) {
+    await this.table.increment("balance", amount).where({ id }).transacting(trx);
   }
 }

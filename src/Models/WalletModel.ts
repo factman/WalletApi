@@ -1,4 +1,4 @@
-enum WalletStatus {
+export enum WalletStatus {
   ACTIVE = "active",
   BLOCKED = "blocked",
   INACTIVE = "inactive",

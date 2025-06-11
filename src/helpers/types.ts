@@ -16,6 +16,13 @@ export enum TokenType {
 
 export type HeaderSchemaType = Record<keyof IncomingHttpHeaders, z.ZodTypeAny> & z.ZodRawShape;
 
+export interface PaginationMeta {
+  currentPage: number;
+  recordsPerPage: number;
+  totalPages: number;
+  totalRecords: number;
+}
+
 export type SchemaType =
   | ZodObject<z.ZodRawShape, "passthrough">
   | ZodObject<z.ZodRawShape, "strict">;

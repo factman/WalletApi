@@ -1,5 +1,22 @@
 import bcrypt from "bcryptjs";
+import { DateTime } from "luxon";
 import { Server } from "node:http";
+
+export function generateSessionId() {
+  const institutionCode = "000000";
+  const dateTime = DateTime.now().toFormat("yyLLddHHmmss");
+  const serial = Date.now().toString().slice(-6);
+  const random = Math.random().toString().slice(-6);
+  return `${institutionCode}${dateTime}${serial}${random}`;
+}
+
+export function getPaginationOffset(page: number, limit: number) {
+  return (page - 1) * limit;
+}
+
+export function getPaginationTotalPages(total: number, limit: number) {
+  return Math.ceil(total / limit);
+}
 
 export function gracefulShutdown(server: Server, cleanUp?: () => Promise<void>) {
   const listener = async () => {

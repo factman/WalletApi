@@ -1,15 +1,16 @@
 import { z } from "zod";
 
 import { buildStrictSchema } from "../../helpers/validations.js";
-import { AddSettlementAccountRequest, CreateTransactionPinRequest } from "./walletsDTO.js";
+import { accountNumberSchema, transactionPinSchema } from "../../validations/validationSchemas.js";
+import {
+  AddSettlementAccountRequest,
+  CreateTransactionPinRequest,
+  NameEnquiryRequestParams,
+} from "./walletsDTO.js";
 
 export const addSettlementAccountRequestSchema = buildStrictSchema<AddSettlementAccountRequest>({
   accountName: z.string().nonempty(),
-  accountNumber: z
-    .string()
-    .nonempty()
-    .length(10)
-    .regex(/^\d+$/, { message: "Account number must contain only digits" }),
+  accountNumber: accountNumberSchema,
   bankCode: z
     .string()
     .nonempty()
@@ -19,5 +20,9 @@ export const addSettlementAccountRequestSchema = buildStrictSchema<AddSettlement
 });
 
 export const createTransactionPinRequestSchema = buildStrictSchema<CreateTransactionPinRequest>({
-  pin: z.string().nonempty().length(4).regex(/^\d+$/, { message: "Pin must contain only digits" }),
+  pin: transactionPinSchema,
+});
+
+export const nameEnquiryRequestSchema = buildStrictSchema<NameEnquiryRequestParams>({
+  accountNumber: accountNumberSchema,
 });
