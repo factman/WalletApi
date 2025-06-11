@@ -22,12 +22,7 @@ export class UsersController {
     const params = idParamSchema.parse(req.params);
 
     try {
-      const password = await this.service.verifyOldPassword(user, body.oldPassword);
-      if (password.error || !password.valid)
-        throw new CustomError("Invalid credentials", StatusCodes.BAD_REQUEST, {
-          message: password.error,
-        });
-
+      await this.service.verifyOldPassword(user, body.oldPassword);
       await database.transaction(async (trx) => {
         await this.service.changeUserPassword(trx, params.id, body.newPassword);
       });
@@ -44,9 +39,7 @@ export class UsersController {
 
     try {
       await database.transaction(async (trx) => {
-        const { error } = await this.service.deleteUserAccount(trx, params.id);
-        if (error)
-          throw new CustomError("Invalid user", StatusCodes.BAD_REQUEST, { message: error });
+        await this.service.deleteUserAccount(trx, params.id);
       });
 
       successResponse(res, null, "Account deleted successfully");
@@ -60,9 +53,7 @@ export class UsersController {
     const params = idParamSchema.parse(req.params);
 
     try {
-      const { error, profile } = await this.service.getUserProfile(params.id);
-      if (error || !profile)
-        throw new CustomError("Not Found", StatusCodes.NOT_FOUND, { message: error });
+      const { profile } = await this.service.getUserProfile(params.id);
 
       successResponse<GetUserResponse>(res, profile, "Fetched user profile successfully");
     } catch (err) {

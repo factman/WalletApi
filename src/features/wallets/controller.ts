@@ -26,9 +26,7 @@ export class WalletController {
     const user = req.userPayload;
 
     try {
-      const { error, wallet } = await this.service.getUserWallet(params.id, user.id);
-      if (error || !wallet)
-        throw new CustomError("Not Found", StatusCodes.NOT_FOUND, { message: error });
+      const { wallet } = await this.service.getUserWallet(params.id, user.id);
 
       if (wallet.isTransactionPinSet)
         throw new CustomError("Already Set", StatusCodes.BAD_REQUEST, {
@@ -36,11 +34,7 @@ export class WalletController {
         });
 
       await database.transaction(async (trx) => {
-        const data = await this.service.createWalletPin(trx, wallet.id, body.pin);
-        if (data.error || !data.wallet)
-          throw new CustomError("Invalid Request", StatusCodes.BAD_REQUEST, {
-            message: data.error,
-          });
+        await this.service.createWalletPin(trx, wallet.id, body.pin);
       });
 
       successResponse(res, null, "Transaction Pin created successfully");
@@ -55,9 +49,7 @@ export class WalletController {
     const user = req.userPayload;
 
     try {
-      const { error, wallet } = await this.service.getUserWallet(params.id, user.id);
-      if (error || !wallet)
-        throw new CustomError("Not Found", StatusCodes.NOT_FOUND, { message: error });
+      const { wallet } = await this.service.getUserWallet(params.id, user.id);
 
       successResponse<GetWalletResponse>(res, { ...wallet }, "Fetched User Wallet");
     } catch (err) {
@@ -70,9 +62,7 @@ export class WalletController {
     const params = nameEnquiryRequestSchema.parse(req.params);
 
     try {
-      const { account, error } = await this.service.getAccountDetails(params.accountNumber);
-      if (error || !account)
-        throw new CustomError("Not Found", StatusCodes.NOT_FOUND, { message: error });
+      const { account } = await this.service.getAccountDetails(params.accountNumber);
 
       successResponse<NameEnquiryResponse>(res, { ...account }, "Fetched Account Details");
     } catch (err) {
@@ -81,19 +71,13 @@ export class WalletController {
     }
   }
 
-  route(req: Request, res: Response) {
-    successResponse(res, { url: req.url }, "Message");
-  }
-
   async setSettlementAccount(req: Request, res: Response) {
     const params = idParamSchema.parse(req.params);
     const body = addSettlementAccountRequestSchema.parse(req.body);
     const user = req.userPayload;
 
     try {
-      const { error, wallet } = await this.service.getUserWallet(params.id, user.id);
-      if (error || !wallet)
-        throw new CustomError("Not Found", StatusCodes.NOT_FOUND, { message: error });
+      const { wallet } = await this.service.getUserWallet(params.id, user.id);
 
       if (wallet.isSettlementAccountSet)
         throw new CustomError("Already Set", StatusCodes.BAD_REQUEST, {
@@ -101,15 +85,11 @@ export class WalletController {
         });
 
       await database.transaction(async (trx) => {
-        const data = await this.service.setWalletSettlementAccount(trx, wallet.id, {
+        await this.service.setWalletSettlementAccount(trx, wallet.id, {
           settlementAccountName: body.accountName,
           settlementAccountNumber: body.accountNumber,
           settlementBankCode: body.bankCode,
         });
-        if (data.error || !data.wallet)
-          throw new CustomError("Invalid Request", StatusCodes.BAD_REQUEST, {
-            message: data.error,
-          });
       });
 
       successResponse(res, null, "Settlement Account Set Successfully");
