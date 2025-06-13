@@ -2,6 +2,7 @@ import { DateTime } from "luxon";
 import { Resend } from "resend";
 
 import { env } from "../configs/env.js";
+import TransactionModel from "../models/TransactionModel.js";
 
 export class ResendService {
   private resend: Resend;
@@ -13,8 +14,7 @@ export class ResendService {
   async sendEmailVerificationOTP(email: string, name: string, otp: string, expireDate: DateTime) {
     return await this.resend.emails.send({
       from: env.RESEND_SENDER,
-      html: ``,
-      subject: `
+      html: `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -70,6 +70,92 @@ export class ResendService {
 </body>
 </html>
       `,
+      subject: "Email Verification - Demo Wallet",
+      to: [email],
+    });
+  }
+
+  async sendTransactionReceipt(
+    email: string,
+    transactionData: Pick<
+      TransactionModel,
+      "amount" | "currency" | "remark" | "sessionId" | "settlementDate" | "type"
+    >,
+  ) {
+    return await this.resend.emails.send({
+      from: env.RESEND_SENDER,
+      html: `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Transfer Receipt - Demo Wallet</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        h2 {
+            color: #007BFF; /* Bootstrap primary color */
+            text-transform: capitalize;
+        }
+        p {
+            color: #555;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #777;
+        }
+        .transaction {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .credit {
+            background-color: #e7f9ee; /* Light green background */
+        }
+        .debit {
+            background-color: #f9e7e7; /* Light red background */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Transaction Receipt</h1>
+        <div class="transaction ${transactionData.type}">
+            <h2>${transactionData.type} Transaction</h2>
+            <p><strong>Amount:</strong> ${transactionData.amount}</p>
+            <p><strong>Date:</strong> ${transactionData.settlementDate}</p>
+            <p><strong>Session ID:</strong> ${transactionData.sessionId}</p>
+            <p><strong>Description:</strong> ${transactionData.remark}</p>
+        </div>
+        <p>If you have any questions or concerns regarding your transactions, please feel free to contact our support team.</p>
+        <p>Thank you for choosing Demo Wallet!</p>
+        <p>Best regards,<br>The Demo Wallet Team</p>
+        <div class="footer">
+            <p>&copy; ${DateTime.now().year.toString()} Demo Wallet. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
+      `,
+      subject: "Bank Transfer Receipt - Demo Wallet",
       to: [email],
     });
   }
@@ -77,8 +163,7 @@ export class ResendService {
   async sendVerificationOTP(email: string, otp: string, expireDate: DateTime) {
     return await this.resend.emails.send({
       from: env.RESEND_SENDER,
-      html: ``,
-      subject: `
+      html: `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -133,6 +218,7 @@ export class ResendService {
 </body>
 </html>
       `,
+      subject: "Your OTP - Demo Wallet",
       to: [email],
     });
   }
