@@ -12,19 +12,27 @@ import TransactionModel, {
 } from "../../models/TransactionModel.js";
 import WalletModel, { WalletStatus } from "../../models/WalletModel.js";
 import { TransactionRepository } from "../../repositories/TransactionRepository.js";
+import { UserRepository } from "../../repositories/UserRepository.js";
 import { WalletRepository } from "../../repositories/WalletRepository.js";
+import { ResendService } from "../../services/ResendService.js";
 import { FundTransferRequest, FundWithdrawalRequest } from "./transactionsDTO.js";
 
 export class TransactionService {
+  private resendService: ResendService;
   private transactionRepository: TransactionRepository;
+  private userRepository: UserRepository;
   private walletRepository: WalletRepository;
 
   constructor(
     transactionRepository = new TransactionRepository(),
     walletRepository = new WalletRepository(),
+    resendService = new ResendService(),
+    userRepository = new UserRepository(),
   ) {
     this.transactionRepository = transactionRepository;
     this.walletRepository = walletRepository;
+    this.resendService = resendService;
+    this.userRepository = userRepository;
   }
 
   async getBeneficiaryWallet(accountNumber: WalletModel["accountNumber"]) {
@@ -199,6 +207,18 @@ export class TransactionService {
         message: "Something went wrong, please try again later.",
       });
 
+    const user = await this.userRepository.getUserById(transaction.userId);
+    if (user) {
+      await this.resendService.sendTransactionReceipt(user.email, {
+        amount,
+        currency: transaction.currency,
+        remark: transaction.remark,
+        sessionId: transaction.sessionId,
+        settlementDate: transaction.settlementDate,
+        type: transaction.type,
+      });
+    }
+
     return transaction;
   }
 
@@ -238,6 +258,18 @@ export class TransactionService {
       throw new CustomError("Something went wrong", StatusCodes.INTERNAL_SERVER_ERROR, {
         message: "Something went wrong, please try again later.",
       });
+
+    const user = await this.userRepository.getUserById(transaction.userId);
+    if (user) {
+      await this.resendService.sendTransactionReceipt(user.email, {
+        amount: amount + fee,
+        currency: transaction.currency,
+        remark: transaction.remark,
+        sessionId: transaction.sessionId,
+        settlementDate: transaction.settlementDate,
+        type: transaction.type,
+      });
+    }
 
     return transaction;
   }
