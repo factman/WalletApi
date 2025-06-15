@@ -358,11 +358,6 @@ export class AuthenticationController {
       await this.service.sendUserWelcomeEmail(user.email);
 
       const authenticatedUser = await this.service.getAuthUserData(session.id);
-      console.log({
-        dateKeys: Object.keys(session.accessTokenExpiresAt),
-        dateType: typeof session.accessTokenExpiresAt,
-        dateValue: DateTime.fromJSDate(session.accessTokenExpiresAt as never),
-      });
       successResponse<SignupResponse>(
         res,
         {
@@ -398,10 +393,10 @@ export class AuthenticationController {
           "Bvn already verified.",
         );
       } else {
-        const bvnData = await this.service.getBvnData(tokenPayload.bvn ?? "", body.otp);
+        const kycData: InitiateBvnVerificationRequest = JSON.parse(tokenPayload.bvn ?? "{}");
+        const bvnData = await this.service.getBvnData(kycData.bvn, body.otp);
 
         await database.transaction(async (trx) => {
-          const kycData: InitiateBvnVerificationRequest = JSON.parse(tokenPayload.bvn ?? "{}");
           const kyc = await this.service.completeUserKyc(trx, user.id, kycData, bvnData.profile);
 
           const accountNames =

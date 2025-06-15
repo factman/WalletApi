@@ -34,8 +34,8 @@ export class SessionRepository extends Repository<SessionModel> {
     return await this.table
       .select()
       .where({ ...session })
-      .where("accessTokenExpiresAt", "<", this.knex.fn.now())
-      .where("expiresAt", "<", this.knex.fn.now())
+      .where("accessTokenExpiresAt", ">", this.knex.fn.now())
+      .where("expiresAt", ">", this.knex.fn.now())
       .first();
   }
 

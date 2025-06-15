@@ -196,7 +196,7 @@ export class TransactionService {
         remark ??
         `Transfer from ${metadata.sender.accountName} To ${metadata.receiver.accountName}`,
       sessionId: generateSessionId(),
-      settlementDate: database.fn.now() as unknown as string,
+      settlementDate: database.fn.now() as unknown as Date,
       status: TransactionStatus.COMPLETED,
       type: TransactionType.CREDIT,
       userId: wallet.userId,
@@ -248,7 +248,7 @@ export class TransactionService {
         remark ??
         `Transfer To ${metadata.receiver.accountName} From ${metadata.sender.accountName}`,
       sessionId: generateSessionId(),
-      settlementDate: database.fn.now() as unknown as string,
+      settlementDate: database.fn.now() as unknown as Date,
       status: TransactionStatus.COMPLETED,
       type: TransactionType.DEBIT,
       userId: wallet.userId,

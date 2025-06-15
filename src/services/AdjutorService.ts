@@ -108,8 +108,8 @@ export class AdjutorService {
         )
       ).data;
 
-    return Promise.resolve<AdjutorResponse<AdjutorKarmaPayload>>({
-      data: null as unknown as AdjutorKarmaPayload,
+    return Promise.resolve<AdjutorResponse<null>>({
+      data: null,
       message: "Successful",
       meta: {
         balance: 1600,

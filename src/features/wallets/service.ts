@@ -142,7 +142,7 @@ export class WalletService {
       openingBalance: wallet.balance - amount,
       remark: `Wallet top-up from ${metadata.sender.accountName}`,
       sessionId: generateSessionId(),
-      settlementDate: database.fn.now() as unknown as string,
+      settlementDate: database.fn.now() as unknown as Date,
       status: TransactionStatus.COMPLETED,
       type: TransactionType.CREDIT,
       userId: wallet.userId,
