@@ -63,6 +63,7 @@ export class AuthenticationController {
 
       successResponse<ForgotPasswordResponse>(res, otpData, "OTP sent successfully");
     } catch (err) {
+      console.log(err);
       const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
       errorResponse(res, error.status, error);
     }
@@ -101,6 +102,7 @@ export class AuthenticationController {
         "Authentication successful",
       );
     } catch (err) {
+      console.log(err);
       const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
       errorResponse(res, error.status, error);
     }
@@ -141,6 +143,7 @@ export class AuthenticationController {
         "Bvn concent initiated successfully",
       );
     } catch (err) {
+      console.log(err);
       const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
       errorResponse(res, error.status, error);
     }
@@ -172,11 +175,11 @@ export class AuthenticationController {
         res,
         {
           accessToken: validSession.session.accessToken,
-          accessTokenExpiresAt: DateTime.fromSQL(
+          accessTokenExpiresAt: DateTime.fromJSDate(
             validSession.session.accessTokenExpiresAt,
           ).toMillis(),
           refreshToken: validSession.session.refreshToken,
-          refreshTokenExpiresAt: DateTime.fromSQL(
+          refreshTokenExpiresAt: DateTime.fromJSDate(
             validSession.session.refreshTokenExpiresAt,
           ).toMillis(),
           userData: authenticatedUser.userData,
@@ -184,6 +187,7 @@ export class AuthenticationController {
         "Login successfully",
       );
     } catch (err) {
+      console.log(err);
       const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
       errorResponse(res, error.status, error);
     }
@@ -198,6 +202,7 @@ export class AuthenticationController {
       });
       successResponse(res, null, "Logout successfully");
     } catch (err) {
+      console.log(err);
       const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
       errorResponse(res, error.status, error);
     }
@@ -235,14 +240,15 @@ export class AuthenticationController {
         res,
         {
           accessToken: session.accessToken,
-          accessTokenExpiresAt: DateTime.fromSQL(session.accessTokenExpiresAt).toMillis(),
+          accessTokenExpiresAt: DateTime.fromJSDate(session.accessTokenExpiresAt).toMillis(),
           refreshToken: session.refreshToken,
-          refreshTokenExpiresAt: DateTime.fromSQL(session.refreshTokenExpiresAt).toMillis(),
+          refreshTokenExpiresAt: DateTime.fromJSDate(session.refreshTokenExpiresAt).toMillis(),
           userData: authenticatedUser.userData,
         },
         "Token refreshed successfully",
       );
     } catch (err) {
+      console.log(err);
       const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
       errorResponse(res, error.status, error);
     }
@@ -286,6 +292,7 @@ export class AuthenticationController {
         "Verification sent successfully",
       );
     } catch (err) {
+      console.log(err);
       const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
       errorResponse(res, error.status, error);
     }
@@ -309,6 +316,7 @@ export class AuthenticationController {
 
       successResponse(res, null, "Password reset successfully, login again");
     } catch (err) {
+      console.log(err);
       const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
       errorResponse(res, error.status, error);
     }
@@ -350,11 +358,16 @@ export class AuthenticationController {
       await this.service.sendUserWelcomeEmail(user.email);
 
       const authenticatedUser = await this.service.getAuthUserData(session.id);
+      console.log({
+        dateKeys: Object.keys(session.accessTokenExpiresAt),
+        dateType: typeof session.accessTokenExpiresAt,
+        dateValue: DateTime.fromJSDate(session.accessTokenExpiresAt as never),
+      });
       successResponse<SignupResponse>(
         res,
         {
           accessToken: session.accessToken,
-          accessTokenExpiresAt: DateTime.fromSQL(session.accessTokenExpiresAt).toMillis(),
+          accessTokenExpiresAt: DateTime.fromJSDate(session.accessTokenExpiresAt).toMillis(),
           otpExpiresAt: verificationData.otpExpiresAt,
           otpMessage: verificationData.otpMessage,
           userData: authenticatedUser.userData,
@@ -415,6 +428,7 @@ export class AuthenticationController {
         );
       }
     } catch (err) {
+      console.log(err);
       const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
       errorResponse(res, error.status, error);
     }
@@ -459,6 +473,7 @@ export class AuthenticationController {
         );
       }
     } catch (err) {
+      console.log(err);
       const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
       errorResponse(res, error.status, error);
     }
@@ -480,6 +495,7 @@ export class AuthenticationController {
 
       successResponse(res, null, "Verification successful, reset password now");
     } catch (err) {
+      console.log(err);
       const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
       errorResponse(res, error.status, error);
     }

@@ -29,6 +29,7 @@ export class UsersController {
 
       successResponse(res, null, "Password changed successfully");
     } catch (err) {
+      console.log(err);
       const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
       errorResponse(res, error.status, error);
     }
@@ -44,6 +45,7 @@ export class UsersController {
 
       successResponse(res, null, "Account deleted successfully");
     } catch (err) {
+      console.log(err);
       const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
       errorResponse(res, error.status, error);
     }
@@ -57,6 +59,7 @@ export class UsersController {
 
       successResponse<GetUserResponse>(res, profile, "Fetched user profile successfully");
     } catch (err) {
+      console.log(err);
       const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
       errorResponse(res, error.status, error);
     }

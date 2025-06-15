@@ -34,6 +34,7 @@ export class TransactionController {
 
       successResponse<TransactionModel>(res, transaction, "Transaction");
     } catch (err) {
+      console.log(err);
       const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
       errorResponse(res, error.status, error);
     }
@@ -66,6 +67,7 @@ export class TransactionController {
         "Transaction history",
       );
     } catch (err) {
+      console.log(err);
       const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
       errorResponse(res, error.status, error);
     }
@@ -90,6 +92,7 @@ export class TransactionController {
 
       successResponse(res, transaction, "Transfer Successful");
     } catch (err) {
+      console.log(err);
       const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
       errorResponse(res, error.status, error);
     }
@@ -106,6 +109,7 @@ export class TransactionController {
 
       successResponse(res, transaction, "Withdrawal Successful");
     } catch (err) {
+      console.log(err);
       const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
       errorResponse(res, error.status, error);
     }

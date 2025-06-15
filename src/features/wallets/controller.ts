@@ -40,6 +40,7 @@ export class WalletController {
 
       successResponse(res, null, "Transaction Pin created successfully");
     } catch (err) {
+      console.log(err);
       const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
       errorResponse(res, error.status, error);
     }
@@ -55,6 +56,7 @@ export class WalletController {
       });
       successResponse(res, null, "Funded Wallet Successfully");
     } catch (err) {
+      console.log(err);
       const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
       errorResponse(res, error.status, error);
     }
@@ -69,6 +71,7 @@ export class WalletController {
 
       successResponse<GetWalletResponse>(res, { ...wallet }, "Fetched User Wallet");
     } catch (err) {
+      console.log(err);
       const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
       errorResponse(res, error.status, error);
     }
@@ -82,6 +85,7 @@ export class WalletController {
 
       successResponse<NameEnquiryResponse>(res, { ...account }, "Fetched Account Details");
     } catch (err) {
+      console.log(err);
       const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
       errorResponse(res, error.status, error);
     }
@@ -110,6 +114,7 @@ export class WalletController {
 
       successResponse(res, null, "Settlement Account Set Successfully");
     } catch (err) {
+      console.log(err);
       const error = CustomError.fromError(err as Error, StatusCodes.INTERNAL_SERVER_ERROR);
       errorResponse(res, error.status, error);
     }

@@ -29,7 +29,7 @@ export default interface TransactionModel {
   amount: number;
   channel: TransactionChannel;
   closingBalance: number;
-  createdAt: string;
+  createdAt: Date;
   currency: string;
   fee: number;
   id: string;
@@ -37,10 +37,10 @@ export default interface TransactionModel {
   openingBalance: number;
   remark: string;
   sessionId: string;
-  settlementDate: null | string;
+  settlementDate: Date | null;
   status: TransactionStatus;
   type: TransactionType;
-  updatedAt: string;
+  updatedAt: Date;
   userId: string;
   walletId: string;
 }

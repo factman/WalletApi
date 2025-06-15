@@ -43,7 +43,7 @@ export async function authGuard(req: Request, res: Response, next: NextFunction)
         if (!session) throw authError;
 
         // validating refreshToken validity
-        const refreshTokenExpireTime = DateTime.fromSQL(session.refreshTokenExpiresAt)
+        const refreshTokenExpireTime = DateTime.fromJSDate(session.refreshTokenExpiresAt)
           .diffNow()
           .as("milliseconds");
         if (refreshTokenExpireTime < 0) {
@@ -53,7 +53,7 @@ export async function authGuard(req: Request, res: Response, next: NextFunction)
         }
 
         // validating accessToken validity
-        const accessTokenExpireTime = DateTime.fromSQL(session.accessTokenExpiresAt)
+        const accessTokenExpireTime = DateTime.fromJSDate(session.accessTokenExpiresAt)
           .diffNow()
           .as("milliseconds");
         if (accessTokenExpireTime < 0) throw authError;

@@ -1,18 +1,18 @@
 export default interface SessionModel {
   accessToken: string;
-  accessTokenExpiresAt: string;
-  createdAt: string;
+  accessTokenExpiresAt: Date;
+  createdAt: Date;
   deviceId: string;
-  expiresAt: string;
+  expiresAt: Date;
   id: string;
   ipAddress: string;
   isTwoFactorVerified: boolean;
   refreshToken: string;
-  refreshTokenExpiresAt: string;
+  refreshTokenExpiresAt: Date;
   twoFactorCode: null | string;
-  twoFactorCodeExpiresAt: null | string;
-  twoFactorVerifiedAt: null | string;
-  updatedAt: string;
+  twoFactorCodeExpiresAt: Date | null;
+  twoFactorVerifiedAt: Date | null;
+  updatedAt: Date;
   userAgent: string;
   userId: string;
 }

@@ -4,8 +4,8 @@ export default interface ProfileModel {
   bvnEmail: string;
   bvnMetadata: string;
   bvnPhone: string;
-  createdAt: string;
-  dob: string;
+  createdAt: Date;
+  dob: Date;
   firstName: string;
   gender: string;
   id: string;
@@ -13,6 +13,6 @@ export default interface ProfileModel {
   lastName: string;
   middleName: null | string;
   state: string;
-  updatedAt: string;
+  updatedAt: Date;
   userId: string;
 }
