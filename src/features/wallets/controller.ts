@@ -27,7 +27,7 @@ export class WalletController {
     const user = req.userPayload;
 
     try {
-      const { wallet } = await this.service.getUserWallet(params.id, user.id);
+      const { wallet } = await this.service.getUserWallet(user.id);
 
       if (wallet.isTransactionPinSet)
         throw new CustomError("Already Set", StatusCodes.BAD_REQUEST, {
@@ -35,7 +35,7 @@ export class WalletController {
         });
 
       await database.transaction(async (trx) => {
-        await this.service.createWalletPin(trx, wallet.id, body.pin);
+        await this.service.createWalletPin(trx, params.id, body.pin);
       });
 
       successResponse(res, null, "Transaction Pin created successfully");
@@ -63,11 +63,10 @@ export class WalletController {
   }
 
   async getWallet(req: Request, res: Response) {
-    const params = idParamSchema.parse(req.params);
     const user = req.userPayload;
 
     try {
-      const { wallet } = await this.service.getUserWallet(params.id, user.id);
+      const { wallet } = await this.service.getUserWallet(user.id);
 
       successResponse<GetWalletResponse>(res, { ...wallet }, "Fetched User Wallet");
     } catch (err) {
@@ -97,7 +96,7 @@ export class WalletController {
     const user = req.userPayload;
 
     try {
-      const { wallet } = await this.service.getUserWallet(params.id, user.id);
+      const { wallet } = await this.service.getUserWallet(user.id);
 
       if (wallet.isSettlementAccountSet)
         throw new CustomError("Already Set", StatusCodes.BAD_REQUEST, {
@@ -105,7 +104,7 @@ export class WalletController {
         });
 
       await database.transaction(async (trx) => {
-        await this.service.setWalletSettlementAccount(trx, wallet.id, {
+        await this.service.setWalletSettlementAccount(trx, params.id, {
           settlementAccountName: body.accountName,
           settlementAccountNumber: body.accountNumber,
           settlementBankCode: body.bankCode,

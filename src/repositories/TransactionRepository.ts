@@ -17,7 +17,7 @@ export class TransactionRepository extends Repository<TransactionModel> {
     const id = this.uuid;
     await this.table.insert({ ...transaction, id }).transacting(trx);
 
-    return await this.table.where({ id }).first();
+    return await this.table.where({ id }).transacting(trx).first();
   }
 
   async getTransactionsByWalletId(

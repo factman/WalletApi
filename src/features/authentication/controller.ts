@@ -409,7 +409,7 @@ export class AuthenticationController {
                 ];
 
           await this.service.createWallet(trx, {
-            accountName: accountNames.join(""),
+            accountName: accountNames.join(" "),
             accountNumber: user.phone.slice(-10),
             userId: user.id,
           });

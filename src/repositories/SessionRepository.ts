@@ -22,8 +22,8 @@ export class SessionRepository extends Repository<SessionModel> {
       | "updatedAt"
     >,
   ) {
-    const session = await this.table.transacting(trx).insert(sessionData);
-    return await this.table.where("id", session[0]).transacting(trx).first();
+    await this.table.transacting(trx).insert(sessionData);
+    return await this.table.where("id", sessionData.id).transacting(trx).first();
   }
 
   async deleteSession(trx: Knex.Knex.Transaction, userId: SessionModel["userId"]) {
