@@ -17,12 +17,7 @@ const service = new WalletService();
 const controller = new WalletController(service);
 
 export const router = Router()
-  .get(
-    WALLETS_ROUTES.GET_WALLET,
-    authGuard,
-    validateRequest(idParamSchema, "params"),
-    controller.getWallet.bind(controller),
-  )
+  .get(WALLETS_ROUTES.GET_WALLET, authGuard, controller.getWallet.bind(controller))
   .post(
     WALLETS_ROUTES.POST_ADD_SETTLEMENT_ACCOUNT,
     authGuard,

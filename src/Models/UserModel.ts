@@ -7,8 +7,8 @@ export enum UserStatus {
 }
 
 export default interface UserModel {
-  createdAt: string;
-  deletedAt: null | string;
+  createdAt: Date;
+  deletedAt: Date | null;
   email: string;
   id: string;
   isBlacklisted: boolean;
@@ -21,5 +21,5 @@ export default interface UserModel {
   phone: string;
   status: UserStatus;
   timezone: string;
-  updatedAt: string;
+  updatedAt: Date;
 }

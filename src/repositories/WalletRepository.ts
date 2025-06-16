@@ -2,7 +2,7 @@ import Knex from "knex";
 
 import database from "../configs/database.js";
 import { SCHEMA_TABLES } from "../helpers/constants.js";
-import WalletModel from "../models/WalletModel.js";
+import WalletModel, { WalletStatus } from "../models/WalletModel.js";
 import { Repository } from "./Repository.js";
 
 const walletColumns: (keyof WalletModel)[] = [
@@ -34,7 +34,7 @@ export class WalletRepository extends Repository<WalletModel> {
     pin: WalletModel["transactionPin"],
   ) {
     await this.table
-      .update({ isTransactionPinSet: true, transactionPin: pin })
+      .update({ isTransactionPinSet: true, status: WalletStatus.ACTIVE, transactionPin: pin })
       .where({ id })
       .transacting(trx);
 
@@ -91,19 +91,11 @@ export class WalletRepository extends Repository<WalletModel> {
     return await this.table.transacting(trx).forUpdate().where({ id }).first();
   }
 
-  async getWalletByIdAndUserId(id: WalletModel["id"], userId: WalletModel["userId"]) {
+  async getWalletByUserId(userId: WalletModel["userId"]) {
     return await this.table
       .select<Omit<WalletModel, "transactionPin">>(walletColumns)
-      .where({ id, userId })
+      .where({ userId })
       .first();
-  }
-
-  async getWalletByPinAndId(
-    trx: Knex.Knex.Transaction,
-    id: WalletModel["id"],
-    pin: WalletModel["transactionPin"],
-  ) {
-    return await this.table.transacting(trx).forUpdate().where({ id, transactionPin: pin }).first();
   }
 
   async increaseWalletBalance(trx: Knex.Knex.Transaction, id: WalletModel["id"], amount: number) {

@@ -122,7 +122,7 @@ export async function up(knex: Knex): Promise<void> {
         table.string("settlementAccountName").nullable();
         table.string("settlementAccountNumber", 10).nullable();
         table.string("settlementBankCode", 10).nullable();
-        table.string("transactionPin", 4).nullable();
+        table.string("transactionPin").nullable();
         table.enum("status", ["active", "blocked", "inactive"]).notNullable().defaultTo("inactive");
         table.datetime("createdAt").notNullable().defaultTo(knex.raw("CURRENT_TIMESTAMP"));
         table

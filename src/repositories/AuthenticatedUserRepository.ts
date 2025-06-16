@@ -12,7 +12,7 @@ export class AuthenticatedUserRepository extends Repository<AuthenticatedUserMod
     return await this.table
       .select<
         Omit<AuthenticatedUserModel, "sessionExpiresAt" | "sessionId">
-      >("deviceId", "email", "ipAddress", "isBlacklisted", "isEmailVerified", "isKycVerified", "isPasswordResetRequired", "isTwoFactorEnabled", "lastLogin", "phone")
+      >("deviceId", "email", "ipAddress", "isBlacklisted", "isEmailVerified", "isKycVerified", "isPasswordResetRequired", "isTwoFactorEnabled", "lastLogin", "phone", "status", "timezone", "userId")
       .where({ sessionId })
       .first();
   }

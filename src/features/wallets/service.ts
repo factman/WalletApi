@@ -93,8 +93,8 @@ export class WalletService {
     return { account };
   }
 
-  async getUserWallet(id: WalletModel["id"], userId: WalletModel["userId"]) {
-    const wallet = await this.walletRepository.getWalletByIdAndUserId(id, userId);
+  async getUserWallet(userId: WalletModel["userId"]) {
+    const wallet = await this.walletRepository.getWalletByUserId(userId);
     if (!wallet)
       throw new CustomError("Not Found", StatusCodes.NOT_FOUND, {
         message: "Wallet not found",
@@ -134,15 +134,15 @@ export class WalletService {
       });
 
     const transaction = await this.transactionRepository.createTransaction(trx, {
-      amount,
+      amount: amount.toFixed(2),
       channel: TransactionChannel.BANK_TRANSFER,
-      closingBalance: wallet.balance,
-      fee: 0,
+      closingBalance: updatedWallet.balance,
+      fee: "0.00",
       metadata,
-      openingBalance: wallet.balance - amount,
+      openingBalance: (parseFloat(updatedWallet.balance) - amount).toFixed(2),
       remark: `Wallet top-up from ${metadata.sender.accountName}`,
       sessionId: generateSessionId(),
-      settlementDate: database.fn.now() as unknown as string,
+      settlementDate: database.fn.now() as unknown as Date,
       status: TransactionStatus.COMPLETED,
       type: TransactionType.CREDIT,
       userId: wallet.userId,
@@ -156,7 +156,7 @@ export class WalletService {
     const user = await this.userRepository.getUserById(transaction.userId);
     if (user) {
       await this.resendService.sendTransactionReceipt(user.email, {
-        amount,
+        amount: amount.toFixed(2),
         currency: transaction.currency,
         remark: transaction.remark,
         sessionId: transaction.sessionId,

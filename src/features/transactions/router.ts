@@ -1,6 +1,8 @@
 import { Router } from "express";
 
+import { authGuard } from "../../middlewares/authMiddleware.js";
 import { validateRequest } from "../../middlewares/validationMiddleware.js";
+import { paginationSchema } from "../../validations/validationSchemas.js";
 import { TRANSACTION_ROUTES } from "./constants.js";
 import { TransactionController } from "./controller.js";
 import { TransactionService } from "./service.js";
@@ -17,22 +19,27 @@ const controller = new TransactionController(service);
 export const router = Router()
   .get(
     TRANSACTION_ROUTES.GET_TRANSACTION,
+    authGuard,
     validateRequest(transactionAndWalletIdParamSchema, "params"),
     controller.getTransaction.bind(controller),
   )
   .get(
     TRANSACTION_ROUTES.GET_TRANSACTIONS_HISTORY,
+    authGuard,
+    validateRequest(paginationSchema, "query"),
     validateRequest(walletIdParamSchema, "params"),
     controller.getTransactionHistory.bind(controller),
   )
   .post(
     TRANSACTION_ROUTES.POST_FUND_TRANSFER,
+    authGuard,
     validateRequest(walletIdParamSchema, "params"),
     validateRequest(fundTransferRequestSchema, "body"),
     controller.transferFund.bind(controller),
   )
   .post(
     TRANSACTION_ROUTES.POST_FUND_WITHDRAWAL,
+    authGuard,
     validateRequest(walletIdParamSchema, "params"),
     validateRequest(fundWithdrawalRequestSchema, "body"),
     controller.withdrawFund.bind(controller),

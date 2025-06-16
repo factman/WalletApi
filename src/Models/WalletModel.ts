@@ -7,18 +7,18 @@ export enum WalletStatus {
 export default interface WalletModel {
   accountName: string;
   accountNumber: string;
-  balance: number;
-  createdAt: string;
+  balance: string;
+  createdAt: Date;
   currency: string;
   id: string;
   isSettlementAccountSet: boolean;
   isTransactionPinSet: boolean;
-  lienBalance: number;
+  lienBalance: string;
   settlementAccountName: null | string;
   settlementAccountNumber: null | string;
   settlementBankCode: null | string;
   status: WalletStatus;
   transactionPin: null | string;
-  updatedAt: string;
+  updatedAt: Date;
   userId: string;
 }

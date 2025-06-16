@@ -1,3 +1,4 @@
+import bcrypt from "bcryptjs";
 import { StatusCodes } from "http-status-codes";
 import Knex from "knex";
 
@@ -58,10 +59,13 @@ export class UsersService {
   }
 
   async verifyOldPassword(user: UserModel, oldPassword: UserModel["password"]) {
-    const oldPasswordHash = await hashPassword(oldPassword);
-    if (oldPasswordHash !== user.password)
+    const isValid = await bcrypt.compare(oldPassword, user.password);
+
+    if (!isValid)
       throw new CustomError("Invalid credentials", StatusCodes.BAD_REQUEST, {
         message: "Incorrect password, try again",
       });
+
+    return isValid;
   }
 }

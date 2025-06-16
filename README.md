@@ -394,7 +394,7 @@ The Wallets feature provides endpoints for managing user wallets, including retr
 
 | Endpoint                                   | Method | Description                      | Auth Required | Request Validation      |
 | ------------------------------------------ | ------ | -------------------------------- | ------------- | ----------------------- |
-| `/api/wallets/:id`                         | GET    | Get wallet details by wallet ID  | Yes           | `id` param (UUID)       |
+| `/api/wallets`                             | GET    | Get wallet details               | Yes           | NULL                    |
 | `/api/wallets/:id/settlement-account`      | POST   | Add or update settlement account | Yes           | `id` param, body schema |
 | `/api/wallets/:id/transaction-pin`         | POST   | Create or update transaction PIN | Yes           | `id` param, body schema |
 | `/api/wallets/name-enquiry/:accountNumber` | GET    | Perform name enquiry for account | Yes           | query params schema     |

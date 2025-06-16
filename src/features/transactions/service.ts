@@ -1,9 +1,10 @@
+import bcrypt from "bcryptjs";
 import { StatusCodes } from "http-status-codes";
 import Knex from "knex";
 
 import database from "../../configs/database.js";
 import { CustomError } from "../../helpers/errorInstance.js";
-import { generateSessionId, hashPin } from "../../helpers/utilities.js";
+import { generateSessionId } from "../../helpers/utilities.js";
 import TransactionModel, {
   TransactionChannel,
   TransactionMetaData,
@@ -71,16 +72,22 @@ export class TransactionService {
     receiverWallet: Pick<WalletModel, "accountName" | "accountNumber" | "id">,
     transferData: FundTransferRequest,
   ) {
-    const hashedPin = await hashPin(transferData.transactionPin);
-    const senderWallet = await this.walletRepository.getWalletByPinAndId(
-      trx,
-      senderWalletId,
-      hashedPin,
-    );
+    const senderWallet = await this.walletRepository.getWalletById(trx, senderWalletId);
     if (!senderWallet)
-      throw new CustomError("Invalid credentials", StatusCodes.BAD_REQUEST, {
-        message: "Incorrect pin",
+      throw new CustomError("Invalid wallet", StatusCodes.BAD_REQUEST, {
+        message: "Invalid beneficiary wallet",
       });
+
+    if (!transferData.transactionPin)
+      throw new CustomError("Invalid credentials", StatusCodes.BAD_REQUEST, {
+        message: "Set transaction pin to transfer funds",
+      });
+
+    if (!bcrypt.compareSync(transferData.transactionPin, senderWallet.transactionPin ?? "")) {
+      throw new CustomError("Invalid credentials", StatusCodes.BAD_REQUEST, {
+        message: "Invalid transaction pin",
+      });
+    }
 
     if (senderWallet.status !== WalletStatus.ACTIVE)
       throw new CustomError("Inactive wallet", StatusCodes.BAD_REQUEST, {
@@ -89,7 +96,7 @@ export class TransactionService {
 
     const fee = this.getTransactionFee(transferData.amount);
     const total = transferData.amount + fee;
-    if (senderWallet.balance < total)
+    if (parseFloat(senderWallet.balance) < total)
       throw new CustomError("Transfer failed", StatusCodes.BAD_REQUEST, {
         message: "Insufficient funds",
       });
@@ -111,6 +118,7 @@ export class TransactionService {
       transferData.amount,
       fee,
       metaData,
+      TransactionChannel.WALLET,
       transferData.remark,
     );
     await this.creditWalletBalance(
@@ -118,6 +126,7 @@ export class TransactionService {
       receiverWallet.id,
       transferData.amount,
       metaData,
+      TransactionChannel.WALLET,
       transferData.remark,
     );
 
@@ -129,12 +138,22 @@ export class TransactionService {
     walletId: WalletModel["id"],
     withdrawData: FundWithdrawalRequest,
   ) {
-    const hashedPin = await hashPin(withdrawData.transactionPin);
-    const wallet = await this.walletRepository.getWalletByPinAndId(trx, walletId, hashedPin);
+    const wallet = await this.walletRepository.getWalletById(trx, walletId);
     if (!wallet)
-      throw new CustomError("Invalid credentials", StatusCodes.BAD_REQUEST, {
-        message: "Incorrect pin",
+      throw new CustomError("Invalid wallet", StatusCodes.BAD_REQUEST, {
+        message: "Invalid sender wallet",
       });
+
+    if (!withdrawData.transactionPin)
+      throw new CustomError("Invalid credentials", StatusCodes.BAD_REQUEST, {
+        message: "Set transaction pin to withdraw funds",
+      });
+
+    if (!bcrypt.compareSync(withdrawData.transactionPin, wallet.transactionPin ?? "")) {
+      throw new CustomError("Invalid credentials", StatusCodes.BAD_REQUEST, {
+        message: "Invalid transaction pin",
+      });
+    }
 
     if (wallet.status !== WalletStatus.ACTIVE)
       throw new CustomError("Inactive wallet", StatusCodes.BAD_REQUEST, {
@@ -143,7 +162,7 @@ export class TransactionService {
 
     const fee = this.getTransactionFee(withdrawData.amount);
     const total = withdrawData.amount + fee;
-    if (wallet.balance < total)
+    if (parseFloat(wallet.balance) < total)
       throw new CustomError("Transfer failed", StatusCodes.BAD_REQUEST, {
         message: "Insufficient funds",
       });
@@ -165,6 +184,7 @@ export class TransactionService {
       withdrawData.amount,
       fee,
       metaData,
+      TransactionChannel.BANK_TRANSFER,
       withdrawData.remark,
     );
 
@@ -176,6 +196,7 @@ export class TransactionService {
     walletId: WalletModel["id"],
     amount: number,
     metadata: TransactionMetaData,
+    channel: TransactionChannel,
     remark?: string,
   ) {
     await this.walletRepository.increaseWalletBalance(trx, walletId, amount);
@@ -186,17 +207,17 @@ export class TransactionService {
       });
 
     const transaction = await this.transactionRepository.createTransaction(trx, {
-      amount,
-      channel: TransactionChannel.WALLET,
+      amount: amount.toFixed(2),
+      channel,
       closingBalance: wallet.balance,
-      fee: 0,
+      fee: "0.00",
       metadata,
-      openingBalance: wallet.balance - amount,
+      openingBalance: (parseFloat(wallet.balance) - amount).toFixed(2),
       remark:
         remark ??
         `Transfer from ${metadata.sender.accountName} To ${metadata.receiver.accountName}`,
       sessionId: generateSessionId(),
-      settlementDate: database.fn.now() as unknown as string,
+      settlementDate: database.fn.now() as unknown as Date,
       status: TransactionStatus.COMPLETED,
       type: TransactionType.CREDIT,
       userId: wallet.userId,
@@ -210,7 +231,7 @@ export class TransactionService {
     const user = await this.userRepository.getUserById(transaction.userId);
     if (user) {
       await this.resendService.sendTransactionReceipt(user.email, {
-        amount,
+        amount: amount.toFixed(2),
         currency: transaction.currency,
         remark: transaction.remark,
         sessionId: transaction.sessionId,
@@ -228,27 +249,35 @@ export class TransactionService {
     amount: number,
     fee: number,
     metadata: TransactionMetaData,
+    channel: TransactionChannel,
     remark?: string,
   ) {
-    await this.walletRepository.decreaseWalletBalance(trx, walletId, amount);
+    const total = amount + fee;
+    await this.walletRepository.decreaseWalletBalance(trx, walletId, total);
     const wallet = await this.walletRepository.getWalletById(trx, walletId);
     if (!wallet)
       throw new CustomError("Something went wrong", StatusCodes.INTERNAL_SERVER_ERROR, {
         message: "Something went wrong, please try again later.",
       });
 
-    const transaction = await this.transactionRepository.createTransaction(trx, {
-      amount,
-      channel: TransactionChannel.WALLET,
+    console.log({
       closingBalance: wallet.balance,
-      fee,
+      openingBalance: (parseFloat(wallet.balance) + total).toFixed(2),
+      total,
+      wallet: wallet.balance,
+    });
+    const transaction = await this.transactionRepository.createTransaction(trx, {
+      amount: amount.toFixed(2),
+      channel,
+      closingBalance: wallet.balance,
+      fee: fee.toFixed(2),
       metadata,
-      openingBalance: wallet.balance + amount + fee,
+      openingBalance: (parseFloat(wallet.balance) + total).toFixed(2),
       remark:
         remark ??
         `Transfer To ${metadata.receiver.accountName} From ${metadata.sender.accountName}`,
       sessionId: generateSessionId(),
-      settlementDate: database.fn.now() as unknown as string,
+      settlementDate: database.fn.now() as unknown as Date,
       status: TransactionStatus.COMPLETED,
       type: TransactionType.DEBIT,
       userId: wallet.userId,
@@ -262,7 +291,7 @@ export class TransactionService {
     const user = await this.userRepository.getUserById(transaction.userId);
     if (user) {
       await this.resendService.sendTransactionReceipt(user.email, {
-        amount: amount + fee,
+        amount: (amount + fee).toFixed(2),
         currency: transaction.currency,
         remark: transaction.remark,
         sessionId: transaction.sessionId,

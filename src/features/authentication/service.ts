@@ -1,3 +1,4 @@
+import bcrypt from "bcryptjs";
 import { StatusCodes } from "http-status-codes";
 import Knex from "knex";
 import { randomUUID } from "node:crypto";
@@ -92,6 +93,7 @@ export class AuthenticationService {
     // but I can tell that the blacklisted users must have a reason, default date and reporting entity
     // so I will just assume that they are blacklisted and return true.
     if (
+      userKarma.data &&
       typeof userKarma.data === "object" &&
       (userKarma.data.reason || userKarma.data.default_date) &&
       typeof userKarma.data.reporting_entity === "object" &&
@@ -111,7 +113,7 @@ export class AuthenticationService {
       isTwoFactorVerified: true,
       twoFactorCode: null,
       twoFactorCodeExpiresAt: null,
-      twoFactorVerifiedAt: database.fn.now() as unknown as string,
+      twoFactorVerifiedAt: database.fn.now() as unknown as Date,
     });
     await this.userRepository.updateUser(trx, userId, {
       lastLogin: database.fn.now() as unknown as string,
@@ -142,7 +144,7 @@ export class AuthenticationService {
       bvnEmail: bvnProfile.email,
       bvnMetadata: Buffer.from(JSON.stringify(bvnProfile)).toString("base64"),
       bvnPhone: bvnProfile.mobile,
-      dob: kycData.dob,
+      dob: kycData.dob as never,
       firstName: kycData.firstName,
       gender: kycData.gender,
       image: bvnProfile.image_url,
@@ -198,11 +200,11 @@ export class AuthenticationService {
     const session = await this.sessionRepository.createSession(trx, {
       ...sessionData,
       accessToken,
-      accessTokenExpiresAt: accessTokenTime.toSQL({ includeOffset: false }),
-      expiresAt: refreshTokenTime.toSQL({ includeOffset: false }),
+      accessTokenExpiresAt: accessTokenTime.toJSDate(),
+      expiresAt: refreshTokenTime.toJSDate(),
       id: sessionId,
       refreshToken,
-      refreshTokenExpiresAt: refreshTokenTime.toSQL({ includeOffset: false }),
+      refreshTokenExpiresAt: refreshTokenTime.toJSDate(),
     });
 
     if (!session)
@@ -266,6 +268,11 @@ export class AuthenticationService {
       sessionId: session.id,
     });
 
+    await this.sessionRepository.updateSession(trx, session.id, {
+      twoFactorCode: otp,
+      twoFactorCodeExpiresAt: tokenTime.toJSDate(),
+    });
+
     await this.resendService.sendVerificationOTP(sessionData.email, otp, tokenTime);
 
     return {
@@ -287,7 +294,7 @@ export class AuthenticationService {
     await this.sessionRepository.updateSession(trx, sessionData.sessionId, {
       isTwoFactorVerified: false,
       twoFactorCode: otp,
-      twoFactorCodeExpiresAt: tokenTime.toSQL({ includeOffset: false }),
+      twoFactorCodeExpiresAt: tokenTime.toJSDate(),
       twoFactorVerifiedAt: null,
     });
 
@@ -349,7 +356,7 @@ export class AuthenticationService {
     });
     await this.sessionRepository.updateSession(trx, sessionData.sessionId, {
       twoFactorCode: otp,
-      twoFactorCodeExpiresAt: tokenTime.toSQL({ includeOffset: false }),
+      twoFactorCodeExpiresAt: tokenTime.toJSDate(),
     });
     await this.resendService.sendEmailVerificationOTP(
       sessionData.email,
@@ -375,10 +382,10 @@ export class AuthenticationService {
     const { refreshToken, refreshTokenTime } = generateRefreshToken(sessionId, sessionData);
     const session = await this.sessionRepository.updateSession(trx, sessionId, {
       accessToken,
-      accessTokenExpiresAt: accessTokenTime.toSQL({ includeOffset: false }),
-      expiresAt: refreshTokenTime.toSQL({ includeOffset: false }),
+      accessTokenExpiresAt: accessTokenTime.toJSDate(),
+      expiresAt: refreshTokenTime.toJSDate(),
       refreshToken,
-      refreshTokenExpiresAt: refreshTokenTime.toSQL({ includeOffset: false }),
+      refreshTokenExpiresAt: refreshTokenTime.toJSDate(),
     });
     if (!session)
       throw new CustomError("Error refreshing token", StatusCodes.INTERNAL_SERVER_ERROR, {
@@ -435,9 +442,8 @@ export class AuthenticationService {
   }
 
   async verifyUserLogin(email: UserModel["email"], password: UserModel["password"]) {
-    const hashedPassword = await hashPassword(password);
-    const user = await this.userRepository.getUserByEmailAndPassword(email, hashedPassword);
-    if (!user)
+    const user = await this.userRepository.getUserByEmail(email);
+    if (!user || !bcrypt.compareSync(password, user.password))
       throw new CustomError("Invalid credentials", StatusCodes.BAD_REQUEST, {
         message: "Invalid credentials. check and try again",
       });

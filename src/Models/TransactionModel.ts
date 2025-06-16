@@ -26,21 +26,21 @@ export interface TransactionMetaData {
 }
 
 export default interface TransactionModel {
-  amount: number;
+  amount: string;
   channel: TransactionChannel;
-  closingBalance: number;
-  createdAt: string;
+  closingBalance: string;
+  createdAt: Date;
   currency: string;
-  fee: number;
+  fee: string;
   id: string;
   metadata: TransactionMetaData;
-  openingBalance: number;
+  openingBalance: string;
   remark: string;
   sessionId: string;
-  settlementDate: null | string;
+  settlementDate: Date | null;
   status: TransactionStatus;
   type: TransactionType;
-  updatedAt: string;
+  updatedAt: Date;
   userId: string;
   walletId: string;
 }
