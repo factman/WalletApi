@@ -134,12 +134,12 @@ export class WalletService {
       });
 
     const transaction = await this.transactionRepository.createTransaction(trx, {
-      amount,
+      amount: amount.toFixed(2),
       channel: TransactionChannel.BANK_TRANSFER,
       closingBalance: updatedWallet.balance,
-      fee: 0,
+      fee: "0.00",
       metadata,
-      openingBalance: updatedWallet.balance - amount,
+      openingBalance: (parseFloat(updatedWallet.balance) - amount).toFixed(2),
       remark: `Wallet top-up from ${metadata.sender.accountName}`,
       sessionId: generateSessionId(),
       settlementDate: database.fn.now() as unknown as Date,
@@ -156,7 +156,7 @@ export class WalletService {
     const user = await this.userRepository.getUserById(transaction.userId);
     if (user) {
       await this.resendService.sendTransactionReceipt(user.email, {
-        amount,
+        amount: amount.toFixed(2),
         currency: transaction.currency,
         remark: transaction.remark,
         sessionId: transaction.sessionId,

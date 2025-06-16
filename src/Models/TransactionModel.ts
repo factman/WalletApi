@@ -26,15 +26,15 @@ export interface TransactionMetaData {
 }
 
 export default interface TransactionModel {
-  amount: number;
+  amount: string;
   channel: TransactionChannel;
-  closingBalance: number;
+  closingBalance: string;
   createdAt: Date;
   currency: string;
-  fee: number;
+  fee: string;
   id: string;
   metadata: TransactionMetaData;
-  openingBalance: number;
+  openingBalance: string;
   remark: string;
   sessionId: string;
   settlementDate: Date | null;

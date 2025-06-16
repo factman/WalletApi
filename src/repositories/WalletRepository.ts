@@ -91,14 +91,6 @@ export class WalletRepository extends Repository<WalletModel> {
     return await this.table.transacting(trx).forUpdate().where({ id }).first();
   }
 
-  async getWalletByPinAndId(
-    trx: Knex.Knex.Transaction,
-    id: WalletModel["id"],
-    pin: WalletModel["transactionPin"],
-  ) {
-    return await this.table.transacting(trx).forUpdate().where({ id, transactionPin: pin }).first();
-  }
-
   async getWalletByUserId(userId: WalletModel["userId"]) {
     return await this.table
       .select<Omit<WalletModel, "transactionPin">>(walletColumns)

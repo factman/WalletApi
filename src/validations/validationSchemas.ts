@@ -62,7 +62,7 @@ export const transactionPinSchema = z
 
 export const amountSchema = z.number({ coerce: true }).positive().safe().finite();
 
-export const paginationSchema = z.object({
+export const paginationSchema = buildStrictSchema<{ limit: number; page: number }>({
   limit: z.number({ coerce: true }).min(1).max(100).positive().default(10),
   page: z.number({ coerce: true }).min(1).positive().safe().finite().default(1),
 });
