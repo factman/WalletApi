@@ -14,6 +14,7 @@ export default defineConfig({
         "src/**/constants.ts",
         "db/**/*.ts",
         "knexfile.ts",
+        "src/app.ts",
         "src/configs/*.ts",
         "src/models/*.ts",
         "src/router/*.ts",

@@ -1,7 +1,15 @@
+import bcrypt from "bcryptjs";
 import { Server } from "node:http";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { gracefulShutdown } from "../utilities.js";
+import {
+  generateSessionId,
+  getPaginationOffset,
+  getPaginationTotalPages,
+  gracefulShutdown,
+  hashPassword,
+  hashPin,
+} from "../utilities.js";
 
 describe("gracefulShutdown", () => {
   let server: Server;
@@ -96,5 +104,57 @@ describe("gracefulShutdown", () => {
 
     listener();
     expect(server.close).toHaveBeenCalled();
+  });
+});
+
+describe("generateSessionId", () => {
+  it("returns a string of expected length and format", () => {
+    const sessionId = generateSessionId();
+    expect(typeof sessionId).toBe("string");
+    expect(sessionId.length).toBeGreaterThanOrEqual(26); // institutionCode(6) + dateTime(12) + serial(6) + random(6)
+    expect(sessionId.startsWith("000000")).toBe(true);
+  });
+
+  it("returns different values on subsequent calls", () => {
+    const id1 = generateSessionId();
+    const id2 = generateSessionId();
+    expect(id1).not.toBe(id2);
+  });
+});
+
+describe("getPaginationOffset", () => {
+  it("returns correct offset for given page and limit", () => {
+    expect(getPaginationOffset(1, 10)).toBe(0);
+    expect(getPaginationOffset(2, 10)).toBe(10);
+    expect(getPaginationOffset(3, 5)).toBe(10);
+  });
+});
+
+describe("getPaginationTotalPages", () => {
+  it("returns correct total pages", () => {
+    expect(getPaginationTotalPages(100, 10)).toBe(10);
+    expect(getPaginationTotalPages(101, 10)).toBe(11);
+    expect(getPaginationTotalPages(0, 10)).toBe(0);
+    expect(getPaginationTotalPages(10, 3)).toBe(4);
+  });
+});
+
+describe("hashPassword", () => {
+  it("returns a bcrypt hash of the password", async () => {
+    const password = "mySecret123";
+    const hash = await hashPassword(password);
+    expect(typeof hash).toBe("string");
+    expect(hash).not.toBe(password);
+    expect(await bcrypt.compare(password, hash)).toBe(true);
+  });
+});
+
+describe("hashPin", () => {
+  it("returns a bcrypt hash of the pin", async () => {
+    const pin = "1234";
+    const hash = await hashPin(pin);
+    expect(typeof hash).toBe("string");
+    expect(hash).not.toBe(pin);
+    expect(await bcrypt.compare(pin, hash)).toBe(true);
   });
 });

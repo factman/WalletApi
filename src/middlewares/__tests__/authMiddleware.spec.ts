@@ -100,7 +100,7 @@ describe("authGuard middleware", () => {
   it("should return 401 and delete session if refresh token expired", async () => {
     req = mockReq({ authorization: "Bearer validtoken" });
     vi.spyOn(jwt, "verify").mockReturnValue({ sessionId: "sid" } as never);
-    const now = DateTime.now().minus({ days: 1 }).toSQL({ includeOffset: false });
+    const now = DateTime.now().minus({ days: 1 }).toJSDate();
     (
       SessionRepository as unknown as { prototype: Record<string, unknown> }
     ).prototype.getSessionById = vi.fn().mockResolvedValue({
