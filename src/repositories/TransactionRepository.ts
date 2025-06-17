@@ -15,7 +15,9 @@ export class TransactionRepository extends Repository<TransactionModel> {
     transaction: Omit<TransactionModel, "createdAt" | "currency" | "id" | "updatedAt">,
   ) {
     const id = this.uuid;
-    await this.table.insert({ ...transaction, id }).transacting(trx);
+    await this.table
+      .insert({ ...transaction, createdAt: this.knex.fn.now(), id, updatedAt: this.knex.fn.now() })
+      .transacting(trx);
 
     return await this.table.where({ id }).transacting(trx).first();
   }

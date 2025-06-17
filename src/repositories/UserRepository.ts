@@ -12,7 +12,11 @@ export class UserRepository extends Repository<UserModel> {
 
   async blacklistUserById(trx: Knex.Knex.Transaction, id: UserModel["id"]) {
     await this.table
-      .update({ isBlacklisted: true, status: UserStatus.BLACKLISTED })
+      .update({
+        isBlacklisted: true,
+        status: UserStatus.BLACKLISTED,
+        updatedAt: this.knex.fn.now(),
+      })
       .where({ id })
       .transacting(trx);
 
@@ -28,7 +32,9 @@ export class UserRepository extends Repository<UserModel> {
     param: Pick<UserModel, "email" | "password" | "phone" | "timezone">,
   ) {
     const id = this.uuid;
-    await this.table.insert({ ...param, id }).transacting(trx);
+    await this.table
+      .insert({ ...param, createdAt: this.knex.fn.now(), id, updatedAt: this.knex.fn.now() })
+      .transacting(trx);
     return await this.table.select().where({ id }).transacting(trx).first();
   }
 
@@ -37,6 +43,7 @@ export class UserRepository extends Repository<UserModel> {
       .update({
         deletedAt: this.knex.fn.now(),
         status: UserStatus.DELETED,
+        updatedAt: this.knex.fn.now(),
       })
       .where({ id })
       .transacting(trx);
@@ -60,7 +67,7 @@ export class UserRepository extends Repository<UserModel> {
     >,
   ) {
     await this.table
-      .update({ ...userData })
+      .update({ ...userData, updatedAt: this.knex.fn.now() })
       .where({ id })
       .transacting(trx);
 

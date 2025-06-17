@@ -34,7 +34,12 @@ export class WalletRepository extends Repository<WalletModel> {
     pin: WalletModel["transactionPin"],
   ) {
     await this.table
-      .update({ isTransactionPinSet: true, status: WalletStatus.ACTIVE, transactionPin: pin })
+      .update({
+        isTransactionPinSet: true,
+        status: WalletStatus.ACTIVE,
+        transactionPin: pin,
+        updatedAt: this.knex.fn.now(),
+      })
       .where({ id })
       .transacting(trx);
 
@@ -53,7 +58,7 @@ export class WalletRepository extends Repository<WalletModel> {
     >,
   ) {
     await this.table
-      .update({ ...settlementAccount, isSettlementAccountSet: true })
+      .update({ ...settlementAccount, isSettlementAccountSet: true, updatedAt: this.knex.fn.now() })
       .where({ id })
       .transacting(trx);
 
@@ -68,7 +73,9 @@ export class WalletRepository extends Repository<WalletModel> {
     walletData: Pick<WalletModel, "accountName" | "accountNumber" | "userId">,
   ) {
     const id = this.uuid;
-    await this.table.insert({ ...walletData, id }).transacting(trx);
+    await this.table
+      .insert({ ...walletData, createdAt: this.knex.fn.now(), id, updatedAt: this.knex.fn.now() })
+      .transacting(trx);
     return await this.table
       .select<Omit<WalletModel, "transactionPin">>(walletColumns)
       .where({ id })
