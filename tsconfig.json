@@ -1,5 +1,5 @@
 {
-  "extends": "@tsconfig/node24/tsconfig.json",
+  // "extends": "@tsconfig/node24/tsconfig.json",
   "compilerOptions": {
     "resolveJsonModule": true,
     "sourceMap": true,
@@ -10,7 +10,11 @@
     "baseUrl": ".",
     "paths": {
       "*.js": ["*.ts"]
-    }
+    },
+    "moduleDetection": "force",
+    "module": "Preserve",
+    "esModuleInterop": true,
+    "isolatedModules": true
   },
   "include": ["**/*.ts"],
   "exclude": ["dist", "node_modules", "coverage", "docs"]
