@@ -14,7 +14,7 @@ export async function up(knex: Knex): Promise<void> {
     knex.schema
       // Create users table
       .createTable("users", (table) => {
-        table.uuid("id").primary().unique().defaultTo(knex.fn.uuid());
+        table.uuid("id").primary().unique();
         table.string("email").notNullable().unique();
         table.string("phone", 20).notNullable().unique();
         table
@@ -40,7 +40,7 @@ export async function up(knex: Knex): Promise<void> {
       })
       // Create sessions table
       .createTable("sessions", (table) => {
-        table.uuid("id").primary().unique().defaultTo(knex.fn.uuid());
+        table.uuid("id").primary().unique();
         table
           .uuid("userId")
           .notNullable()
@@ -71,7 +71,7 @@ export async function up(knex: Knex): Promise<void> {
       })
       // Create profiles table
       .createTable("profiles", (table) => {
-        table.uuid("id").primary().unique().defaultTo(knex.fn.uuid());
+        table.uuid("id").primary().unique();
         table
           .uuid("userId")
           .notNullable()
@@ -103,7 +103,7 @@ export async function up(knex: Knex): Promise<void> {
       })
       // Create wallets table
       .createTable("wallets", (table) => {
-        table.uuid("id").primary().unique().defaultTo(knex.fn.uuid());
+        table.uuid("id").primary().unique();
         table
           .uuid("userId")
           .notNullable()
@@ -135,7 +135,7 @@ export async function up(knex: Knex): Promise<void> {
       })
       // Create transactions table
       .createTable("transactions", (table) => {
-        table.uuid("id").primary().unique().defaultTo(knex.fn.uuid());
+        table.uuid("id").primary().unique();
         table
           .uuid("userId")
           .notNullable()
