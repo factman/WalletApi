@@ -17,7 +17,7 @@ import {
   SignupResponse,
   VerifyBvnResponse,
   VerifyEmailResponse,
-} from "./authenticationDTOs.js";
+} from "./authenticationDTO.js";
 import { generateBvnVerificationToken, validateRefreshToken } from "./helpers/utilities.js";
 import { AuthenticationService } from "./service.js";
 import {

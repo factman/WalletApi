@@ -20,7 +20,7 @@ import { UserRepository } from "../../repositories/UserRepository.js";
 import { WalletRepository } from "../../repositories/WalletRepository.js";
 import { AdjutorBvnPayload, AdjutorService } from "../../services/AdjutorService.js";
 import { ResendService } from "../../services/ResendService.js";
-import { InitiateBvnVerificationRequest } from "./authenticationDTOs.js";
+import { InitiateBvnVerificationRequest } from "./authenticationDTO.js";
 import {
   generateAccessToken,
   generateOTP,

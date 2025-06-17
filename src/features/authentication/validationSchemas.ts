@@ -15,7 +15,7 @@ import {
   VerifyBvnRequest,
   VerifyEmailRequest,
   VerifyForgotPasswordRequest,
-} from "./authenticationDTOs.js";
+} from "./authenticationDTO.js";
 
 export const forgotPasswordRequestSchema = buildStrictSchema<ForgotPasswordRequest>({
   deviceId: z.string().nonempty(),

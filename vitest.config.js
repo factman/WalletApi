@@ -19,6 +19,8 @@ export default defineConfig({
         "src/models/*.ts",
         "src/router/*.ts",
         "src/**/router.ts",
+        "src/**/*DTO.ts",
+        "src/**/controller.ts",
       ],
     },
   },
