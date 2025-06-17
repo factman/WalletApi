@@ -1,0 +1,11 @@
+FROM mysql:8.4
+
+# Set environment variables for MySQL
+
+ENV MYSQL_DATABASE=${DB_NAME} \
+  MYSQL_USER=${DB_USER} \
+  MYSQL_PASSWORD=${DB_PASSWORD} \
+  MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+
+# Expose MySQL port
+EXPOSE 3306
