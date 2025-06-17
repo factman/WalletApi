@@ -1,4 +1,17 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "@tsconfig/node24/tsconfig.json",
+  "compilerOptions": {
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": ".",
+    "allowJs": true,
+    "typeRoots": ["./@types", "./node_modules/@types"],
+    "baseUrl": ".",
+    "paths": {
+      "*.js": ["*.ts"]
+    }
+  },
+  "include": ["**/*.ts"],
   "exclude": ["**/*.test.ts", "**/*.spec.ts", "db/**/*.ts"]
 }
