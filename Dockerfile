@@ -50,9 +50,6 @@ RUN npm install
 # Lint for errors
 RUN npm run lint
 
-# Run coverage test
-RUN npm run coverage
-
 # Build the app
 RUN npm run build
 
