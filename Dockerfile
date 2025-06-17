@@ -1,5 +1,5 @@
 # Stage 1: Build and install dependencies
-FROM node:24 AS builder
+FROM node:24-slim AS builder
 
 WORKDIR /app
 
@@ -50,24 +50,9 @@ RUN npm install
 # Lint for errors
 RUN npm run lint
 
-# Build the app
-RUN npm run build
-
 # Run migrations and seed the database
 RUN npm run deploy
 
-# Stage 2: Production image
-FROM node:24-slim
+# Run Application
 
-WORKDIR /app
-
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/dist ./dist
-
-RUN printenv
-
-# Remove devDependencies
-RUN npm prune --production
-
-CMD ["node", "dist/index.js"]
+CMD ["tsx", "index.ts"]
