@@ -17,24 +17,6 @@ ENV DB_PASSWORD=${DB_PASSWORD}
 ARG DB_NAME
 ENV DB_NAME=${DB_NAME}
 
-COPY package*.json ./
-RUN npm install
-
-COPY . .
-
-RUN printenv
-
-# Run migrations (adjust the command as needed)
-RUN npm run migrate
-
-# Build the app (adjust the command as needed)
-RUN npm run build
-
-# Stage 2: Production image
-FROM node:22-slim
-
-WORKDIR /app
-
 ARG ACCESS_TOKEN_SECRET
 ENV ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
 ARG REFRESH_TOKEN_SECRET
@@ -57,6 +39,22 @@ ARG ADJUTOR_API_KEY
 ENV ADJUTOR_API_KEY=${ADJUTOR_API_KEY}
 ARG ADJUTOR_API_URL
 ENV ADJUTOR_API_URL=${ADJUTOR_API_URL}
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+# Run migrations (adjust the command as needed)
+RUN npm run deploy
+
+# Build the app (adjust the command as needed)
+RUN npm run build
+
+# Stage 2: Production image
+FROM node:22-slim
+
+WORKDIR /app
 
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules

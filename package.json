@@ -34,6 +34,7 @@
     "test:run": "vitest --run",
     "test:ui": "vitest --ui",
     "coverage": "vitest run --coverage",
+    "deploy": "knex migrate:latest && knex seed:run",
     "migrate": "dotenvx run -- knex migrate:latest",
     "migrate:rollback": "dotenvx run -- knex migrate:rollback",
     "migrate:up": "dotenvx run -- knex migrate:up",
