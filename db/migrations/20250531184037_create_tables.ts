@@ -13,7 +13,7 @@ export async function up(knex: Knex): Promise<void> {
   return (
     knex.schema
       // Create users table
-      .createTable("users", (table) => {
+      .createTableIfNotExists("users", (table) => {
         table.uuid("id").primary().unique();
         table.string("email").notNullable().unique();
         table.string("phone", 20).notNullable().unique();
@@ -36,7 +36,7 @@ export async function up(knex: Knex): Promise<void> {
         table.index("status", "idx_users_status");
       })
       // Create sessions table
-      .createTable("sessions", (table) => {
+      .createTableIfNotExists("sessions", (table) => {
         table.uuid("id").primary().unique();
         table
           .uuid("userId")
@@ -64,7 +64,7 @@ export async function up(knex: Knex): Promise<void> {
         table.index("expiresAt", "idx_sessions_expiresAt");
       })
       // Create profiles table
-      .createTable("profiles", (table) => {
+      .createTableIfNotExists("profiles", (table) => {
         table.uuid("id").primary().unique();
         table
           .uuid("userId")
@@ -93,7 +93,7 @@ export async function up(knex: Knex): Promise<void> {
         table.index("bvn", "idx_profiles_bvn");
       })
       // Create wallets table
-      .createTable("wallets", (table) => {
+      .createTableIfNotExists("wallets", (table) => {
         table.uuid("id").primary().unique();
         table
           .uuid("userId")
@@ -122,7 +122,7 @@ export async function up(knex: Knex): Promise<void> {
         table.index("status", "idx_wallets_status");
       })
       // Create transactions table
-      .createTable("transactions", (table) => {
+      .createTableIfNotExists("transactions", (table) => {
         table.uuid("id").primary().unique();
         table
           .uuid("userId")
