@@ -1,6 +1,6 @@
 import Knex from "knex";
 
-import knexConfig from "../../knexfile.js";
-import { env } from "./env.js";
+import knexConfig from "../../knexfile";
+import { env } from "./env";
 
 export default Knex(knexConfig[env.NODE_ENV]);

@@ -8,9 +8,6 @@
     "allowJs": true,
     "typeRoots": ["./@types", "./node_modules/@types"],
     "baseUrl": ".",
-    "paths": {
-      "*.js": ["*.ts"]
-    },
     "moduleDetection": "force",
     "module": "commonjs",
     "moduleResolution": "node",

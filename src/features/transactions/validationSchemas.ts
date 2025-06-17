@@ -1,12 +1,12 @@
 import { z } from "zod";
 
-import { buildStrictSchema } from "../../helpers/validations.js";
+import { buildStrictSchema } from "../../helpers/validations";
 import {
   accountNumberSchema,
   amountSchema,
   transactionPinSchema,
-} from "../../validations/validationSchemas.js";
-import { FundTransferRequest, FundWithdrawalRequest } from "./transactionsDTO.js";
+} from "../../validations/validationSchemas";
+import { FundTransferRequest, FundWithdrawalRequest } from "./transactionsDTO";
 
 export const walletIdParamSchema = buildStrictSchema<{ walletId: string }>({
   walletId: z.string().uuid(),

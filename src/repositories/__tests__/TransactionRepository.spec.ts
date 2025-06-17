@@ -2,8 +2,8 @@
 import Knex from "knex";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import TransactionModel from "../../models/TransactionModel.js";
-import { TransactionRepository } from "../TransactionRepository.js";
+import TransactionModel from "../../models/TransactionModel";
+import { TransactionRepository } from "../TransactionRepository";
 
 const mockTable = {
   count: vi.fn().mockReturnThis(),

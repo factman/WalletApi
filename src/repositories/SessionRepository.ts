@@ -1,9 +1,9 @@
 import Knex from "knex";
 
-import database from "../configs/database.js";
-import { SCHEMA_TABLES } from "../helpers/constants.js";
-import SessionModel from "../models/SessionModel.js";
-import { Repository } from "./Repository.js";
+import database from "../configs/database";
+import { SCHEMA_TABLES } from "../helpers/constants";
+import SessionModel from "../models/SessionModel";
+import { Repository } from "./Repository";
 
 export class SessionRepository extends Repository<SessionModel> {
   constructor(databaseInstance = database) {

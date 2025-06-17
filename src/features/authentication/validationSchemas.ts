@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-import { buildStrictSchema } from "../../helpers/validations.js";
-import { passwordSchema } from "../../validations/validationSchemas.js";
+import { buildStrictSchema } from "../../helpers/validations";
+import { passwordSchema } from "../../validations/validationSchemas";
 import {
   ForgotPasswordRequest,
   InitiateAuthenticationRequest,
@@ -15,7 +15,7 @@ import {
   VerifyBvnRequest,
   VerifyEmailRequest,
   VerifyForgotPasswordRequest,
-} from "./authenticationDTO.js";
+} from "./authenticationDTO";
 
 export const forgotPasswordRequestSchema = buildStrictSchema<ForgotPasswordRequest>({
   deviceId: z.string().nonempty(),

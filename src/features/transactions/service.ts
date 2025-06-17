@@ -2,21 +2,21 @@ import bcrypt from "bcryptjs";
 import { StatusCodes } from "http-status-codes";
 import Knex from "knex";
 
-import database from "../../configs/database.js";
-import { CustomError } from "../../helpers/errorInstance.js";
-import { generateSessionId } from "../../helpers/utilities.js";
+import database from "../../configs/database";
+import { CustomError } from "../../helpers/errorInstance";
+import { generateSessionId } from "../../helpers/utilities";
 import TransactionModel, {
   TransactionChannel,
   TransactionMetaData,
   TransactionStatus,
   TransactionType,
-} from "../../models/TransactionModel.js";
-import WalletModel, { WalletStatus } from "../../models/WalletModel.js";
-import { TransactionRepository } from "../../repositories/TransactionRepository.js";
-import { UserRepository } from "../../repositories/UserRepository.js";
-import { WalletRepository } from "../../repositories/WalletRepository.js";
-import { ResendService } from "../../services/ResendService.js";
-import { FundTransferRequest, FundWithdrawalRequest } from "./transactionsDTO.js";
+} from "../../models/TransactionModel";
+import WalletModel, { WalletStatus } from "../../models/WalletModel";
+import { TransactionRepository } from "../../repositories/TransactionRepository";
+import { UserRepository } from "../../repositories/UserRepository";
+import { WalletRepository } from "../../repositories/WalletRepository";
+import { ResendService } from "../../services/ResendService";
+import { FundTransferRequest, FundWithdrawalRequest } from "./transactionsDTO";
 
 export class TransactionService {
   private resendService: ResendService;

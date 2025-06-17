@@ -1,21 +1,21 @@
 import { StatusCodes } from "http-status-codes";
 import Knex from "knex";
 
-import database from "../../configs/database.js";
-import { CustomError } from "../../helpers/errorInstance.js";
-import { generateSessionId, hashPin } from "../../helpers/utilities.js";
+import database from "../../configs/database";
+import { CustomError } from "../../helpers/errorInstance";
+import { generateSessionId, hashPin } from "../../helpers/utilities";
 import {
   TransactionChannel,
   TransactionMetaData,
   TransactionStatus,
   TransactionType,
-} from "../../models/TransactionModel.js";
-import WalletModel, { WalletStatus } from "../../models/WalletModel.js";
-import { TransactionRepository } from "../../repositories/TransactionRepository.js";
-import { UserRepository } from "../../repositories/UserRepository.js";
-import { WalletRepository } from "../../repositories/WalletRepository.js";
-import { ResendService } from "../../services/ResendService.js";
-import { FundWalletRequest } from "./walletsDTO.js";
+} from "../../models/TransactionModel";
+import WalletModel, { WalletStatus } from "../../models/WalletModel";
+import { TransactionRepository } from "../../repositories/TransactionRepository";
+import { UserRepository } from "../../repositories/UserRepository";
+import { WalletRepository } from "../../repositories/WalletRepository";
+import { ResendService } from "../../services/ResendService";
+import { FundWalletRequest } from "./walletsDTO";
 
 export class WalletService {
   private resendService: ResendService;

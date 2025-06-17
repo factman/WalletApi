@@ -5,7 +5,6 @@ WORKDIR /app
 
 ARG NODE_ENV=development
 ENV NODE_ENV=${NODE_ENV}
-ENV CI=false
 
 ARG DB_HOST
 ENV DB_HOST=${DB_HOST}

@@ -1,7 +1,7 @@
-import database from "../configs/database.js";
-import { SCHEMA_VIEWS } from "../helpers/constants.js";
-import UserProfileModel from "../models/UserProfileModel.js";
-import { Repository } from "./Repository.js";
+import database from "../configs/database";
+import { SCHEMA_VIEWS } from "../helpers/constants";
+import UserProfileModel from "../models/UserProfileModel";
+import { Repository } from "./Repository";
 
 export class UserProfileRepository extends Repository<UserProfileModel> {
   constructor(databaseInstance = database) {

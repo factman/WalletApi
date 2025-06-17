@@ -1,5 +1,5 @@
-import SessionModel from "./SessionModel.js";
-import UserModel from "./UserModel.js";
+import SessionModel from "./SessionModel";
+import UserModel from "./UserModel";
 
 export default interface AuthenticatedUserModel {
   deviceId: SessionModel["deviceId"];

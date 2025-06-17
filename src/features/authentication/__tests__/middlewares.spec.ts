@@ -3,14 +3,14 @@
 import { NextFunction, Request, Response } from "express";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { errorResponse } from "../../../helpers/responseHandlers.js";
-import { TokenAuthType } from "../../../helpers/types.js";
-import { SessionRepository } from "../../../repositories/SessionRepository.js";
-import * as utilities from "../helpers/utilities.js";
-import { validateOtpVerification } from "../middlewares.js";
+import { errorResponse } from "../../../helpers/responseHandlers";
+import { TokenAuthType } from "../../../helpers/types";
+import { SessionRepository } from "../../../repositories/SessionRepository";
+import * as utilities from "../helpers/utilities";
+import { validateOtpVerification } from "../middlewares";
 
 vi.mock("../../../repositories/SessionRepository");
-vi.mock("../../../configs/database.js", () => ({
+vi.mock("../../../configs/database", () => ({
   default: {
     transaction: vi.fn().mockResolvedValue({
       rollback: vi.fn(),

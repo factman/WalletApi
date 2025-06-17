@@ -1,12 +1,12 @@
 import { Router } from "express";
 
 import packageJson from "../../package.json";
-import { env } from "../configs/env.js";
-import { authenticationRouter } from "../features/authentication/index.js";
-import { transactionRouter } from "../features/transactions/index.js";
-import { usersRouter } from "../features/users/index.js";
-import { walletsRouter } from "../features/wallets/index.js";
-import { successResponse } from "../helpers/responseHandlers.js";
+import { env } from "../configs/env";
+import { authenticationRouter } from "../features/authentication/index";
+import { transactionRouter } from "../features/transactions/index";
+import { usersRouter } from "../features/users/index";
+import { walletsRouter } from "../features/wallets/index";
+import { successResponse } from "../helpers/responseHandlers";
 
 export function appRouter() {
   return (

@@ -1,12 +1,12 @@
 import { Router } from "express";
 
-import { authGuard } from "../../middlewares/authMiddleware.js";
-import { validateRequest } from "../../middlewares/validationMiddleware.js";
-import { idParamSchema } from "../../validations/validationSchemas.js";
-import { USERS_ROUTES } from "./constants.js";
-import { UsersController } from "./controller.js";
-import { UsersService } from "./service.js";
-import { changePasswordRequestSchema } from "./validationSchemas.js";
+import { authGuard } from "../../middlewares/authMiddleware";
+import { validateRequest } from "../../middlewares/validationMiddleware";
+import { idParamSchema } from "../../validations/validationSchemas";
+import { USERS_ROUTES } from "./constants";
+import { UsersController } from "./controller";
+import { UsersService } from "./service";
+import { changePasswordRequestSchema } from "./validationSchemas";
 
 const service = new UsersService();
 const controller = new UsersController(service);

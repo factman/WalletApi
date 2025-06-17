@@ -3,31 +3,31 @@ import { StatusCodes } from "http-status-codes";
 import Knex from "knex";
 import { randomUUID } from "node:crypto";
 
-import database from "../../configs/database.js";
-import { env } from "../../configs/env.js";
-import { CustomError } from "../../helpers/errorInstance.js";
-import { TokenAuthType, VerificationTokenPayload } from "../../helpers/types.js";
-import { hashPassword } from "../../helpers/utilities.js";
-import AuthenticatedUserModel from "../../models/AuthenticatedUserModel.js";
-import ProfileModel from "../../models/ProfileModel.js";
-import SessionModel from "../../models/SessionModel.js";
-import UserModel, { UserStatus } from "../../models/UserModel.js";
-import WalletModel from "../../models/WalletModel.js";
-import { AuthenticatedUserRepository } from "../../repositories/AuthenticatedUserRepository.js";
-import { ProfileRepository } from "../../repositories/ProfileRepository.js";
-import { SessionRepository } from "../../repositories/SessionRepository.js";
-import { UserRepository } from "../../repositories/UserRepository.js";
-import { WalletRepository } from "../../repositories/WalletRepository.js";
-import { AdjutorBvnPayload, AdjutorService } from "../../services/AdjutorService.js";
-import { ResendService } from "../../services/ResendService.js";
-import { InitiateBvnVerificationRequest } from "./authenticationDTO.js";
+import database from "../../configs/database";
+import { env } from "../../configs/env";
+import { CustomError } from "../../helpers/errorInstance";
+import { TokenAuthType, VerificationTokenPayload } from "../../helpers/types";
+import { hashPassword } from "../../helpers/utilities";
+import AuthenticatedUserModel from "../../models/AuthenticatedUserModel";
+import ProfileModel from "../../models/ProfileModel";
+import SessionModel from "../../models/SessionModel";
+import UserModel, { UserStatus } from "../../models/UserModel";
+import WalletModel from "../../models/WalletModel";
+import { AuthenticatedUserRepository } from "../../repositories/AuthenticatedUserRepository";
+import { ProfileRepository } from "../../repositories/ProfileRepository";
+import { SessionRepository } from "../../repositories/SessionRepository";
+import { UserRepository } from "../../repositories/UserRepository";
+import { WalletRepository } from "../../repositories/WalletRepository";
+import { AdjutorBvnPayload, AdjutorService } from "../../services/AdjutorService";
+import { ResendService } from "../../services/ResendService";
+import { InitiateBvnVerificationRequest } from "./authenticationDTO";
 import {
   generateAccessToken,
   generateOTP,
   generateRefreshToken,
   generateVerificationToken,
   getUsername,
-} from "./helpers/utilities.js";
+} from "./helpers/utilities";
 
 export class AuthenticationService {
   private adjutorService: AdjutorService;

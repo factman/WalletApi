@@ -9,7 +9,7 @@ import {
   gracefulShutdown,
   hashPassword,
   hashPin,
-} from "../utilities.js";
+} from "../utilities";
 
 describe("gracefulShutdown", () => {
   let server: Server;

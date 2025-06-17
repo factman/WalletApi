@@ -1,1 +1,1 @@
-export { router as authenticationRouter } from "./router.js";
+export { router as authenticationRouter } from "./router";

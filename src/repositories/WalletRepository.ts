@@ -1,9 +1,9 @@
 import Knex from "knex";
 
-import database from "../configs/database.js";
-import { SCHEMA_TABLES } from "../helpers/constants.js";
-import WalletModel, { WalletStatus } from "../models/WalletModel.js";
-import { Repository } from "./Repository.js";
+import database from "../configs/database";
+import { SCHEMA_TABLES } from "../helpers/constants";
+import WalletModel, { WalletStatus } from "../models/WalletModel";
+import { Repository } from "./Repository";
 
 const walletColumns: (keyof WalletModel)[] = [
   "id",

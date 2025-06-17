@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { UserProfileRepository } from "../UserProfileRepository.js";
+import { UserProfileRepository } from "../UserProfileRepository";
 
 const mockTable = {
   first: vi.fn(),

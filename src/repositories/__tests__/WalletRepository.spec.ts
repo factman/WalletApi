@@ -1,8 +1,8 @@
 import Knex from "knex";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { WalletStatus } from "../../models/WalletModel.js";
-import { WalletRepository } from "../WalletRepository.js";
+import { WalletStatus } from "../../models/WalletModel";
+import { WalletRepository } from "../WalletRepository";
 
 const trx = {} as Knex.Knex.Transaction;
 

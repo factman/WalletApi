@@ -5,16 +5,16 @@ import { DateTime } from "luxon";
 import { randomUUID } from "node:crypto";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { TokenPayload, TokenType } from "../../helpers/types.js";
-import { UserStatus } from "../../models/UserModel.js";
-import { SessionRepository } from "../../repositories/SessionRepository.js";
-import { UserRepository } from "../../repositories/UserRepository.js";
-import { authGuard } from "../authMiddleware.js";
+import { TokenPayload, TokenType } from "../../helpers/types";
+import { UserStatus } from "../../models/UserModel";
+import { SessionRepository } from "../../repositories/SessionRepository";
+import { UserRepository } from "../../repositories/UserRepository";
+import { authGuard } from "../authMiddleware";
 
 // Mocks
-vi.mock("../../repositories/SessionRepository.js");
-vi.mock("../../repositories/UserRepository.js");
-vi.mock("../../configs/database.js", () => ({
+vi.mock("../../repositories/SessionRepository");
+vi.mock("../../repositories/UserRepository");
+vi.mock("../../configs/database", () => ({
   default: { transaction: vi.fn() },
 }));
 
@@ -75,7 +75,7 @@ describe("authGuard middleware", () => {
     req = mockReq({ authorization: "Bearer validtoken" });
     vi.spyOn(jwt, "verify").mockReturnValue({ sessionId: "sid" } as never);
     // Patch tokenSchema to fail
-    const { tokenSchema } = await import("../../validations/validationSchemas.js");
+    const { tokenSchema } = await import("../../validations/validationSchemas");
     vi.spyOn(tokenSchema(TokenType.ACCESS), "safeParse").mockReturnValue({
       success: false,
     } as never);
@@ -109,8 +109,8 @@ describe("authGuard middleware", () => {
       userId: "uid",
     });
     const trx = { rollback: vi.fn() };
-    const db = (await import("../../configs/database.js")).default;
-    (db.transaction as any).mockResolvedValue(trx);
+    const db: any = (await import("../../configs/database")).default;
+    db.transaction.mockResolvedValue(trx);
     (
       SessionRepository as unknown as { prototype: Record<string, unknown> }
     ).prototype.deleteSession = vi.fn().mockResolvedValue(undefined);
@@ -163,7 +163,7 @@ describe("authGuard middleware", () => {
       .fn()
       .mockResolvedValue(userData);
     // Patch tokenSchema to succeed
-    const { tokenSchema } = await import("../../validations/validationSchemas.js");
+    const { tokenSchema } = await import("../../validations/validationSchemas");
     vi.spyOn(tokenSchema(TokenType.ACCESS), "safeParse").mockReturnValue({
       data: tokenPayload,
       success: true,

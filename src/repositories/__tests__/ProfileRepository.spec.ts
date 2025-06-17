@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { SCHEMA_TABLES } from "../../helpers/constants.js";
-import ProfileModel from "../../models/ProfileModel.js";
-import { ProfileRepository } from "../ProfileRepository.js";
+import { SCHEMA_TABLES } from "../../helpers/constants";
+import ProfileModel from "../../models/ProfileModel";
+import { ProfileRepository } from "../ProfileRepository";
 
 vi.mock("node:crypto", () => ({
   randomUUID: vi.fn().mockReturnValue("test-uuid"),

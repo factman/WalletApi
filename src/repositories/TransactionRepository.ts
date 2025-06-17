@@ -1,9 +1,9 @@
 import Knex from "knex";
 
-import database from "../configs/database.js";
-import { SCHEMA_TABLES } from "../helpers/constants.js";
-import TransactionModel from "../models/TransactionModel.js";
-import { Repository } from "./Repository.js";
+import database from "../configs/database";
+import { SCHEMA_TABLES } from "../helpers/constants";
+import TransactionModel from "../models/TransactionModel";
+import { Repository } from "./Repository";
 
 export class TransactionRepository extends Repository<TransactionModel> {
   constructor(databaseInstance = database) {

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, expect, it } from "vitest";
 
-import { changePasswordRequestSchema } from "../validationSchemas.js";
+import { changePasswordRequestSchema } from "../validationSchemas";
 
 describe("changePasswordRequestSchema", () => {
   it("should validate a correct payload", () => {

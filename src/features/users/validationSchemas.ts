@@ -1,8 +1,8 @@
 import { z } from "zod";
 
-import { buildStrictSchema } from "../../helpers/validations.js";
-import { passwordSchema } from "../../validations/validationSchemas.js";
-import { ChangePasswordRequest } from "./usersDTO.js";
+import { buildStrictSchema } from "../../helpers/validations";
+import { passwordSchema } from "../../validations/validationSchemas";
+import { ChangePasswordRequest } from "./usersDTO";
 
 export const changePasswordRequestSchema = buildStrictSchema<ChangePasswordRequest>({
   deviceId: z.string().nonempty(),

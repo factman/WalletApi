@@ -1,20 +1,20 @@
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
-import database from "../../configs/database.js";
-import { CustomError } from "../../helpers/errorInstance.js";
-import { errorResponse, successResponse } from "../../helpers/responseHandlers.js";
-import { getPaginationOffset, getPaginationTotalPages } from "../../helpers/utilities.js";
-import TransactionModel from "../../models/TransactionModel.js";
-import { paginationSchema } from "../../validations/validationSchemas.js";
-import { TransactionService } from "./service.js";
-import { GetTransactionHistoryResponse } from "./transactionsDTO.js";
+import database from "../../configs/database";
+import { CustomError } from "../../helpers/errorInstance";
+import { errorResponse, successResponse } from "../../helpers/responseHandlers";
+import { getPaginationOffset, getPaginationTotalPages } from "../../helpers/utilities";
+import TransactionModel from "../../models/TransactionModel";
+import { paginationSchema } from "../../validations/validationSchemas";
+import { TransactionService } from "./service";
+import { GetTransactionHistoryResponse } from "./transactionsDTO";
 import {
   fundTransferRequestSchema,
   fundWithdrawalRequestSchema,
   transactionAndWalletIdParamSchema,
   walletIdParamSchema,
-} from "./validationSchemas.js";
+} from "./validationSchemas";
 
 export class TransactionController {
   private service: TransactionService;

@@ -1,9 +1,9 @@
 import Knex from "knex";
 
-import database from "../configs/database.js";
-import { SCHEMA_TABLES } from "../helpers/constants.js";
-import UserModel, { UserStatus } from "../models/UserModel.js";
-import { Repository } from "./Repository.js";
+import database from "../configs/database";
+import { SCHEMA_TABLES } from "../helpers/constants";
+import UserModel, { UserStatus } from "../models/UserModel";
+import { Repository } from "./Repository";
 
 export class UserRepository extends Repository<UserModel> {
   constructor(databaseInstance = database) {
