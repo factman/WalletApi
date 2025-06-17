@@ -43,6 +43,8 @@ ENV ADJUTOR_API_URL=${ADJUTOR_API_URL}
 # Copy files
 COPY . .
 
+RUN ls -a
+
 # Install project
 RUN npm install
 
