@@ -55,4 +55,4 @@ RUN npm run deploy
 
 # Run Application
 
-CMD ["tsx", "index.ts"]
+CMD ["npm", "start"]
