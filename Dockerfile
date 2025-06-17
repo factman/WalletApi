@@ -40,16 +40,20 @@ ENV ADJUTOR_API_KEY=${ADJUTOR_API_KEY}
 ARG ADJUTOR_API_URL
 ENV ADJUTOR_API_URL=${ADJUTOR_API_URL}
 
-COPY package*.json ./
-RUN npm install
-
+# Copy files
 COPY . .
 
-# Run migrations (adjust the command as needed)
-RUN npm run deploy
+# Install project
+RUN npm install
 
-# Build the app (adjust the command as needed)
+# Lint for errors
+RUN npm run lint
+
+# Build the app
 RUN npm run build
+
+# Run migrations and seed the database
+RUN npm run deploy
 
 # Stage 2: Production image
 FROM node:24-slim

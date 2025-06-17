@@ -138,7 +138,7 @@ export class WalletService {
       channel: TransactionChannel.BANK_TRANSFER,
       closingBalance: updatedWallet.balance,
       fee: "0.00",
-      metadata,
+      metadata: JSON.stringify(metadata),
       openingBalance: (parseFloat(updatedWallet.balance) - amount).toFixed(2),
       remark: `Wallet top-up from ${metadata.sender.accountName}`,
       sessionId: generateSessionId(),
