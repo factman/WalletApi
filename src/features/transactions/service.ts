@@ -211,7 +211,7 @@ export class TransactionService {
       channel,
       closingBalance: wallet.balance,
       fee: "0.00",
-      metadata,
+      metadata: JSON.stringify(metadata),
       openingBalance: (parseFloat(wallet.balance) - amount).toFixed(2),
       remark:
         remark ??
@@ -271,7 +271,7 @@ export class TransactionService {
       channel,
       closingBalance: wallet.balance,
       fee: fee.toFixed(2),
-      metadata,
+      metadata: JSON.stringify(metadata),
       openingBalance: (parseFloat(wallet.balance) + total).toFixed(2),
       remark:
         remark ??

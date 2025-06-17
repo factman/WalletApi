@@ -33,7 +33,7 @@ export default interface TransactionModel {
   currency: string;
   fee: string;
   id: string;
-  metadata: TransactionMetaData;
+  metadata: string;
   openingBalance: string;
   remark: string;
   sessionId: string;

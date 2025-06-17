@@ -148,7 +148,7 @@ export async function up(knex: Knex): Promise<void> {
         table.decimal("openingBalance", 11, 2).unsigned().notNullable();
         table.decimal("closingBalance", 11, 2).unsigned().notNullable();
         table.string("remark").nullable();
-        table.json("metadata").notNullable();
+        table.text("metadata").notNullable();
         table.date("settlementDate").nullable();
         table.datetime("createdAt").notNullable();
         table.datetime("updatedAt").notNullable();
