@@ -50,6 +50,9 @@ RUN npm install
 # Lint for errors
 RUN npm run lint
 
+# Build application
+RUN npm run build
+
 # Run migrations and seed the database
 RUN npm run deploy
 
