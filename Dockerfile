@@ -8,6 +8,8 @@ RUN npm install
 
 COPY . .
 
+RUN printenv
+
 # Run migrations (adjust the command as needed)
 RUN npm run migrate
 
