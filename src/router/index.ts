@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import packageJson from "../../package.json" with { type: "json" };
+import packageJson from "../../package.json";
 import { env } from "../configs/env.js";
 import { authenticationRouter } from "../features/authentication/index.js";
 import { transactionRouter } from "../features/transactions/index.js";
