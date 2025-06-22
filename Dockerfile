@@ -1,5 +1,5 @@
 # Stage 1: Build and install dependencies
-FROM node:24-slim AS builder
+FROM node:24-slim
 
 WORKDIR /app
 
@@ -56,5 +56,4 @@ RUN npm run build
 RUN npm run deploy
 
 # Run Application
-
-CMD ["npm", "start"]
+CMD ["node", "./dist/index.js"]
