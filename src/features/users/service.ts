@@ -2,13 +2,13 @@ import bcrypt from "bcryptjs";
 import { StatusCodes } from "http-status-codes";
 import Knex from "knex";
 
-import { CustomError } from "../../helpers/errorInstance.js";
-import { hashPassword } from "../../helpers/utilities.js";
-import UserModel, { UserStatus } from "../../models/UserModel.js";
-import UserProfileModel from "../../models/UserProfileModel.js";
-import { SessionRepository } from "../../repositories/SessionRepository.js";
-import { UserProfileRepository } from "../../repositories/UserProfileRepository.js";
-import { UserRepository } from "../../repositories/UserRepository.js";
+import { CustomError } from "../../helpers/errorInstance";
+import { hashPassword } from "../../helpers/utilities";
+import UserModel, { UserStatus } from "../../models/UserModel";
+import UserProfileModel from "../../models/UserProfileModel";
+import { SessionRepository } from "../../repositories/SessionRepository";
+import { UserProfileRepository } from "../../repositories/UserProfileRepository";
+import { UserRepository } from "../../repositories/UserRepository";
 
 export class UsersService {
   private sessionRepository: SessionRepository;

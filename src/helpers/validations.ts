@@ -1,9 +1,9 @@
 import { z } from "zod";
 
-import { HeaderSchemaType } from "./types.js";
+import { HeaderSchemaType } from "./types";
 
-export function buildHeaderSchema(schemaObject: Partial<HeaderSchemaType>) {
-  return z.object(schemaObject as HeaderSchemaType).passthrough();
+export function buildHeaderSchema(schemaObject: HeaderSchemaType) {
+  return z.object(schemaObject).passthrough();
 }
 
 export function buildStrictSchema<T, D extends z.ZodRawShape = Record<keyof T, z.ZodTypeAny>>(

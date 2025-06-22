@@ -1,13 +1,13 @@
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
-import database from "../../configs/database.js";
-import { CustomError } from "../../helpers/errorInstance.js";
-import { errorResponse, successResponse } from "../../helpers/responseHandlers.js";
-import { idParamSchema } from "../../validations/validationSchemas.js";
-import { UsersService } from "./service.js";
-import { GetUserResponse } from "./usersDTO.js";
-import { changePasswordRequestSchema } from "./validationSchemas.js";
+import database from "../../configs/database";
+import { CustomError } from "../../helpers/errorInstance";
+import { errorResponse, successResponse } from "../../helpers/responseHandlers";
+import { idParamSchema } from "../../validations/validationSchemas";
+import { UsersService } from "./service";
+import { GetUserResponse } from "./usersDTO";
+import { changePasswordRequestSchema } from "./validationSchemas";
 
 export class UsersController {
   private service: UsersService;

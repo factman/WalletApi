@@ -3,11 +3,11 @@ import bcrypt from "bcryptjs";
 import crypto from "node:crypto";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { env } from "../../../configs/env.js";
-import * as utilities from "../../../helpers/utilities.js";
-import { UserStatus } from "../../../models/UserModel.js";
-import * as featureUtilities from "../helpers/utilities.js";
-import { AuthenticationService } from "../service.js";
+import { env } from "../../../configs/env";
+import * as utilities from "../../../helpers/utilities";
+import { UserStatus } from "../../../models/UserModel";
+import * as featureUtilities from "../helpers/utilities";
+import { AuthenticationService } from "../service";
 
 function mockRepositories() {
   return {

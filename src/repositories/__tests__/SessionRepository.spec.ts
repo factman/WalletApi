@@ -2,7 +2,7 @@
 import Knex from "knex";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { SessionRepository } from "../SessionRepository.js";
+import { SessionRepository } from "../SessionRepository";
 
 const mockTrx = {} as Knex.Knex.Transaction;
 

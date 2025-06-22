@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { env } from "../configs/env.js";
+import { env } from "../configs/env";
 
 export interface AdjutorBank {
   longcode: string;

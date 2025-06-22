@@ -13,7 +13,7 @@ import {
   verifyBvnRequestSchema,
   verifyEmailRequestSchema,
   verifyForgotPasswordRequestSchema,
-} from "../validationSchemas.js";
+} from "../validationSchemas";
 
 // Mock passwordSchema expects at least 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char
 const validPassword = "Password1!";

@@ -1,17 +1,17 @@
 import { Router } from "express";
 
-import { authGuard } from "../../middlewares/authMiddleware.js";
-import { validateRequest } from "../../middlewares/validationMiddleware.js";
-import { idParamSchema } from "../../validations/validationSchemas.js";
-import { WALLETS_ROUTES } from "./constants.js";
-import { WalletController } from "./controller.js";
-import { WalletService } from "./service.js";
+import { authGuard } from "../../middlewares/authMiddleware";
+import { validateRequest } from "../../middlewares/validationMiddleware";
+import { idParamSchema } from "../../validations/validationSchemas";
+import { WALLETS_ROUTES } from "./constants";
+import { WalletController } from "./controller";
+import { WalletService } from "./service";
 import {
   addSettlementAccountRequestSchema,
   createTransactionPinRequestSchema,
   fundWalletRequestSchema,
   nameEnquiryRequestSchema,
-} from "./validationSchemas.js";
+} from "./validationSchemas";
 
 const service = new WalletService();
 const controller = new WalletController(service);

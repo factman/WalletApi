@@ -4,8 +4,8 @@ import helmet from "helmet";
 import { StatusCodes } from "http-status-codes";
 import morgan from "morgan";
 
-import { errorResponse } from "./helpers/responseHandlers.js";
-import { appRouter } from "./router/index.js";
+import { errorResponse } from "./helpers/responseHandlers";
+import { appRouter } from "./router/index";
 
 const app = express();
 

@@ -1,7 +1,7 @@
 import { getReasonPhrase, StatusCodes } from "http-status-codes";
 import { describe, expect, it } from "vitest";
 
-import { CustomError } from "../errorInstance.js";
+import { CustomError } from "../errorInstance";
 
 describe("CustomError", () => {
   it("should create an instance with default values", () => {

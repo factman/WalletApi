@@ -1,18 +1,18 @@
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
-import database from "../../configs/database.js";
-import { CustomError } from "../../helpers/errorInstance.js";
-import { errorResponse, successResponse } from "../../helpers/responseHandlers.js";
-import { idParamSchema } from "../../validations/validationSchemas.js";
-import { WalletService } from "./service.js";
+import database from "../../configs/database";
+import { CustomError } from "../../helpers/errorInstance";
+import { errorResponse, successResponse } from "../../helpers/responseHandlers";
+import { idParamSchema } from "../../validations/validationSchemas";
+import { WalletService } from "./service";
 import {
   addSettlementAccountRequestSchema,
   createTransactionPinRequestSchema,
   fundWalletRequestSchema,
   nameEnquiryRequestSchema,
-} from "./validationSchemas.js";
-import { GetWalletResponse, NameEnquiryResponse } from "./walletsDTO.js";
+} from "./validationSchemas";
+import { GetWalletResponse, NameEnquiryResponse } from "./walletsDTO";
 
 export class WalletController {
   private service: WalletService;

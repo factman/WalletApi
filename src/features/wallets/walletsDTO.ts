@@ -1,4 +1,4 @@
-import WalletModel from "../../models/WalletModel.js";
+import WalletModel from "../../models/WalletModel";
 
 export interface AddSettlementAccountRequest {
   accountName: string;

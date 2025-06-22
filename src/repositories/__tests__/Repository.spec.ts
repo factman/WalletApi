@@ -2,8 +2,8 @@
 import Knex from "knex";
 import { describe, expect, it, vi } from "vitest";
 
-import { SCHEMA_TABLES, SCHEMA_VIEWS } from "../../helpers/constants.js";
-import { Repository } from "../Repository.js";
+import { SCHEMA_TABLES, SCHEMA_VIEWS } from "../../helpers/constants";
+import { Repository } from "../Repository";
 
 // Mock dependencies
 vi.mock("../../helpers/constants", () => ({

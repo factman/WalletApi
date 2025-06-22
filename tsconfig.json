@@ -1,12 +1,18 @@
 {
-  "extends": "@tsconfig/node22/tsconfig.json",
+  "extends": "@tsconfig/node24/tsconfig.json",
   "compilerOptions": {
     "resolveJsonModule": true,
     "sourceMap": true,
     "outDir": "./dist",
     "rootDir": ".",
     "allowJs": true,
-    "typeRoots": ["./@types", "./node_modules/@types"]
+    "typeRoots": ["./@types", "./node_modules/@types"],
+    "baseUrl": ".",
+    "moduleDetection": "force",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "isolatedModules": true
   },
   "include": ["**/*.ts"],
   "exclude": ["dist", "node_modules", "coverage", "docs"]

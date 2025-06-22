@@ -1,14 +1,17 @@
 import Knex from "knex";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { WalletStatus } from "../../models/WalletModel.js";
-import { WalletRepository } from "../WalletRepository.js";
+import { WalletStatus } from "../../models/WalletModel";
+import { WalletRepository } from "../WalletRepository";
 
 const trx = {} as Knex.Knex.Transaction;
 
 const mockTable = {
   decrement: vi.fn().mockReturnThis(),
   first: vi.fn(),
+  fn: {
+    now: vi.fn().mockReturnValue("NOW()"),
+  },
   forUpdate: vi.fn().mockReturnThis(),
   increment: vi.fn().mockReturnThis(),
   insert: vi.fn().mockReturnThis(),
@@ -21,6 +24,7 @@ const mockTable = {
 vi.mock("../Repository", () => {
   return {
     Repository: class {
+      protected knex = mockTable;
       protected table = mockTable;
       protected uuid = "mock-uuid";
     },
@@ -42,6 +46,7 @@ describe("WalletRepository", () => {
       isTransactionPinSet: true,
       status: WalletStatus.ACTIVE,
       transactionPin: "1234",
+      updatedAt: "NOW()",
     });
     expect(mockTable.where).toHaveBeenCalledWith({ id: "1" });
     expect(result).toEqual({ accountName: "Test", id: "1" });
@@ -58,6 +63,7 @@ describe("WalletRepository", () => {
     expect(mockTable.update).toHaveBeenCalledWith({
       ...settlementAccount,
       isSettlementAccountSet: true,
+      updatedAt: "NOW()",
     });
     expect(mockTable.where).toHaveBeenCalledWith({ id: "2" });
     expect(result).toEqual({ accountName: "Test2", id: "2" });
@@ -67,7 +73,12 @@ describe("WalletRepository", () => {
     mockTable.first.mockResolvedValue({ accountName: "User", id: "mock-uuid" });
     const walletData = { accountName: "User", accountNumber: "111", userId: "u1" };
     const result = await repo.createUserWallet(trx, walletData);
-    expect(mockTable.insert).toHaveBeenCalledWith({ ...walletData, id: "mock-uuid" });
+    expect(mockTable.insert).toHaveBeenCalledWith({
+      ...walletData,
+      createdAt: "NOW()",
+      id: "mock-uuid",
+      updatedAt: "NOW()",
+    });
     expect(mockTable.where).toHaveBeenCalledWith({ id: "mock-uuid" });
     expect(result).toEqual({ accountName: "User", id: "mock-uuid" });
   });

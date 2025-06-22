@@ -5,7 +5,7 @@ import {
   createTransactionPinRequestSchema,
   fundWalletRequestSchema,
   nameEnquiryRequestSchema,
-} from "../validationSchemas.js";
+} from "../validationSchemas";
 
 describe("addSettlementAccountRequestSchema", () => {
   it("should pass with valid data", () => {

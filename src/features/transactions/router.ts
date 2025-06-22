@@ -1,17 +1,17 @@
 import { Router } from "express";
 
-import { authGuard } from "../../middlewares/authMiddleware.js";
-import { validateRequest } from "../../middlewares/validationMiddleware.js";
-import { paginationSchema } from "../../validations/validationSchemas.js";
-import { TRANSACTION_ROUTES } from "./constants.js";
-import { TransactionController } from "./controller.js";
-import { TransactionService } from "./service.js";
+import { authGuard } from "../../middlewares/authMiddleware";
+import { validateRequest } from "../../middlewares/validationMiddleware";
+import { paginationSchema } from "../../validations/validationSchemas";
+import { TRANSACTION_ROUTES } from "./constants";
+import { TransactionController } from "./controller";
+import { TransactionService } from "./service";
 import {
   fundTransferRequestSchema,
   fundWithdrawalRequestSchema,
   transactionAndWalletIdParamSchema,
   walletIdParamSchema,
-} from "./validationSchemas.js";
+} from "./validationSchemas";
 
 const service = new TransactionService();
 const controller = new TransactionController(service);

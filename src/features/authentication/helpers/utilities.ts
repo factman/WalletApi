@@ -1,16 +1,16 @@
 import jwt from "jsonwebtoken";
 import { DateTime } from "luxon";
 
-import { env } from "../../../configs/env.js";
+import { env } from "../../../configs/env";
 import {
   TokenAuthType,
   TokenPayload,
   TokenType,
   VerificationTokenPayload,
-} from "../../../helpers/types.js";
-import SessionModel from "../../../models/SessionModel.js";
-import UserModel from "../../../models/UserModel.js";
-import { tokenSchema, verificationTokenSchema } from "../../../validations/validationSchemas.js";
+} from "../../../helpers/types";
+import SessionModel from "../../../models/SessionModel";
+import UserModel from "../../../models/UserModel";
+import { tokenSchema, verificationTokenSchema } from "../../../validations/validationSchemas";
 
 export function generateAccessToken(
   sessionId: SessionModel["id"],

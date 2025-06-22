@@ -2,12 +2,15 @@
 import Knex from "knex";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import TransactionModel from "../../models/TransactionModel.js";
-import { TransactionRepository } from "../TransactionRepository.js";
+import TransactionModel from "../../models/TransactionModel";
+import { TransactionRepository } from "../TransactionRepository";
 
 const mockTable = {
   count: vi.fn().mockReturnThis(),
   first: vi.fn(),
+  fn: {
+    now: vi.fn().mockReturnValue("NOW()"),
+  },
   insert: vi.fn().mockReturnThis(),
   limit: vi.fn().mockReturnThis(),
   offset: vi.fn().mockReturnThis(),
@@ -25,6 +28,7 @@ const mockDatabase = {
 vi.mock("../Repository", () => {
   return {
     Repository: class {
+      protected knex = mockTable;
       protected table = mockTable;
       protected uuid = "test-uuid";
     },
@@ -58,7 +62,12 @@ describe("TransactionRepository", () => {
 
       const result = await repo.createTransaction(trx, transaction);
 
-      expect(mockTable.insert).toHaveBeenCalledWith({ ...transaction, id: "test-uuid" });
+      expect(mockTable.insert).toHaveBeenCalledWith({
+        ...transaction,
+        createdAt: "NOW()",
+        id: "test-uuid",
+        updatedAt: "NOW()",
+      });
       expect(mockTable.transacting).toHaveBeenCalledWith(trx);
       expect(mockTable.where).toHaveBeenCalledWith({ id: "test-uuid" });
       expect(result).toEqual({ ...transaction, id: "test-uuid" });

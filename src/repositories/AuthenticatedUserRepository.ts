@@ -1,7 +1,7 @@
-import database from "../configs/database.js";
-import { SCHEMA_VIEWS } from "../helpers/constants.js";
-import AuthenticatedUserModel from "../models/AuthenticatedUserModel.js";
-import { Repository } from "./Repository.js";
+import database from "../configs/database";
+import { SCHEMA_VIEWS } from "../helpers/constants";
+import AuthenticatedUserModel from "../models/AuthenticatedUserModel";
+import { Repository } from "./Repository";
 
 export class AuthenticatedUserRepository extends Repository<AuthenticatedUserModel> {
   constructor(databaseInstance = database) {

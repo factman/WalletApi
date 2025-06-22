@@ -34,6 +34,7 @@
     "test:run": "vitest --run",
     "test:ui": "vitest --ui",
     "coverage": "vitest run --coverage",
+    "deploy": "knex migrate:latest && knex seed:run",
     "migrate": "dotenvx run -- knex migrate:latest",
     "migrate:rollback": "dotenvx run -- knex migrate:rollback",
     "migrate:up": "dotenvx run -- knex migrate:up",
@@ -54,12 +55,14 @@
     "morgan": "^1.10.0",
     "mysql2": "^3.14.1",
     "resend": "^4.5.1",
+    "uninstall": "^0.0.0",
     "zod": "^3.25.46"
   },
   "devDependencies": {
     "@dotenvx/dotenvx": "^1.44.1",
     "@eslint/js": "^9.27.0",
     "@tsconfig/node22": "^22.0.2",
+    "@tsconfig/node24": "^24.0.1",
     "@types/axios": "^0.9.36",
     "@types/cors": "^2.8.18",
     "@types/express": "^5.0.2",

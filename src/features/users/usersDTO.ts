@@ -1,4 +1,4 @@
-import UserProfileModel from "../../models/UserProfileModel.js";
+import UserProfileModel from "../../models/UserProfileModel";
 
 export interface ChangePasswordRequest {
   deviceId: string;

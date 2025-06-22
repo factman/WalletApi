@@ -1,17 +1,17 @@
 import { z } from "zod";
 
-import { buildStrictSchema } from "../../helpers/validations.js";
+import { buildStrictSchema } from "../../helpers/validations";
 import {
   accountNumberSchema,
   amountSchema,
   transactionPinSchema,
-} from "../../validations/validationSchemas.js";
+} from "../../validations/validationSchemas";
 import {
   AddSettlementAccountRequest,
   CreateTransactionPinRequest,
   FundWalletRequest,
   NameEnquiryRequestParams,
-} from "./walletsDTO.js";
+} from "./walletsDTO";
 
 const bankCodeSchema = z
   .string()

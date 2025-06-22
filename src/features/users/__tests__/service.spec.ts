@@ -2,10 +2,10 @@
 import bcrypt from "bcryptjs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { CustomError } from "../../../helpers/errorInstance.js";
-import * as utilities from "../../../helpers/utilities.js";
-import { UserStatus } from "../../../models/UserModel.js";
-import { UsersService } from "../service.js";
+import { CustomError } from "../../../helpers/errorInstance";
+import * as utilities from "../../../helpers/utilities";
+import { UserStatus } from "../../../models/UserModel";
+import { UsersService } from "../service";
 
 describe("UsersService", () => {
   let usersService: UsersService;

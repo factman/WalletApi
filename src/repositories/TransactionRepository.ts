@@ -1,9 +1,9 @@
 import Knex from "knex";
 
-import database from "../configs/database.js";
-import { SCHEMA_TABLES } from "../helpers/constants.js";
-import TransactionModel from "../models/TransactionModel.js";
-import { Repository } from "./Repository.js";
+import database from "../configs/database";
+import { SCHEMA_TABLES } from "../helpers/constants";
+import TransactionModel from "../models/TransactionModel";
+import { Repository } from "./Repository";
 
 export class TransactionRepository extends Repository<TransactionModel> {
   constructor(databaseInstance = database) {
@@ -15,7 +15,9 @@ export class TransactionRepository extends Repository<TransactionModel> {
     transaction: Omit<TransactionModel, "createdAt" | "currency" | "id" | "updatedAt">,
   ) {
     const id = this.uuid;
-    await this.table.insert({ ...transaction, id }).transacting(trx);
+    await this.table
+      .insert({ ...transaction, createdAt: this.knex.fn.now(), id, updatedAt: this.knex.fn.now() })
+      .transacting(trx);
 
     return await this.table.where({ id }).transacting(trx).first();
   }

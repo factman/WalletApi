@@ -1,9 +1,9 @@
 import Knex from "knex";
 
-import database from "../configs/database.js";
-import { SCHEMA_TABLES } from "../helpers/constants.js";
-import SessionModel from "../models/SessionModel.js";
-import { Repository } from "./Repository.js";
+import database from "../configs/database";
+import { SCHEMA_TABLES } from "../helpers/constants";
+import SessionModel from "../models/SessionModel";
+import { Repository } from "./Repository";
 
 export class SessionRepository extends Repository<SessionModel> {
   constructor(databaseInstance = database) {
@@ -22,7 +22,9 @@ export class SessionRepository extends Repository<SessionModel> {
       | "updatedAt"
     >,
   ) {
-    await this.table.transacting(trx).insert(sessionData);
+    await this.table
+      .transacting(trx)
+      .insert({ ...sessionData, createdAt: this.knex.fn.now(), updatedAt: this.knex.fn.now() });
     return await this.table.where("id", sessionData.id).transacting(trx).first();
   }
 
@@ -49,7 +51,7 @@ export class SessionRepository extends Repository<SessionModel> {
     sessionData: Partial<Omit<SessionModel, "createdAt" | "id" | "updatedAt" | "userId">>,
   ) {
     await this.table
-      .update({ ...sessionData })
+      .update({ ...sessionData, updatedAt: this.knex.fn.now() })
       .where({ id })
       .transacting(trx);
 

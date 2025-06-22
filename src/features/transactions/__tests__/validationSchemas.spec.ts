@@ -5,7 +5,7 @@ import {
   fundWithdrawalRequestSchema,
   transactionAndWalletIdParamSchema,
   walletIdParamSchema,
-} from "../validationSchemas.js";
+} from "../validationSchemas";
 
 // Mock valid values for imported schemas
 const validAmount = 1000;

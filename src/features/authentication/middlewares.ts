@@ -1,13 +1,13 @@
 import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
-import database from "../../configs/database.js";
-import { CustomError } from "../../helpers/errorInstance.js";
-import { errorResponse } from "../../helpers/responseHandlers.js";
-import { TokenAuthType } from "../../helpers/types.js";
-import SessionModel from "../../models/SessionModel.js";
-import { SessionRepository } from "../../repositories/SessionRepository.js";
-import { validateVerificationToken } from "./helpers/utilities.js";
+import database from "../../configs/database";
+import { CustomError } from "../../helpers/errorInstance";
+import { errorResponse } from "../../helpers/responseHandlers";
+import { TokenAuthType } from "../../helpers/types";
+import SessionModel from "../../models/SessionModel";
+import { SessionRepository } from "../../repositories/SessionRepository";
+import { validateVerificationToken } from "./helpers/utilities";
 
 export function validateOtpVerification(authType: TokenAuthType) {
   return async (req: Request, res: Response, next: NextFunction) => {

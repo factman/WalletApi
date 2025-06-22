@@ -1,1 +1,1 @@
-export { router as transactionRouter } from "./router.js";
+export { router as transactionRouter } from "./router";

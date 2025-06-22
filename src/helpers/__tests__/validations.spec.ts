@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 
-import { HeaderSchemaType } from "../types.js";
-import { buildHeaderSchema, buildStrictSchema } from "../validations.js";
+import { HeaderSchemaType } from "../types";
+import { buildHeaderSchema, buildStrictSchema } from "../validations";
 
 describe("buildStrictSchema", () => {
   it("should create a strict schema that only allows defined properties", () => {

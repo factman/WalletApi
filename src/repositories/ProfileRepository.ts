@@ -1,9 +1,9 @@
 import Knex from "knex";
 
-import database from "../configs/database.js";
-import { SCHEMA_TABLES } from "../helpers/constants.js";
-import ProfileModel from "../models/ProfileModel.js";
-import { Repository } from "./Repository.js";
+import database from "../configs/database";
+import { SCHEMA_TABLES } from "../helpers/constants";
+import ProfileModel from "../models/ProfileModel";
+import { Repository } from "./Repository";
 
 export class ProfileRepository extends Repository<ProfileModel> {
   constructor(databaseInstance = database) {
@@ -15,7 +15,9 @@ export class ProfileRepository extends Repository<ProfileModel> {
     profile: Omit<ProfileModel, "createdAt" | "id" | "updatedAt">,
   ) {
     const id = this.uuid;
-    await this.table.insert({ ...profile, id }).transacting(trx);
+    await this.table
+      .insert({ ...profile, createdAt: this.knex.fn.now(), id, updatedAt: this.knex.fn.now() })
+      .transacting(trx);
     return await this.table.where({ id }).transacting(trx).first();
   }
 }

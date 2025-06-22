@@ -1,13 +1,13 @@
 import axios from "axios";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { env } from "../../configs/env.js";
+import { env } from "../../configs/env";
 import {
   AdjutorBank,
   AdjutorBvnPayload,
   AdjutorKarmaPayload,
   AdjutorService,
-} from "../AdjutorService.js";
+} from "../AdjutorService";
 
 vi.mock("axios");
 

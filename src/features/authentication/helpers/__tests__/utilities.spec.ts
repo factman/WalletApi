@@ -3,11 +3,11 @@ import jwt from "jsonwebtoken";
 import { DateTime } from "luxon";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { TokenAuthType, TokenType } from "../../../../helpers/types.js";
-import * as utilities from "../utilities.js";
+import { TokenAuthType, TokenType } from "../../../../helpers/types";
+import * as utilities from "../utilities";
 
 vi.mock("jsonwebtoken");
-vi.mock("../../../../configs/env.js", () => ({
+vi.mock("../../../../configs/env", () => ({
   env: {
     ACCESS_TOKEN_EXPIRATION: 3600,
     ACCESS_TOKEN_SECRET: "access_secret",
@@ -17,7 +17,7 @@ vi.mock("../../../../configs/env.js", () => ({
     VERIFICATION_TOKEN_SECRET: "verification_secret",
   },
 }));
-vi.mock("../../../../validations/validationSchemas.js", () => ({
+vi.mock("../../../../validations/validationSchemas", () => ({
   tokenSchema: () => ({
     safeParse: (token: any) =>
       token.type === TokenType.REFRESH ? { data: token, success: true } : { success: false },

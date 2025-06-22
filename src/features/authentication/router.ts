@@ -1,12 +1,12 @@
 import { Router } from "express";
 
-import { TokenAuthType } from "../../helpers/types.js";
-import { authGuard } from "../../middlewares/authMiddleware.js";
-import { validateRequest } from "../../middlewares/validationMiddleware.js";
-import { AuthenticationController } from "./controller.js";
-import { AUTHENTICATION_ROUTES } from "./helpers/constants.js";
-import { validateOtpVerification } from "./middlewares.js";
-import { AuthenticationService } from "./service.js";
+import { TokenAuthType } from "../../helpers/types";
+import { authGuard } from "../../middlewares/authMiddleware";
+import { validateRequest } from "../../middlewares/validationMiddleware";
+import { AuthenticationController } from "./controller";
+import { AUTHENTICATION_ROUTES } from "./helpers/constants";
+import { validateOtpVerification } from "./middlewares";
+import { AuthenticationService } from "./service";
 import {
   forgotPasswordRequestSchema,
   initiateAuthenticationRequestSchema,
@@ -20,7 +20,7 @@ import {
   verifyBvnRequestSchema,
   verifyEmailRequestSchema,
   verifyForgotPasswordRequestSchema,
-} from "./validationSchemas.js";
+} from "./validationSchemas";
 
 const service = new AuthenticationService();
 const controller = new AuthenticationController(service);

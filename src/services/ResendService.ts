@@ -1,8 +1,8 @@
 import { DateTime } from "luxon";
 import { Resend } from "resend";
 
-import { env } from "../configs/env.js";
-import TransactionModel from "../models/TransactionModel.js";
+import { env } from "../configs/env";
+import TransactionModel from "../models/TransactionModel";
 
 export class ResendService {
   private resend: Resend;

@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { CustomError } from "../../../helpers/errorInstance.js";
+import { CustomError } from "../../../helpers/errorInstance";
 import {
   TransactionChannel,
   TransactionStatus,
   TransactionType,
-} from "../../../models/TransactionModel.js";
-import { WalletStatus } from "../../../models/WalletModel.js";
-import { TransactionService } from "../service.js";
+} from "../../../models/TransactionModel";
+import { WalletStatus } from "../../../models/WalletModel";
+import { TransactionService } from "../service";
 
 const mockTrx = {} as any;
 

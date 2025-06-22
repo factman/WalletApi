@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { SCHEMA_TABLES } from "../../helpers/constants.js";
-import ProfileModel from "../../models/ProfileModel.js";
-import { ProfileRepository } from "../ProfileRepository.js";
+import { SCHEMA_TABLES } from "../../helpers/constants";
+import ProfileModel from "../../models/ProfileModel";
+import { ProfileRepository } from "../ProfileRepository";
 
 vi.mock("node:crypto", () => ({
   randomUUID: vi.fn().mockReturnValue("test-uuid"),
@@ -19,11 +19,15 @@ describe("ProfileRepository", () => {
     trx = {};
     mockTable = {
       first: vi.fn(),
+      fn: {
+        now: vi.fn().mockReturnValue("NOW()"),
+      },
       insert: vi.fn().mockReturnThis(),
       transacting: vi.fn().mockReturnThis(),
       where: vi.fn().mockReturnThis(),
     };
     mockDb = () => mockTable;
+    mockDb.fn = mockTable.fn;
     repo = new ProfileRepository(mockDb);
   });
 
@@ -42,7 +46,12 @@ describe("ProfileRepository", () => {
 
     const result = await repo.createUserProfile(trx, profileData);
 
-    expect(mockTable.insert).toHaveBeenCalledWith({ ...profileData, id: "test-uuid" });
+    expect(mockTable.insert).toHaveBeenCalledWith({
+      ...profileData,
+      createdAt: "NOW()",
+      id: "test-uuid",
+      updatedAt: "NOW()",
+    });
     expect(mockTable.insert).toHaveBeenCalled();
     expect(mockTable.where).toHaveBeenCalledWith({ id: "test-uuid" });
     expect(mockTable.transacting).toHaveBeenCalledWith(trx);

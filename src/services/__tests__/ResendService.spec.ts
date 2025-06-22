@@ -2,11 +2,11 @@ import { DateTime } from "luxon";
 import { Resend } from "resend";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import TransactionModel, { TransactionType } from "../../models/TransactionModel.js";
-import { ResendService } from "../ResendService.js";
+import TransactionModel, { TransactionType } from "../../models/TransactionModel";
+import { ResendService } from "../ResendService";
 
 // Mock env
-vi.mock("../../configs/env.js", () => ({
+vi.mock("../../configs/env", () => ({
   env: {
     RESEND_API_KEY: "test-api-key",
     RESEND_SENDER: "noreply@demowallet.com",

@@ -3,9 +3,9 @@ import type { Knex } from "knex";
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { CustomError } from "../../../helpers/errorInstance.js";
-import { WalletStatus } from "../../../models/WalletModel.js";
-import { WalletService } from "../service.js";
+import { CustomError } from "../../../helpers/errorInstance";
+import { WalletStatus } from "../../../models/WalletModel";
+import { WalletService } from "../service";
 
 describe("WalletService", () => {
   let walletService: WalletService;

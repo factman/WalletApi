@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { UserStatus } from "../../models/UserModel.js";
-import { UserRepository } from "../UserRepository.js";
+import { UserStatus } from "../../models/UserModel";
+import { UserRepository } from "../UserRepository";
 
 const mockTrx = {} as any;
 const mockTable = {

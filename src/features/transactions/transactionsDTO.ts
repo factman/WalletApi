@@ -1,5 +1,5 @@
-import { PaginationMeta } from "../../helpers/types.js";
-import TransactionModel from "../../models/TransactionModel.js";
+import { PaginationMeta } from "../../helpers/types";
+import TransactionModel from "../../models/TransactionModel";
 
 export interface FundTransferRequest {
   amount: number;

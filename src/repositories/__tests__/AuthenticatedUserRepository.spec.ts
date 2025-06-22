@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { SCHEMA_VIEWS } from "../../helpers/constants.js";
-import { AuthenticatedUserRepository } from "../AuthenticatedUserRepository.js";
+import { SCHEMA_VIEWS } from "../../helpers/constants";
+import { AuthenticatedUserRepository } from "../AuthenticatedUserRepository";
 
 const mockTable = {
   first: vi.fn(),

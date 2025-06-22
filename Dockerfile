@@ -1,29 +1,59 @@
 # Stage 1: Build and install dependencies
-FROM node:22-slim AS builder
+FROM node:24-slim
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm install
+ARG NODE_ENV=development
+ENV NODE_ENV=${NODE_ENV}
 
+ARG DB_HOST
+ENV DB_HOST=${DB_HOST}
+ARG DB_PORT
+ENV DB_PORT=${DB_PORT}
+ARG DB_USER
+ENV DB_USER=${DB_USER}
+ARG DB_PASSWORD
+ENV DB_PASSWORD=${DB_PASSWORD}
+ARG DB_NAME
+ENV DB_NAME=${DB_NAME}
+
+ARG ACCESS_TOKEN_SECRET
+ENV ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
+ARG REFRESH_TOKEN_SECRET
+ENV REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
+ARG VERIFICATION_TOKEN_SECRET
+ENV VERIFICATION_TOKEN_SECRET=${VERIFICATION_TOKEN_SECRET}
+ARG ACCESS_TOKEN_EXPIRATION
+ENV ACCESS_TOKEN_EXPIRATION=${ACCESS_TOKEN_EXPIRATION}
+ARG REFRESH_TOKEN_EXPIRATION
+ENV REFRESH_TOKEN_EXPIRATION=${REFRESH_TOKEN_EXPIRATION}
+ARG VERIFICATION_TOKEN_EXPIRATION
+ENV VERIFICATION_TOKEN_EXPIRATION=${VERIFICATION_TOKEN_EXPIRATION}
+
+ARG RESEND_API_KEY
+ENV RESEND_API_KEY=${RESEND_API_KEY}
+ARG RESEND_SENDER
+ENV RESEND_SENDER=${RESEND_SENDER}
+
+ARG ADJUTOR_API_KEY
+ENV ADJUTOR_API_KEY=${ADJUTOR_API_KEY}
+ARG ADJUTOR_API_URL
+ENV ADJUTOR_API_URL=${ADJUTOR_API_URL}
+
+# Copy files
 COPY . .
 
-# Run migrations (adjust the command as needed)
-RUN npm run migrate
+# Install project
+RUN npm install
 
-# Build the app (adjust the command as needed)
+# Lint for errors
+RUN npm run lint
+
+# Build application
 RUN npm run build
 
-# Stage 2: Production image
-FROM node:22-slim
+# Run migrations and seed the database
+RUN npm run deploy
 
-WORKDIR /app
-
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/dist ./dist
-
-# Remove devDependencies
-RUN npm prune --production
-
-CMD ["node", "dist/index.js"]
+# Run Application
+CMD ["node", "./dist/index.js"]
